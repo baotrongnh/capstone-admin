@@ -24,17 +24,20 @@ export default function TableActions() {
                          <TableHead>ID</TableHead>
                          <TableHead>Name</TableHead>
                          <TableHead>Price</TableHead>
-                         <TableHead>Status</TableHead>
                          <TableHead>Inquiries</TableHead>
+                         <TableHead>Current Tenant</TableHead>
                          <TableHead>Status</TableHead>
                          <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                </TableHeader>
                <TableBody>
                     <TableRow>
-                         <TableCell>Wireless Mouse</TableCell>
-                         <TableCell className="font-medium">Wireless Mouse</TableCell>
+                         <TableCell>A101</TableCell>
+                         <TableCell className="font-medium">BS16 Vinhome GrandPark</TableCell>
                          <TableCell>$29.99</TableCell>
+                         <TableCell>12</TableCell>
+                         <TableCell>Nguyễn Văn A</TableCell>
+                         <TableCell>Available</TableCell>
                          <TableCell className="text-right">
                               <DropdownMenu>
                                    <DropdownMenuTrigger asChild>
@@ -44,8 +47,7 @@ export default function TableActions() {
                                         </Button>
                                    </DropdownMenuTrigger>
                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                                        <DropdownMenuItem>View detail</DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem variant="destructive">
                                              Delete
