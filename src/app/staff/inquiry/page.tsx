@@ -29,7 +29,7 @@ UPDATE STATUS FOR INQUIRY:
 */
 
 
-export default function Inquiry() {
+export default function InquiryPageStaff() {
      return (
           <div>INQUIRY PAGE</div>
      )
