@@ -1,6 +1,5 @@
+import ChatContainer from "@/components/chat/chat-container";
 
 export default function ChatPage() {
-     return (
-          <div>Staff Chat</div>
-     )
+  return <ChatContainer />;
 }
