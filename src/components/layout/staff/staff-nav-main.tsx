@@ -27,11 +27,11 @@ export function StaffNavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Quick Create"
+              tooltip="Tạo hợp đồng nhanh"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
               <IconCirclePlusFilled />
-              <span>Create Schedule</span>
+              <span>Tạo hợp đồng nhanh</span>
             </SidebarMenuButton>
             <Button
               size="icon"

@@ -40,7 +40,7 @@ const data = {
   },
   navMain: [
     {
-      title: "Overview",
+      title: "Tổng quan",
       url: "#",
       icon: IconLayoutDashboard,
     },
@@ -50,17 +50,17 @@ const data = {
       icon: IconMessage2Question,
     },
     {
-      title: "Schedule",
+      title: "Lịch hẹn",
       url: ROUTE_STAFF.SCHEDULE,
       icon: IconCalendarStats,
     },
     {
-      title: "Verify",
+      title: "Xác thực thông tin",
       url: "#",
       icon: IconFaceId,
     },
     {
-      title: "Chat",
+      title: "Tin nhắn",
       url: "#",
       icon: IconBrandLine,
     },
@@ -115,12 +115,12 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Cài đặt",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "Trợ giúp",
       url: "#",
       icon: IconHelp,
     }
