@@ -1,0 +1,12 @@
+{
+  "StaffSidebar": {
+    "dashboard": "Dashboard",
+    "inquiries": "Inquiries",
+    "schedule": "Schedule",
+    "identityVerification": "Identity Verification",
+    "messages": "Messages",
+    "settings": "Settings",
+    "help": "Help",
+    "quickContract": "Quick Contract"
+  }
+}
