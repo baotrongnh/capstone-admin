@@ -1,20 +1,20 @@
 "use client"
 
 import {
-  IconBrandLine,
-  IconCalendarStats,
   IconCamera,
+  IconChartBar,
+  IconDashboard,
   IconDatabase,
-  IconFaceId,
   IconFileAi,
   IconFileDescription,
   IconFileWord,
+  IconFolder,
   IconHelp,
   IconInnerShadowTop,
-  IconLayoutDashboard,
-  IconMessage2Question,
+  IconListDetails,
   IconReport,
-  IconSettings
+  IconSettings,
+  IconUsers
 } from "@tabler/icons-react"
 import * as React from "react"
 
@@ -28,41 +28,38 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ROUTE_STAFF } from "@/constant/routes"
-import { StaffNavMain } from "./staff-nav-main"
-import { StaffNavSecondary } from "./staff-nav-secondary"
 
 const data = {
   user: {
-    name: "Staff A",
-    email: "staffa@example.com",
+    name: "shadcn",
+    email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
-      title: "Overview",
+      title: "Dashboard",
       url: "#",
-      icon: IconLayoutDashboard,
+      icon: IconDashboard,
     },
     {
-      title: "Yêu cầu",
-      url: ROUTE_STAFF.INQUIRY,
-      icon: IconMessage2Question,
-    },
-    {
-      title: "Schedule",
-      url: ROUTE_STAFF.SCHEDULE,
-      icon: IconCalendarStats,
-    },
-    {
-      title: "Verify",
+      title: "Lifecycle",
       url: "#",
-      icon: IconFaceId,
+      icon: IconListDetails,
     },
     {
-      title: "Chat",
+      title: "Analytics",
       url: "#",
-      icon: IconBrandLine,
+      icon: IconChartBar,
+    },
+    {
+      title: "Projects",
+      url: "#",
+      icon: IconFolder,
+    },
+    {
+      title: "Team",
+      url: "#",
+      icon: IconUsers,
     },
   ],
   navClouds: [
@@ -123,7 +120,7 @@ const data = {
       title: "Get Help",
       url: "#",
       icon: IconHelp,
-    }
+    },
   ],
   documents: [
     {
@@ -144,7 +141,7 @@ const data = {
   ],
 }
 
-export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -156,16 +153,16 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             >
               <a href="#">
                 <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">INTELL.</span>
+                <span className="text-base font-semibold">Intell (Operator).</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <StaffNavMain items={data.navMain} />
+        {/* <OperatorNavMain items={data.navMain} /> */}
         {/* <NavDocuments items={data.documents} /> */}
-        <StaffNavSecondary items={data.navSecondary} className="mt-auto" />
+        {/* <OperatorNavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
