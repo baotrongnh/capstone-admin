@@ -14,12 +14,14 @@ import Link from "next/link"
 
 export function StaffNavMain({
   items,
+  quickContractLabel = "Tạo hợp đồng nhanh",
 }: {
   items: {
     title: string
     url: string
     icon?: Icon
   }[]
+  quickContractLabel?: string
 }) {
   return (
     <SidebarGroup>
@@ -27,11 +29,11 @@ export function StaffNavMain({
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
             <SidebarMenuButton
-              tooltip="Tạo hợp đồng nhanh"
+              tooltip={quickContractLabel}
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
               <IconCirclePlusFilled />
-              <span>Tạo hợp đồng nhanh</span>
+              <span>{quickContractLabel}</span>
             </SidebarMenuButton>
             <Button
               size="icon"

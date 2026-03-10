@@ -1,0 +1,12 @@
+{
+  "StaffSidebar": {
+    "dashboard": "Tổng quan",
+    "inquiries": "Yêu cầu",
+    "schedule": "Lịch hẹn",
+    "identityVerification": "Xác thực thông tin",
+    "messages": "Tin nhắn",
+    "settings": "Cài đặt",
+    "help": "Trợ giúp",
+    "quickContract": "Tạo hợp đồng nhanh"
+  }
+}

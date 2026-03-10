@@ -3,17 +3,11 @@
 import {
   IconBrandLine,
   IconCalendarStats,
-  IconCamera,
-  IconDatabase,
   IconFaceId,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
   IconHelp,
   IconInnerShadowTop,
   IconLayoutDashboard,
   IconMessage2Question,
-  IconReport,
   IconSettings
 } from "@tabler/icons-react"
 import * as React from "react"
@@ -29,122 +23,32 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { ROUTE_STAFF } from "@/constant/routes"
+import { useTranslations } from "next-intl"
 import { StaffNavMain } from "./staff-nav-main"
 import { StaffNavSecondary } from "./staff-nav-secondary"
 
-const data = {
-  user: {
-    name: "Staff A",
-    email: "staffa@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Tổng quan",
-      url: "#",
-      icon: IconLayoutDashboard,
-    },
-    {
-      title: "Yêu cầu",
-      url: ROUTE_STAFF.INQUIRY,
-      icon: IconMessage2Question,
-    },
-    {
-      title: "Lịch hẹn",
-      url: ROUTE_STAFF.SCHEDULE,
-      icon: IconCalendarStats,
-    },
-    {
-      title: "Xác thực thông tin",
-      url: "#",
-      icon: IconFaceId,
-    },
-    {
-      title: "Tin nhắn",
-      url: "#",
-      icon: IconBrandLine,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Cài đặt",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Trợ giúp",
-      url: "#",
-      icon: IconHelp,
-    }
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
+const user = {
+  name: "Staff A",
+  email: "staffa@example.com",
+  avatar: "/avatars/shadcn.jpg",
 }
 
 export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations('StaffSidebar')
+
+  const navMain = [
+    { title: t('dashboard'), url: "#", icon: IconLayoutDashboard },
+    { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
+    { title: t('schedule'), url: ROUTE_STAFF.SCHEDULE, icon: IconCalendarStats },
+    { title: t('identityVerification'), url: "#", icon: IconFaceId },
+    { title: t('messages'), url: "#", icon: IconBrandLine },
+  ]
+
+  const navSecondary = [
+    { title: t('settings'), url: "#", icon: IconSettings },
+    { title: t('help'), url: "#", icon: IconHelp },
+  ]
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -163,12 +67,11 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <StaffNavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} /> */}
-        <StaffNavSecondary items={data.navSecondary} className="mt-auto" />
+        <StaffNavMain items={navMain} quickContractLabel={t('quickContract')} />
+        <StaffNavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )
