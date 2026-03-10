@@ -1,13 +1,12 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import React from "react";
+import { SiteHeader } from "@/components/site-header"
+import { StaffSidebar } from "@/components/layout/staff/staff-sidebar"
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar"
+import React from 'react'
 
-export default function StaffLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider
       style={
@@ -17,9 +16,9 @@ export default function StaffLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <StaffSidebar variant="inset" />
       <SidebarInset>
-        {/* <SiteHeader /> */}
+        <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2 p-3">
             {children}
@@ -27,5 +26,5 @@ export default function StaffLayout({
         </div>
       </SidebarInset>
     </SidebarProvider>
-  );
+  )
 }
