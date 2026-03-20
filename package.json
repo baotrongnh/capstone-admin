@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate-types": "openapi-typescript http://iso.klong.dev/openapi/v1.yaml -o ./src/types/api.d.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
