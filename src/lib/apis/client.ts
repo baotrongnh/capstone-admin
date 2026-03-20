@@ -26,7 +26,7 @@ apiClient.interceptors.response.use(undefined, async (error) => {
 
           const refreshToken = localStorage.getItem('refreshToken')
           if (!refreshToken) {
-               const redirectUrl = `/?openAuthModal=true&redirect=${encodeURIComponent(window.location.pathname)}`
+               const redirectUrl = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
                localStorage.clear()
                window.location.href = redirectUrl
                return Promise.reject(error)
@@ -36,8 +36,6 @@ apiClient.interceptors.response.use(undefined, async (error) => {
                const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoints.auth}/refresh`,
                     { refreshToken }
                )
-               //debug (nhbt):
-               console.log('REFRESH NEW TOKEN: ', data)
                const newTokens = data.data.tokens
                localStorage.setItem('accessToken', newTokens.accessToken)
                localStorage.setItem('refreshToken', newTokens.refreshToken)
