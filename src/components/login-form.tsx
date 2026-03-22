@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useLogin } from "@/hooks/query/useAuth"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
@@ -16,13 +16,21 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const loginMutation = useLogin()
 
   const handleLogin = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const username = formData.get('username')
-    const password = formData.get('password')
-    console.log({ username, password })
+    const identifier = formData.get('username')?.toString().trim()
+    const password = formData.get('password')?.toString()
+
+    if (!identifier || !password) return
+
+    loginMutation.mutate({
+      identifier,
+      password,
+      actorType: 'admin'
+    })
   }
 
   return (
@@ -38,7 +46,7 @@ export function LoginForm({
                 </p>
               </div>
               <Field>
-                <FieldLabel htmlFor="email">Username</FieldLabel>
+                <FieldLabel htmlFor="username">Username</FieldLabel>
                 <Input
                   id="username"
                   name="username"
@@ -64,7 +72,9 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit" disabled={loginMutation.isPending}>
+                  {loginMutation.isPending ? 'Logging in...' : 'Login'}
+                </Button>
               </Field>
             </FieldGroup>
           </form>
@@ -78,10 +88,6 @@ export function LoginForm({
           </div>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
     </div>
   )
 }
