@@ -1,1 +1,0 @@
-export { ImageViewModal } from "./modalViewImage";
