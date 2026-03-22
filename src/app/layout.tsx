@@ -30,9 +30,9 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="h-screen overflow-hidden">
+    <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable}`}
       >
         <ReactQueryProvider>
           <NextIntlClientProvider messages={messages}>

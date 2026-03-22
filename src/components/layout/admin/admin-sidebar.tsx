@@ -22,7 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ROUTE_STAFF } from "@/constant/routes"
+import { ROUTE_ADMIN, ROUTE_STAFF } from "@/constant/routes"
 import { useTranslations } from "next-intl"
 import { AdminNavMain } from "./admin-nav-main"
 import { AdminNavSecondary } from "./admin-nav-secondary"
@@ -37,7 +37,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   const t = useTranslations('StaffSidebar')
 
   const navMain = [
-    { title: t('dashboard'), url: "#", icon: IconLayoutDashboard },
+    { title: t('dashboard'), url: ROUTE_ADMIN.DASHBOARD, icon: IconLayoutDashboard },
     { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
     { title: t('schedule'), url: ROUTE_STAFF.SCHEDULE, icon: IconCalendarStats },
     { title: t('identityVerification'), url: "#", icon: IconFaceId },
