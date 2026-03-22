@@ -155,7 +155,7 @@ const mockRequests = [
   },
 ];
 
-export default function RequestPage() {
+export default function RequestStaffPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
