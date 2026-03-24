@@ -28,6 +28,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { OperatorNavMain } from "./operator-nav-main"
 
 const data = {
   user: {
@@ -160,7 +161,7 @@ export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sideba
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {/* <OperatorNavMain items={data.navMain} /> */}
+        <OperatorNavMain items={data.navMain} />
         {/* <NavDocuments items={data.documents} /> */}
         {/* <OperatorNavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

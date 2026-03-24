@@ -326,6 +326,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/partner-requests/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all partner requests */
+        get: operations["UsersController_findAllPartnerRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/partner-requests/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List own partner requests */
+        get: operations["UsersController_findMyPartnerRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/partner-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get partner request details */
+        get: operations["UsersController_findOnePartnerRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update partner request */
+        patch: operations["UsersController_updatePartnerRequest"];
+        trace?: never;
+    };
+    "/api/v1/users/partner-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit partner request */
+        post: operations["UsersController_createPartnerRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/partner-requests/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Review partner request (approve/reject) */
+        patch: operations["UsersController_reviewPartnerRequest"];
+        trace?: never;
+    };
     "/api/v1/apartments/search": {
         parameters: {
             query?: never;
@@ -365,6 +451,26 @@ export interface paths {
         patch: operations["ApartmentsController_update"];
         trace?: never;
     };
+    "/api/v1/apartments/{id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rate apartment by user
+         * @description User can rate only once per apartment and only when they have an active contract for that apartment.
+         */
+        post: operations["ApartmentsController_rateApartment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/apartments": {
         parameters: {
             query?: never;
@@ -382,15 +488,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/apartments/partner/{partnerId}": {
+    "/api/v1/apartments/owner/{ownerId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get apartments by partner */
-        get: operations["ApartmentsController_findByPartner"];
+        /** Get apartments by owner */
+        get: operations["ApartmentsController_findByOwner"];
         put?: never;
         post?: never;
         delete?: never;
@@ -859,6 +965,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/viewing-requests/user/book": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * User books apartment viewing
+         * @description Authenticated user books a viewing by sending apartmentId, appointmentAt, and note.
+         */
+        post: operations["ViewingRequestsController_createUserViewingBooking"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewing-requests/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get my viewing requests
+         * @description Authenticated user gets their own viewing requests/appointments with optional status filter and pagination.
+         */
+        get: operations["ViewingRequestsController_getMyViewingRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/viewing-requests/my-assigned": {
         parameters: {
             query?: never;
@@ -911,6 +1057,66 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/viewing-requests/appointments/{appointmentId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Confirm viewing appointment
+         * @description Assigned staff confirms the viewing appointment. System marks appointment as confirmed.
+         */
+        patch: operations["ViewingRequestsController_confirmAppointment"];
+        trace?: never;
+    };
+    "/api/v1/viewing-requests/appointments/{appointmentId}/done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Staff confirms done job
+         * @description Assigned staff confirms the viewing job is done. System marks appointment as completed.
+         */
+        patch: operations["ViewingRequestsController_confirmDoneJob"];
+        trace?: never;
+    };
+    "/api/v1/viewing-requests/appointments/{appointmentId}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cancel appointment
+         * @description Staff (assigned) or user (owner) cancels an appointment. System marks appointment as cancelled.
+         */
+        patch: operations["ViewingRequestsController_cancelAppointment"];
         trace?: never;
     };
     "/api/v1/iot/devices": {
@@ -1181,59 +1387,7 @@ export interface paths {
         patch: operations["TasksController_cancel"];
         trace?: never;
     };
-    "/api/v1/partners": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all partners */
-        get: operations["PartnersController_findAllPartners"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get own partner profile */
-        get: operations["PartnersController_getMyProfile"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update own partner profile */
-        patch: operations["PartnersController_updateProfile"];
-        trace?: never;
-    };
-    "/api/v1/partners/profile/identity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get own identity information */
-        get: operations["PartnersController_getProfileIdentity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/profile/verify-identity": {
+    "/api/v1/notifications/fcm-token": {
         parameters: {
             query?: never;
             header?: never;
@@ -1242,118 +1396,13 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Verify identity card via AI (front + back)
-         * @description Upload front and back identity card images. AI will extract information from both sides and store extracted data. Images are NOT saved.
-         */
-        post: operations["PartnersController_verifyIdentityCard"];
-        delete?: never;
+        /** Register FCM device token for push notifications */
+        post: operations["NotificationsController_registerFcmToken"];
+        /** Remove FCM device token */
+        delete: operations["NotificationsController_removeFcmToken"];
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get partner by ID */
-        get: operations["PartnersController_findOnePartner"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/requests/all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all partner requests */
-        get: operations["PartnersController_findAllRequests"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/requests/my": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List own partner requests */
-        get: operations["PartnersController_findMyRequests"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/requests/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get partner request details */
-        get: operations["PartnersController_findOneRequest"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update partner request */
-        patch: operations["PartnersController_updateRequest"];
-        trace?: never;
-    };
-    "/api/v1/partners/requests": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Submit partner request */
-        post: operations["PartnersController_createRequest"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/partners/requests/{id}/review": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Review partner request (approve/reject) */
-        patch: operations["PartnersController_reviewRequest"];
         trace?: never;
     };
     "/api/v1/notifications/my": {
@@ -1399,7 +1448,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Send notification */
+        /** Send notification (admin/operator only) */
         post: operations["NotificationsController_create"];
         delete?: never;
         options?: never;
@@ -1812,6 +1861,40 @@ export interface paths {
         patch: operations["UserRoomsController_moveOut"];
         trace?: never;
     };
+    "/api/v1/user-apartments/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get apartments assigned to current user */
+        get: operations["UserApartmentsController_findMy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user-apartments/{id}/access-info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update user-apartment access information */
+        patch: operations["UserApartmentsController_updateAccessInfo"];
+        trace?: never;
+    };
     "/api/v1/apartment-policies": {
         parameters: {
             query?: never;
@@ -1973,6 +2056,109 @@ export interface paths {
         patch: operations["ReservationsController_cancel"];
         trace?: never;
     };
+    "/api/v1/chat/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get conversations list (staff: all, user: own) */
+        get: operations["ChatController_getConversations"];
+        put?: never;
+        /** Create a new chat conversation */
+        post: operations["ChatController_createConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/chat/conversations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get conversation detail */
+        get: operations["ChatController_getConversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/chat/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get paginated messages for a conversation */
+        get: operations["ChatController_getMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/chat/conversations/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Close a conversation (staff only) */
+        patch: operations["ChatController_closeConversation"];
+        trace?: never;
+    };
+    "/api/v1/chat/conversations/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Archive a conversation (staff only) */
+        patch: operations["ChatController_archiveConversation"];
+        trace?: never;
+    };
+    "/api/v1/chat/conversations/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Reopen a closed conversation (staff only) */
+        patch: operations["ChatController_reopenConversation"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1990,7 +2176,7 @@ export interface components {
              * @example user
              * @enum {string}
              */
-            actorType: "user" | "staff" | "operator" | "admin" | "partner" | "guest";
+            actorType: "user" | "staff" | "operator" | "admin" | "guest";
             /**
              * @description All available roles for this account
              * @example [
@@ -2047,7 +2233,7 @@ export interface components {
              * @description Type of actor logging in. If not provided, system will auto-detect.
              * @enum {string}
              */
-            actorType?: "user" | "staff" | "operator" | "admin" | "partner";
+            actorType?: "user" | "staff" | "operator" | "admin";
         };
         GoogleAuthDto: {
             /**
@@ -2064,7 +2250,7 @@ export interface components {
             refreshToken: string;
         };
         MessageResponseDto: {
-            /** @example Operation successful */
+            /** @example Operation completed successfully */
             message: string;
         };
         ForgotPasswordDto: {
@@ -2097,6 +2283,39 @@ export interface components {
              * @example newPassword456
              */
             newPassword: string;
+        };
+        UserIdentityListDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            id: string;
+            /** @example 012345678901 */
+            nationalId?: Record<string, never> | null;
+            /** @example false */
+            isVerified: boolean;
+            /** @example 2026-03-10T10:30:00.000Z */
+            verifiedAt?: Record<string, never> | null;
+        };
+        UserListItemDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example 0901234567 */
+            phone?: Record<string, never> | null;
+            /** @example Nguyen Van A */
+            fullName: string;
+            /** @example 1990-05-15T00:00:00.000Z */
+            dateOfBirth?: Record<string, never> | null;
+            /** @example https://example.com/avatar.jpg */
+            profileImageUrl?: Record<string, never> | null;
+            identity?: components["schemas"]["UserIdentityListDto"] | null;
+            /** @example true */
+            isActive: boolean;
+            /** @example false */
+            isVerified: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         UserIdentityDetailDto: {
             /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
@@ -2142,35 +2361,14 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        UserListItemDto: {
-            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
-            id: string;
-            /** @example user@example.com */
-            email: string;
-            /** @example 0901234567 */
-            phone?: Record<string, never> | null;
-            /** @example Nguyen Van A */
-            fullName: string;
-            /** @example 1990-05-15T00:00:00.000Z */
-            dateOfBirth?: Record<string, never> | null;
-            /** @example https://example.com/avatar.jpg */
-            profileImageUrl?: Record<string, never> | null;
-            identity?: components["schemas"]["UserIdentityDetailDto"] | null;
-            /** @example true */
-            isActive: boolean;
-            /** @example false */
-            isVerified: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
         ContractApartmentSummaryDto: {
             id: string;
-            /** @example 123 Nguyen Hue, Q1 */
-            address: string;
             /** @example A101 */
             apartmentNumber: string;
+            /** @example 26728 */
+            newWardCode?: number | null;
+            /** @example 26731 */
+            oldWardCode?: number | null;
         };
         ContractSummaryDto: {
             id: string;
@@ -2195,6 +2393,11 @@ export interface components {
             rentalContract: components["schemas"]["ContractSummaryDto"];
         };
         UserDetailDto: {
+            /**
+             * @example user
+             * @enum {string}
+             */
+            role: "user" | "partner" | "staff" | "operator" | "admin";
             /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
             id: string;
             /** @example user@example.com */
@@ -2211,10 +2414,51 @@ export interface components {
             emergencyContactName?: Record<string, never> | null;
             /** @example 0987654321 */
             emergencyContactPhone?: Record<string, never> | null;
+            /** @example ABC Investment Co., Ltd */
+            companyName?: Record<string, never> | null;
+            /** @example 0312345678 */
+            taxCode?: Record<string, never> | null;
+            /** @example 1234567890 */
+            bankAccountNumber?: Record<string, never> | null;
+            /** @example Vietcombank */
+            bankName?: Record<string, never> | null;
+            /** @example 123 Nguyen Trai, District 1 */
+            address?: Record<string, never> | null;
+            /** @example 10.00 */
+            commissionRate?: string | null;
+            /** Format: date-time */
+            contractStartDate?: string | null;
+            /** Format: date-time */
+            contractEndDate?: string | null;
+            paymentTerms?: string | null;
+            /** @example EMP-001 */
+            employeeCode?: Record<string, never> | null;
+            /** @example customer_service */
+            staffRole?: Record<string, never> | null;
+            /** @example Customer Service */
+            department?: Record<string, never> | null;
+            /** @example Ho Chi Minh */
+            workingCity?: Record<string, never> | null;
+            /** @example District 1 */
+            workingDistrict?: Record<string, never> | null;
+            /** Format: date-time */
+            hireDate?: string | null;
+            /** @example morning */
+            operatorShift?: Record<string, never> | null;
+            /** @example admin_root */
+            username?: Record<string, never> | null;
+            /** @example admin */
+            adminRoleLevel?: Record<string, never> | null;
+            /**
+             * @example {
+             *       "users": true
+             *     }
+             */
+            permissions?: Record<string, never> | null;
             /** @example true */
             isActive: boolean;
             /** @example false */
-            isVerified: boolean;
+            isVerified?: Record<string, never> | null;
             /** @example 2026-03-10T10:30:00.000Z */
             lastLoginAt?: Record<string, never> | null;
             identity?: components["schemas"]["UserIdentityDetailDto"] | null;
@@ -2223,6 +2467,44 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             contractMemberships?: components["schemas"]["ContractMembershipDto"][] | null;
+        };
+        AiVerificationSideDto: {
+            /** @example true */
+            success: boolean;
+            /**
+             * @example {
+             *       "id": "012345678901",
+             *       "name": "Nguyen Van A",
+             *       "dob": "15/05/1990",
+             *       "sex": "M",
+             *       "nationality": "VN",
+             *       "home": "Ha Noi",
+             *       "address": "123 Tran Hung Dao",
+             *       "province": "Ha Noi",
+             *       "district": "Hoan Kiem",
+             *       "ward": "Hoan Kiem",
+             *       "street": "123 Tran Hung Dao"
+             *     }
+             */
+            extractedInfo?: Record<string, never> | null;
+        };
+        AiVerificationResultDto: {
+            front?: components["schemas"]["AiVerificationSideDto"] | null;
+            back?: components["schemas"]["AiVerificationSideDto"] | null;
+        };
+        UserIdentityCardDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            id: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example Nguyen Van A */
+            fullName: string;
+            identity?: components["schemas"]["UserIdentityDetailDto"] | null;
+            /** @example false */
+            isVerified: boolean;
+            aiVerification?: components["schemas"]["AiVerificationResultDto"] | null;
+            /** Format: date-time */
+            updatedAt: string;
         };
         UserCreatedDto: {
             /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
@@ -2386,12 +2668,198 @@ export interface components {
             id: string;
             /** @example user@example.com */
             email: string;
-            /** @example Nguyen Van A */
-            fullName: string;
             /** @example false */
             isActive: boolean;
+        };
+        PartnerRequestUserSummaryDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            id: string;
+            /** @example Nguyen Van A */
+            fullName: string;
+            /** @example ABC Investment Co., Ltd */
+            companyName?: Record<string, never> | null;
+        };
+        PartnerRequestListItemDto: {
+            /** @example d88c6858-ec67-4a37-9541-8e9bcf0f9328 */
+            id: string;
+            /**
+             * @example apartment
+             * @enum {string}
+             */
+            propertyType: "apartment" | "house" | "condo" | "studio";
+            /** @example 123 Nguyen Trai */
+            address: string;
+            /** @example Ho Chi Minh */
+            city: string;
+            /** @example District 1 */
+            district: string;
+            /**
+             * @example submitted
+             * @enum {string}
+             */
+            status: "submitted" | "under_review" | "approved" | "rejected" | "on_hold";
+            /** Format: date-time */
+            createdAt: string;
+            user?: components["schemas"]["PartnerRequestUserSummaryDto"] | null;
+            /** @example Need additional legal papers */
+            reviewNotes?: Record<string, never> | null;
+            /** @example Invalid contact info */
+            rejectionReason?: Record<string, never> | null;
+        };
+        PartnerRequestReviewerSummaryDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567891 */
+            id: string;
+            /** @example Operator One */
+            fullName: string;
+        };
+        PartnerRequestDetailDto: {
+            /** @example d88c6858-ec67-4a37-9541-8e9bcf0f9328 */
+            id: string;
+            /**
+             * @example apartment
+             * @enum {string}
+             */
+            propertyType: "apartment" | "house" | "condo" | "studio";
+            /** @example 123 Nguyen Trai */
+            address: string;
+            /** @example Ho Chi Minh */
+            city: string;
+            /** @example District 1 */
+            district: string;
+            /** @example 75.50 */
+            totalArea?: string | null;
+            /** @example 1 */
+            numberOfUnits: number;
+            /** @example 15000000.00 */
+            expectedRentPrice?: string | null;
+            /** @example Near metro */
+            description?: string | null;
+            /**
+             * @example [
+             *       "parking",
+             *       "elevator"
+             *     ]
+             */
+            amenities?: string[] | null;
+            /**
+             * @example submitted
+             * @enum {string}
+             */
+            status: "submitted" | "under_review" | "approved" | "rejected" | "on_hold";
+            reviewNotes?: string | null;
+            rejectionReason?: string | null;
+            /** Format: date-time */
+            approvedAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            user: components["schemas"]["PartnerRequestUserSummaryDto"];
+            reviewedByOperator?: components["schemas"]["PartnerRequestReviewerSummaryDto"] | null;
+        };
+        PartnerRequestMutationResultDto: {
+            /** @example d88c6858-ec67-4a37-9541-8e9bcf0f9328 */
+            id: string;
+            /**
+             * @example apartment
+             * @enum {string}
+             */
+            propertyType: "apartment" | "house" | "condo" | "studio";
+            /** @example 123 Nguyen Trai */
+            address: string;
+            /**
+             * @example submitted
+             * @enum {string}
+             */
+            status: "submitted" | "under_review" | "approved" | "rejected" | "on_hold";
+            reviewNotes?: string | null;
+            /** Format: date-time */
+            createdAt?: string | null;
+            /** Format: date-time */
+            updatedAt?: string | null;
+        };
+        CreatePartnerRequestDto: {
+            /**
+             * @description Property type
+             * @example apartment
+             * @enum {string}
+             */
+            propertyType?: "apartment" | "house" | "condo" | "studio";
+            /** @example 123 Nguyen Trai */
+            address: string;
+            /** @example Ho Chi Minh */
+            city: string;
+            /** @example District 1 */
+            district: string;
+            /**
+             * @description Total area in m2
+             * @example 75.5
+             */
+            totalArea?: number;
+            /** @example 1 */
+            numberOfUnits?: number;
+            /**
+             * @description Expected rent in VND
+             * @example 15000000
+             */
+            expectedRentPrice?: number;
+            /** @example Near metro, has balcony */
+            description?: string;
+            /**
+             * @example [
+             *       "parking",
+             *       "elevator",
+             *       "security"
+             *     ]
+             */
+            amenities?: string[];
+        };
+        UpdatePartnerRequestDto: {
+            /**
+             * @description Property type
+             * @example apartment
+             * @enum {string}
+             */
+            propertyType?: "apartment" | "house" | "condo" | "studio";
+            /** @example 123 Nguyen Trai */
+            address?: string;
+            /** @example Ho Chi Minh */
+            city?: string;
+            /** @example District 1 */
+            district?: string;
+            /**
+             * @description Total area in m2
+             * @example 75.5
+             */
+            totalArea?: number;
+            /** @example 1 */
+            numberOfUnits?: number;
+            /**
+             * @description Expected rent in VND
+             * @example 15000000
+             */
+            expectedRentPrice?: number;
+            /** @example Near metro, has balcony */
+            description?: string;
+            /**
+             * @example [
+             *       "parking",
+             *       "elevator",
+             *       "security"
+             *     ]
+             */
+            amenities?: string[];
+        };
+        ReviewPartnerRequestDto: {
+            /**
+             * @example approved
+             * @enum {string}
+             */
+            status: "approved" | "rejected" | "on_hold" | "under_review";
+            /** @example Documents checked and valid */
+            reviewNotes?: string;
+            /** @example Missing ownership proof */
+            rejectionReason?: string;
         };
         WardAddressDto: {
             /** @example 26728 */
@@ -2442,14 +2910,19 @@ export interface components {
             depositAmount?: string | null;
             /** @example available */
             status: string;
+            /**
+             * @description Diem danh gia trung binh cua apartment (1-5)
+             * @example 4.5
+             */
+            rating?: number | null;
             description?: string | null;
             images?: string[] | null;
             /** @description Địa chỉ đã resolve từ mã địa chỉ sau sáp nhập (v2) */
             newAddress?: components["schemas"]["WardAddressDto"] | null;
             /** @description Địa chỉ đã resolve từ mã địa chỉ trước sáp nhập (v1) */
             oldAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Chuỗi địa chỉ hiển thị theo addressType đang filter (new/old/both) */
-            displayAddress?: string | null;
+            /** @description Dia chi hien thi theo addressType dang filter (new/old/both) */
+            address?: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -2478,13 +2951,53 @@ export interface components {
             description?: string | null;
             images?: string[] | null;
         };
-        PartnerSummaryDto: {
+        OwnerSummaryDto: {
             /** @example e33f798c-7978-4a86-b243-b3ac43e020ba */
             id: string;
             /** @example Công ty Đầu tư Hoàng Gia */
             companyName: string;
             /** @example Trương Thị Đầu Tư */
             fullName: string;
+        };
+        RentalContractLinkedUserDto: {
+            /** @example e33f798c-7978-4a86-b243-b3ac43e020ba */
+            id: string;
+            /** @example Nguyen Van A */
+            fullName: string;
+        };
+        RentalContractMemberLinkDto: {
+            /** @example 7c2946d7-b237-4e6d-aec4-8f055f8d12f0 */
+            id: string;
+            /** @example primary */
+            memberType: string;
+            /** @example true */
+            isPrimaryContact: boolean;
+            /** @example active */
+            status: string;
+            user: components["schemas"]["RentalContractLinkedUserDto"];
+        };
+        ApartmentUserApartmentContractDto: {
+            /** @example 5e10f4d8-1c14-48f5-8ad4-e35ea928f2a3 */
+            id: string;
+            /** @example CTR-2026-00001 */
+            contractNumber: string;
+            /** @example active */
+            status: string;
+            members: components["schemas"]["RentalContractMemberLinkDto"][];
+        };
+        ApartmentUserApartmentDto: {
+            /** @example ce47fe96-d6a9-4df2-9f95-c0a7ac4a4d5c */
+            id: string;
+            /** @example active */
+            status: string;
+            /** @example true */
+            isPrimaryTenant: boolean;
+            /** Format: date-time */
+            moveInDate?: string | null;
+            /** Format: date-time */
+            moveOutDate?: string | null;
+            user: components["schemas"]["RentalContractLinkedUserDto"];
+            rentalContract: components["schemas"]["ApartmentUserApartmentContractDto"];
         };
         ApartmentDetailDto: {
             /** @example d6e0a098-c1e9-4b5d-9207-e507e9a5974d */
@@ -2534,11 +3047,22 @@ export interface components {
             depositAmount?: string | null;
             /** @example available */
             status: string;
+            /**
+             * @description Diem danh gia trung binh cua apartment (1-5)
+             * @example 4.5
+             */
+            rating?: number | null;
             description?: string | null;
             images?: string[] | null;
             videoTourUrl?: string | null;
             yearBuilt?: number | null;
-            partnerId?: string | null;
+            /** @description Dia chi resolve theo ma phuong/xa sau sap nhap (v2) */
+            newAddress?: components["schemas"]["WardAddressDto"] | null;
+            /** @description Dia chi resolve theo ma phuong/xa truoc sap nhap (v1) */
+            oldAddress?: components["schemas"]["WardAddressDto"] | null;
+            /** @description Dia chi hien thi theo addressType query (new/old/both) khi lay chi tiet can ho */
+            address?: string | null;
+            ownerId?: string | null;
             approvedByOperatorId?: string | null;
             /** Format: date-time */
             approvedAt?: string | null;
@@ -2547,11 +3071,46 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             rooms: components["schemas"]["RoomDto"][];
-            partner?: components["schemas"]["PartnerSummaryDto"];
+            owner?: components["schemas"]["OwnerSummaryDto"];
             /** @example [] */
             iotDevices: Record<string, never>[];
             /** @example [] */
             utilityMeters: Record<string, never>[];
+            /**
+             * @description Danh sach userApartment duoc lay tu rental contract co status active
+             * @example []
+             */
+            userApartments: components["schemas"]["ApartmentUserApartmentDto"][];
+        };
+        ApartmentRatingResultDto: {
+            /** @example fbec65aa-facd-45f8-bd7b-97317018f3e6 */
+            id: string;
+            /** @example d6e0a098-c1e9-4b5d-9207-e507e9a5974d */
+            apartmentId: string;
+            /** @example e33f798c-7978-4a86-b243-b3ac43e020ba */
+            userId: string;
+            /** @example 5 */
+            rating: number;
+            /** @example Can ho sach se, quan ly ho tro nhanh. */
+            comment?: string | null;
+            /**
+             * @description Diem danh gia trung binh moi nhat cua apartment
+             * @example 4.5
+             */
+            averageRating?: number | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        RateApartmentDto: {
+            /**
+             * @description Diem danh gia tu 1 den 5
+             * @example 5
+             */
+            rating: number;
+            /** @example Can ho sach se, quan ly ho tro nhanh. */
+            comment?: string | null;
         };
         ApartmentMutationResultDto: {
             /** @example d6e0a098-c1e9-4b5d-9207-e507e9a5974d */
@@ -2644,8 +3203,8 @@ export interface components {
             videoTourUrl?: string;
             /** @example 2020 */
             yearBuilt?: number;
-            /** @description Partner ID if listed by partner */
-            partnerId?: string;
+            /** @description Owner user ID if listed by a specific owner */
+            ownerId?: string;
         };
         UpdateApartmentDto: {
             /** @example Vinhomes Central Park */
@@ -2720,8 +3279,8 @@ export interface components {
             videoTourUrl?: string;
             /** @example 2020 */
             yearBuilt?: number;
-            /** @description Partner ID if listed by partner */
-            partnerId?: string;
+            /** @description Owner user ID if listed by a specific owner */
+            ownerId?: string;
             /**
              * @description Apartment status
              * @enum {string}
@@ -3577,6 +4136,99 @@ export interface components {
              */
             preferredContactTime?: string;
         };
+        UserViewingAssignedStaffDto: {
+            /** @example e9df7f8e-6cd8-45f9-8e9a-4c0c1e1d9f3f */
+            id: string;
+            /** @example Tran Van B */
+            fullName: string;
+            /** @example 0908889999 */
+            phone: string;
+        };
+        UserViewingBookingResponseDto: {
+            /** @example d7a8e15e-e4b7-4df5-83d4-f7d7e4d4a31a */
+            contactRequestId: string;
+            /** @example b6a52ecf-6f88-4ed4-9aa4-7b8db6bc65d4 */
+            appointmentId: string;
+            /** @example 11111111-2222-3333-4444-555555555555 */
+            apartmentId: string;
+            /** @example A-1208 */
+            apartmentNumber: string;
+            /**
+             * Format: date-time
+             * @example 2026-03-24T09:30:00.000Z
+             */
+            appointmentAt: string;
+            /** @example 30 */
+            durationMinutes: number;
+            /** @example scheduled */
+            status: string;
+            /** @example Toi muon xem can ho vao buoi sang, vui long lien he truoc 30 phut. */
+            note: string;
+            assignedStaff: components["schemas"]["UserViewingAssignedStaffDto"];
+        };
+        CreateUserViewingRequestDto: {
+            /**
+             * @description ID can ho ma user muon dat lich xem
+             * @example 11111111-2222-3333-4444-555555555555
+             */
+            apartmentId: string;
+            /**
+             * @description Thoi gian hen xem can ho (ISO 8601)
+             * @example 2026-03-24T09:30:00.000Z
+             */
+            appointmentAt: string;
+            /**
+             * @description Ghi chu cua user cho lich hen
+             * @example Toi muon xem can ho vao buoi sang, vui long lien he truoc 30 phut.
+             */
+            note: string;
+        };
+        UserMyViewingApartmentDto: {
+            /** @example 11111111-2222-3333-4444-555555555555 */
+            id: string;
+            /** @example A-1208 */
+            apartmentNumber: string;
+            /** @example Intelli Tower A */
+            buildingName?: string | null;
+            /** @example 26728 */
+            newWardCode?: number | null;
+            /** @example 26731 */
+            oldWardCode?: number | null;
+        };
+        UserMyViewingContactRequestDto: {
+            /** @example d7a8e15e-e4b7-4df5-83d4-f7d7e4d4a31a */
+            id: string;
+            /** @example scheduled */
+            status: string;
+            /** @example Toi muon xem can ho vao buoi sang. */
+            message?: string | null;
+            /** @example Vui long lien he truoc 30 phut. */
+            notes?: string | null;
+            /** Format: date-time */
+            receivedAt: string;
+        };
+        UserMyViewingRequestDto: {
+            /** @example b6a52ecf-6f88-4ed4-9aa4-7b8db6bc65d4 */
+            appointmentId: string;
+            /**
+             * Format: date-time
+             * @example 2026-03-24T09:30:00.000Z
+             */
+            appointmentAt: string;
+            /** @example 30 */
+            durationMinutes: number;
+            /** @example scheduled */
+            status: string;
+            /** @example Toi muon xem can ho vao buoi sang. */
+            note?: string | null;
+            /** Format: date-time */
+            cancelledAt?: string | null;
+            apartment: components["schemas"]["UserMyViewingApartmentDto"];
+            assignedStaff: components["schemas"]["UserViewingAssignedStaffDto"];
+            contactRequest?: components["schemas"]["UserMyViewingContactRequestDto"] | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
         AppointmentResponseDto: {
             id: string;
             guestId?: string | null;
@@ -4038,217 +4690,24 @@ export interface components {
             /** @description Completion notes */
             completionNotes?: string;
         };
-        PartnerResponseDto: {
-            id: string;
-            /** @example partner@company.com */
-            email: string;
-            /** @example 0901234567 */
-            phone: string;
-            fullName?: string | null;
-            companyName?: string | null;
-            taxCode?: string | null;
-            nationalId?: string | null;
-            bankAccountNumber?: string | null;
-            bankName?: string | null;
-            address?: string | null;
-            /** Format: date-time */
-            contractStartDate?: string | null;
-            /** Format: date-time */
-            contractEndDate?: string | null;
-            /** @example 10.00 */
-            commissionRate?: Record<string, never> | null;
-            paymentTerms?: string | null;
-            isVerified: boolean;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
+        RegisterFcmTokenDto: {
+            /**
+             * @description FCM device token from Firebase SDK
+             * @example dK4xR9gS...:APA91bH...
+             */
+            token: string;
+            /**
+             * @description Device name / identifier (e.g. "iPhone 15", "Chrome Windows")
+             * @example iPhone 15 Pro
+             */
+            device?: string;
         };
-        UpdatePartnerProfileDto: {
-            /** @example Nguyễn Văn A */
-            fullName?: string;
-            /** @example 0901234567 */
-            phone?: string;
-            /** @example partner@company.com */
-            email?: string;
-            /** @example Công ty TNHH ABC */
-            companyName?: string;
-            /** @example 0123456789 */
-            taxCode?: string;
-            /** @example 9704 0000 1234 5678 */
-            bankAccountNumber?: string;
-            /** @example Vietcombank */
-            bankName?: string;
-            /** @example 123 Nguyễn Huệ, Q1, TP.HCM */
-            address?: string;
-        };
-        PartnerIdentityDetailDto: {
-            id: string;
-            partnerId: string;
-            /** @example 012345678901 */
-            nationalId?: Record<string, never> | null;
-            /** @example A12345678 */
-            passportNumber?: Record<string, never> | null;
-            /** @example Nguyen Van A */
-            name?: Record<string, never> | null;
-            /** @example 01/01/1990 */
-            dob?: Record<string, never> | null;
-            /** @example M */
-            sex?: Record<string, never> | null;
-            /** @example Việt Nam */
-            nationality?: Record<string, never> | null;
-            /** @example Kinh */
-            ethnicity?: Record<string, never> | null;
-            /** @example Ha Noi */
-            home?: Record<string, never> | null;
-            /** @example 123 Tran Hung Dao, Hoan Kiem, Ha Noi */
-            address?: Record<string, never> | null;
-            /** @example Ha Noi */
-            province?: Record<string, never> | null;
-            /** @example Hoan Kiem */
-            district?: Record<string, never> | null;
-            /** @example Hoan Kiem */
-            ward?: Record<string, never> | null;
-            /** @example 123 Tran Hung Dao */
-            street?: Record<string, never> | null;
-            /** @example Sẹo 2cm trán phải */
-            features?: Record<string, never> | null;
-            /** @example 01/01/2020 */
-            issueDate?: Record<string, never> | null;
-            /** @example 01/01/2030 */
-            doe?: Record<string, never> | null;
-            /** @example false */
-            isVerified: boolean;
-            /** @example 2026-03-10T10:30:00.000Z */
-            verifiedAt?: Record<string, never> | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        PartnerRequestResponseDto: {
-            id: string;
-            partnerId: string;
-            /** @example apartment */
-            propertyType: string;
-            /** @example 456 Le Loi, Q3 */
-            address: string;
-            /** @example Ho Chi Minh */
-            city: string;
-            /** @example Quan 3 */
-            district: string;
-            /** @example 100.00 */
-            totalArea?: Record<string, never> | null;
-            /** @example 1 */
-            numberOfUnits: number;
-            /** @example 20000000.00 */
-            expectedRentPrice?: Record<string, never> | null;
-            propertyImages?: Record<string, never> | null;
-            propertyDocuments?: Record<string, never> | null;
-            description?: string | null;
-            amenities?: Record<string, never> | null;
-            /** @example exclusive */
-            preferredContractType: string;
-            /** @example submitted */
-            status: string;
-            reviewedByOperatorId?: string | null;
-            reviewNotes?: string | null;
-            rejectionReason?: string | null;
-            /** Format: date-time */
-            approvedAt?: string | null;
-            createdApartmentIds?: Record<string, never> | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        CreatePartnerRequestDto: {
+        RemoveFcmTokenDto: {
             /**
-             * @default apartment
-             * @enum {string}
+             * @description FCM device token to remove
+             * @example dK4xR9gS...:APA91bH...
              */
-            propertyType: "apartment" | "house" | "condo" | "studio";
-            /** @example 123 Nguyễn Xiển, Long Thạnh Mỹ */
-            address: string;
-            /** @example TP. Hồ Chí Minh */
-            city: string;
-            /** @example Quận 9 */
-            district: string;
-            /**
-             * @description Total area in m²
-             * @example 75.5
-             */
-            totalArea?: number;
-            /**
-             * @description Number of units
-             * @example 1
-             */
-            numberOfUnits?: number;
-            /**
-             * @description Expected monthly rent in VND
-             * @example 15000000
-             */
-            expectedRentPrice?: number;
-            /** @example Căn hộ mới, full nội thất... */
-            description?: string;
-            /**
-             * @example [
-             *       "parking",
-             *       "gym",
-             *       "pool"
-             *     ]
-             */
-            amenities?: string[];
-        };
-        UpdatePartnerRequestDto: {
-            /**
-             * @default apartment
-             * @enum {string}
-             */
-            propertyType: "apartment" | "house" | "condo" | "studio";
-            /** @example 123 Nguyễn Xiển, Long Thạnh Mỹ */
-            address?: string;
-            /** @example TP. Hồ Chí Minh */
-            city?: string;
-            /** @example Quận 9 */
-            district?: string;
-            /**
-             * @description Total area in m²
-             * @example 75.5
-             */
-            totalArea?: number;
-            /**
-             * @description Number of units
-             * @example 1
-             */
-            numberOfUnits?: number;
-            /**
-             * @description Expected monthly rent in VND
-             * @example 15000000
-             */
-            expectedRentPrice?: number;
-            /** @example Căn hộ mới, full nội thất... */
-            description?: string;
-            /**
-             * @example [
-             *       "parking",
-             *       "gym",
-             *       "pool"
-             *     ]
-             */
-            amenities?: string[];
-        };
-        ReviewPartnerRequestDto: {
-            /**
-             * @description Approve or reject the request
-             * @enum {string}
-             */
-            status: "approved" | "rejected";
-            /** @example Đã xác minh thông tin bất động sản */
-            reviewNotes?: string;
-            /** @example Thiếu giấy tờ sở hữu */
-            rejectionReason?: string;
+            token: string;
         };
         NotificationResponseDto: {
             id: string;
@@ -4288,13 +4747,9 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        UnreadCountResponseDto: {
-            /** @example 5 */
-            count: number;
-        };
         CreateNotificationDto: {
             /** @enum {string} */
-            recipientType: "guest" | "user" | "staff" | "operator" | "admin" | "partner" | "system";
+            recipientType: "guest" | "user" | "staff" | "operator" | "admin" | "system";
             /** @description Recipient UUID */
             recipientId: string;
             /**
@@ -4839,6 +5294,99 @@ export interface components {
              */
             notes?: string;
         };
+        UserApartmentApartmentDto: {
+            id: string;
+            /** @example A-1208 */
+            apartmentNumber: string;
+            /** @example Intelli Tower A */
+            buildingName?: string | null;
+        };
+        UserApartmentContractDto: {
+            id: string;
+            /** @example CTR-2026-00001 */
+            contractNumber: string;
+        };
+        UserApartmentResponseDto: {
+            id: string;
+            userId: string;
+            apartmentId: string;
+            rentalContractId: string;
+            /** @example active */
+            status: string;
+            isPrimaryTenant: boolean;
+            /** Format: date-time */
+            moveInDate?: string | null;
+            /** Format: date-time */
+            moveOutDate?: string | null;
+            apartmentDoorPassword?: string | null;
+            buildingGateCode?: string | null;
+            smartLockPin?: string | null;
+            mailboxCode?: string | null;
+            parkingAccessCode?: string | null;
+            wifiName?: string | null;
+            wifiPassword?: string | null;
+            emergencyContactName?: string | null;
+            emergencyContactPhone?: string | null;
+            notes?: string | null;
+            apartment: components["schemas"]["UserApartmentApartmentDto"];
+            rentalContract: components["schemas"]["UserApartmentContractDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UpdateUserApartmentAccessDto: {
+            /**
+             * @description Apartment door password/PIN
+             * @example 2580
+             */
+            apartmentDoorPassword?: string;
+            /**
+             * @description Building gate code
+             * @example GATE-9911
+             */
+            buildingGateCode?: string;
+            /**
+             * @description Smart lock PIN/code
+             * @example SL-8899
+             */
+            smartLockPin?: string;
+            /**
+             * @description Mailbox code
+             * @example MB-1188
+             */
+            mailboxCode?: string;
+            /**
+             * @description Parking access code/card number
+             * @example PARK-B2-99
+             */
+            parkingAccessCode?: string;
+            /**
+             * @description WiFi SSID name
+             * @example INTELLI_HOME_12A
+             */
+            wifiName?: string;
+            /**
+             * @description WiFi password
+             * @example Wifi@2026#Safe
+             */
+            wifiPassword?: string;
+            /**
+             * @description Emergency contact name for apartment support
+             * @example To ky thuat toa A
+             */
+            emergencyContactName?: string;
+            /**
+             * @description Emergency contact phone
+             * @example 0901234567
+             */
+            emergencyContactPhone?: string;
+            /**
+             * @description Internal notes for access instructions
+             * @example Khong cung cap cho ben thu ba
+             */
+            notes?: string;
+        };
         ApartmentPolicyListItemDto: {
             id: string;
             apartmentId: string;
@@ -5006,6 +5554,36 @@ export interface components {
              * @example Need parking spot
              */
             specialRequests?: string;
+        };
+        CreateConversationDto: {
+            /**
+             * @description Custom title for the conversation
+             * @example Hỏi về căn hộ A1-2001
+             */
+            title?: string;
+            /**
+             * @description Guest session ID (auto-generated if empty). Only for guest users.
+             * @example guest_1710000000_abc123
+             */
+            guestSessionId?: string;
+            /**
+             * @description Guest display name
+             * @example Nguyễn Văn A
+             */
+            guestName?: string;
+            /**
+             * @description Guest email address
+             * @example guest@example.com
+             */
+            guestEmail?: string;
+            /**
+             * @description Additional metadata (page URL, apartment of interest, etc.)
+             * @example {
+             *       "pageUrl": "/apartments/123",
+             *       "apartmentId": "apt-001"
+             *     }
+             */
+            metadata?: Record<string, never>;
         };
     };
     responses: never;
@@ -5555,12 +6133,24 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Identity card verified and info extracted from both sides */
+            /** @description Identity card verified and extracted info returned */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["UserIdentityCardDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
             };
             /** @description Invalid image files or unsupported format */
             400: {
@@ -5738,6 +6328,225 @@ export interface operations {
             };
         };
     };
+    UsersController_findAllPartnerRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All partner requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["PartnerRequestListItemDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    UsersController_findMyPartnerRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Current user partner requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["PartnerRequestListItemDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    UsersController_findOnePartnerRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Partner request details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["PartnerRequestDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_updatePartnerRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePartnerRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Partner request updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["PartnerRequestMutationResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_createPartnerRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePartnerRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Partner request submitted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["PartnerRequestMutationResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    UsersController_reviewPartnerRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewPartnerRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Partner request reviewed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["PartnerRequestMutationResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ApartmentsController_search: {
         parameters: {
             query?: {
@@ -5803,7 +6612,10 @@ export interface operations {
     };
     ApartmentsController_findOne: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Address type for display address: new (v2), old (v1), both (default) */
+                addressType?: "new" | "old" | "both";
+            };
             header?: never;
             path: {
                 id: string;
@@ -5922,6 +6734,63 @@ export interface operations {
             };
         };
     };
+    ApartmentsController_rateApartment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RateApartmentDto"];
+            };
+        };
+        responses: {
+            /** @description Apartment rated successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["ApartmentRatingResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description No active contract for apartment */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Apartment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Apartment already rated by user */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ApartmentsController_create: {
         parameters: {
             query?: never;
@@ -5956,18 +6825,18 @@ export interface operations {
             };
         };
     };
-    ApartmentsController_findByPartner: {
+    ApartmentsController_findByOwner: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                partnerId: string;
+                ownerId: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Partner apartments */
+            /** @description Owner apartments */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -7255,6 +8124,106 @@ export interface operations {
             };
         };
     };
+    ViewingRequestsController_createUserViewingBooking: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserViewingRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Viewing appointment created for user */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["UserViewingBookingResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid request data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User or apartment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Requested slot is full */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ViewingRequestsController_getMyViewingRequests: {
+        parameters: {
+            query?: {
+                /** @description Filter by appointment status */
+                status?: "scheduled" | "confirmed" | "completed" | "cancelled" | "no_show";
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated list of current user viewing requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["UserMyViewingRequestDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                            /** @example 25 */
+                            total?: number;
+                            /** @example 1 */
+                            page?: number;
+                            /** @example 10 */
+                            limit?: number;
+                            /** @example 3 */
+                            totalPages?: number;
+                        };
+                    };
+                };
+            };
+        };
+    };
     ViewingRequestsController_getMyAssigned: {
         parameters: {
             query?: never;
@@ -7353,6 +8322,154 @@ export interface operations {
                         };
                     };
                 };
+            };
+        };
+    };
+    ViewingRequestsController_confirmAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Appointment ID to confirm */
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Appointment confirmed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["MessageResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Appointment cannot be confirmed from current status */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Current staff is not assigned to this appointment */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Appointment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ViewingRequestsController_confirmDoneJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Appointment ID that the staff completed */
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Job confirmed and appointment is completed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["MessageResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Current staff is not assigned to this appointment */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Appointment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ViewingRequestsController_cancelAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Appointment ID to cancel */
+                appointmentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Appointment cancelled successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["MessageResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description No permission to cancel appointment */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Appointment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -8104,69 +9221,7 @@ export interface operations {
             };
         };
     };
-    PartnersController_findAllPartners: {
-        parameters: {
-            query?: {
-                isActive?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of partners */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerResponseDto"][];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    PartnersController_getMyProfile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner profile */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    PartnersController_updateProfile: {
+    NotificationsController_registerFcmToken: {
         parameters: {
             query?: never;
             header?: never;
@@ -8175,319 +9230,20 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdatePartnerProfileDto"];
+                "application/json": components["schemas"]["RegisterFcmTokenDto"];
             };
         };
         responses: {
-            /** @description Updated partner profile */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Partner not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Email or tax code already in use */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PartnersController_getProfileIdentity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner identity information */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerIdentityDetailDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Partner not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PartnersController_verifyIdentityCard: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Upload front and back identity card images for AI to extract information. Images are NOT stored. */
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Front image of identity card (required) - JPEG, PNG, or WebP
-                     */
-                    identityCardFront: string;
-                    /**
-                     * Format: binary
-                     * @description Back image of identity card (required) - JPEG, PNG, or WebP
-                     */
-                    identityCardBack: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Identity card verified and info extracted from both sides */
+            /** @description Token registered */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid image files or unsupported format */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Partner not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description National ID already used by another account */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
-    PartnersController_findOnePartner: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Partner not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PartnersController_findAllRequests: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of partner requests */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRequestResponseDto"][];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    PartnersController_findMyRequests: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Own partner requests */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRequestResponseDto"][];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    PartnersController_findOneRequest: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner request details */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRequestResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Request not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PartnersController_updateRequest: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePartnerRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Request updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRequestResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Request not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PartnersController_createRequest: {
+    NotificationsController_removeFcmToken: {
         parameters: {
             query?: never;
             header?: never;
@@ -8496,67 +9252,12 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreatePartnerRequestDto"];
+                "application/json": components["schemas"]["RemoveFcmTokenDto"];
             };
         };
         responses: {
-            /** @description Request submitted */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 201 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRequestResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    PartnersController_reviewRequest: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReviewPartnerRequestDto"];
-            };
-        };
-        responses: {
-            /** @description Request reviewed */
+            /** @description Token removed */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRequestResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Request not found */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -8605,24 +9306,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Unread count */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["UnreadCountResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
+                content?: never;
             };
         };
     };
@@ -8639,7 +9327,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Notification sent */
+            /** @description Notification sent + FCM push */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -8671,25 +9359,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Notification marked as read */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["NotificationResponseDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
             /** @description Notification not found */
             404: {
                 headers: {
@@ -8708,7 +9377,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description All marked as read */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9146,7 +9814,7 @@ export interface operations {
     ActivityLogsController_findAll: {
         parameters: {
             query?: {
-                actorType?: "guest" | "user" | "staff" | "operator" | "admin" | "partner" | "system";
+                actorType?: "guest" | "user" | "staff" | "operator" | "admin" | "system";
                 actorId?: string;
                 entityType?: string;
                 entityId?: string;
@@ -9694,6 +10362,79 @@ export interface operations {
             };
         };
     };
+    UserApartmentsController_findMy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User apartment assignments with access info */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["UserApartmentResponseDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    UserApartmentsController_updateAccessInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserApartmentAccessDto"];
+            };
+        };
+        responses: {
+            /** @description Updated user-apartment assignment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["UserApartmentResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description User apartment assignment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ApartmentPoliciesController_findAll: {
         parameters: {
             query?: {
@@ -10145,6 +10886,151 @@ export interface operations {
             };
             /** @description Reservation not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_getConversations: {
+        parameters: {
+            query?: {
+                /** @description Filter by conversation status */
+                status?: "active" | "closed" | "archived";
+                /** @description Page number (starting from 1) */
+                page?: number;
+                /** @description Number of items per page */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_createConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateConversationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_getConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_getMessages: {
+        parameters: {
+            query?: {
+                /** @description Page number (starting from 1) */
+                page?: number;
+                /** @description Number of messages per page */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_closeConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_archiveConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_reopenConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
