@@ -1,14 +1,13 @@
 "use client"
 
 import {
-  IconBrandLine,
-  IconCalendarStats,
-  IconFaceId,
+  IconBusinessplan,
   IconHelp,
   IconInnerShadowTop,
   IconLayoutDashboard,
-  IconMessage2Question,
-  IconSettings
+  IconSettings,
+  IconUser,
+  IconUsersGroup
 } from "@tabler/icons-react"
 import * as React from "react"
 
@@ -22,14 +21,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ROUTE_ADMIN, ROUTE_STAFF } from "@/constant/routes"
+import { ROUTE_ADMIN } from "@/constant/routes"
 import { useTranslations } from "next-intl"
 import { AdminNavMain } from "./admin-nav-main"
 import { AdminNavSecondary } from "./admin-nav-secondary"
 
 const user = {
-  name: "Staff A",
-  email: "staffa@example.com",
+  name: "Admin",
+  email: "admin@gmail.com",
   avatar: "/avatars/shadcn.jpg",
 }
 
@@ -38,14 +37,13 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
 
   const navMain = [
     { title: t('dashboard'), url: ROUTE_ADMIN.DASHBOARD, icon: IconLayoutDashboard },
-    { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
-    { title: t('schedule'), url: ROUTE_STAFF.SCHEDULE, icon: IconCalendarStats },
-    { title: t('identityVerification'), url: "#", icon: IconFaceId },
-    { title: t('messages'), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
+    { title: 'Doanh thu', url: ROUTE_ADMIN.DASHBOARD, icon: IconBusinessplan },
+    { title: 'Quản lý người dùng', url: ROUTE_ADMIN.DASHBOARD, icon: IconUser },
+    { title: 'Quản lý nhân viên', url: ROUTE_ADMIN.DASHBOARD, icon: IconUsersGroup },
+    { title: 'Cài đặt hệ thống', url: ROUTE_ADMIN.DASHBOARD, icon: IconSettings },
   ]
 
   const navSecondary = [
-    { title: t('settings'), url: "#", icon: IconSettings },
     { title: t('help'), url: "#", icon: IconHelp },
   ]
 
@@ -60,7 +58,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             >
               <a href="#">
                 <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">INTELL.</span>
+                <span className="text-base font-semibold">INTELLISERVOPS (Admin)</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
