@@ -3,12 +3,12 @@
 import {
   IconBrandLine,
   IconCalendarStats,
+  IconContract,
   IconHelp,
   IconHomeQuestion,
   IconInnerShadowTop,
   IconLayoutDashboard,
-  IconMessage2Question,
-  IconSettings
+  IconMessage2Question
 } from "@tabler/icons-react"
 import * as React from "react"
 
@@ -41,7 +41,8 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
     { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
     { title: t('schedule'), url: ROUTE_STAFF.SCHEDULE, icon: IconCalendarStats },
     { title: t('messages'), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
-    { title: 'Xác thực căn hộ', url: ROUTE_STAFF.CHAT, icon: IconHomeQuestion },
+    { title: 'Xác thực căn hộ', url: ROUTE_STAFF.VERIFY, icon: IconHomeQuestion },
+    { title: 'Hợp đồng', url: ROUTE_STAFF.CONTRACT, icon: IconContract },
   ]
 
   const navSecondary = [
