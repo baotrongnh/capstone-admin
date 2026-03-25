@@ -1,31 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Search,
-  Filter,
-  Eye,
-  Image as ImageIcon,
-  Edit,
-  ChevronDown,
-  Clock,
-  ClipboardList,
-  CheckCircle2,
-  Send,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ClipboardList,
+  Clock,
+  Search,
+  Send,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { RequestDetailModal } from "./components/modals/moda-detail-request";
 import { StaffUpdateModal } from "./components/modals/modal-staff-update";
 import { ViewStaffUpdateModal } from "./components/modals/modal-view-staff-update";
 import { TableRequest } from "./components/table-request";
+import { useApartments } from "@/hooks/useApartments";
 
 const statusConfig: Record<
   string,
@@ -164,6 +161,19 @@ export default function RequestStaffPage() {
   const [viewStaffUpdateModalOpen, setViewStaffUpdateModalOpen] =
     useState(false);
 
+  const params = useMemo<Record<string, any>>(
+    () => ({
+      sortBy: "baseRentPrice",
+      sortOrder: "asc",
+      status: "inactive",
+    }),
+    [],
+  );
+
+  const { data: apartments } = useApartments(params);
+
+  console.log("DAA", apartments);
+
   const [requestsWithUpdates, setRequestsWithUpdates] = useState<
     Map<string, any>
   >(
@@ -249,14 +259,12 @@ export default function RequestStaffPage() {
     submitted: filteredRequests.filter((r) => r.status === "submitted").length,
   };
 
-  // Hàm chuyển đổi bộ lọc khi click vào thẻ thống kê
   const toggleFilter = (status: string) => {
     setStatusFilter(statusFilter === status ? null : status);
   };
 
   return (
     <div className="space-y-6">
-      {/* --- Tiêu đề trang --- */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
           Duyệt Yêu cầu Căn hộ
@@ -266,7 +274,6 @@ export default function RequestStaffPage() {
         </p>
       </div>
 
-      {/* --- Các thẻ Thống kê (Thiết kế bo góc mới) --- */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Thẻ: Chờ duyệt */}
         <div
@@ -357,9 +364,7 @@ export default function RequestStaffPage() {
         </div>
       </div>
 
-      {/* --- Thanh Bộ Lọc (Đồng bộ thiết kế) --- */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border border-gray-200 rounded-2xl bg-white">
-        {/* Trái: Dropdown trạng thái & Thanh tìm kiếm */}
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
