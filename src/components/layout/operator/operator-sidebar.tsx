@@ -1,18 +1,11 @@
 "use client"
 
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
+  IconBuilding,
+  IconDeviceAirtag,
+  IconHeartHandshake,
   IconHelp,
   IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
   IconSettings,
   IconUsers
 } from "@tabler/icons-react"
@@ -28,118 +21,45 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { ROUTE_OPERATOR } from "@/constant/routes"
 import { OperatorNavMain } from "./operator-nav-main"
+import { OperatorNavSecondary } from "./operator-nav-secondary"
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "Operator",
+    email: "operator@gmail.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
+      title: "Quản lý căn hộ",
+      url: ROUTE_OPERATOR.APARTMENT,
+      icon: IconBuilding,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
+      title: "Quản lý nhân viên",
+      url: ROUTE_OPERATOR.STAFF_MANAGER,
       icon: IconUsers,
     },
-  ],
-  navClouds: [
     {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Duyệt hợp tác",
+      url: ROUTE_OPERATOR.REQUEST_PARTNER,
+      icon: IconHeartHandshake,
     },
     {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
+      title: "Thiết bị IoT",
+      url: ROUTE_OPERATOR.IOT_MANAGER,
+      icon: IconDeviceAirtag,
+    }
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
+      title: "Trợ giúp",
       url: "#",
       icon: IconHelp,
     },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
+  ]
 }
 
 export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -154,7 +74,7 @@ export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sideba
             >
               <a href="#">
                 <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">Intell (Operator).</span>
+                <span className="text-base font-semibold">IntelliServop (Operator)</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -163,7 +83,7 @@ export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sideba
       <SidebarContent>
         <OperatorNavMain items={data.navMain} />
         {/* <NavDocuments items={data.documents} /> */}
-        {/* <OperatorNavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        <OperatorNavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

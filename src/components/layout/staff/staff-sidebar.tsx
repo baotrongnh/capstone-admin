@@ -3,8 +3,8 @@
 import {
   IconBrandLine,
   IconCalendarStats,
-  IconFaceId,
   IconHelp,
+  IconHomeQuestion,
   IconInnerShadowTop,
   IconLayoutDashboard,
   IconMessage2Question,
@@ -28,8 +28,8 @@ import { StaffNavMain } from "./staff-nav-main"
 import { StaffNavSecondary } from "./staff-nav-secondary"
 
 const user = {
-  name: "Staff A",
-  email: "staffa@example.com",
+  name: "Staff",
+  email: "staff@gmail.com",
   avatar: "/avatars/shadcn.jpg",
 }
 
@@ -40,12 +40,11 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
     { title: t('dashboard'), url: "#", icon: IconLayoutDashboard },
     { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
     { title: t('schedule'), url: ROUTE_STAFF.SCHEDULE, icon: IconCalendarStats },
-    { title: t('identityVerification'), url: "#", icon: IconFaceId },
     { title: t('messages'), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
+    { title: 'Xác thực căn hộ', url: ROUTE_STAFF.CHAT, icon: IconHomeQuestion },
   ]
 
   const navSecondary = [
-    { title: t('settings'), url: "#", icon: IconSettings },
     { title: t('help'), url: "#", icon: IconHelp },
   ]
 
@@ -60,7 +59,7 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             >
               <a href="#">
                 <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">INTELL.</span>
+                <span className="text-base font-semibold">INTELLISERVOPS (STAFF)</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

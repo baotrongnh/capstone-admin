@@ -1,7 +1,8 @@
 "use client"
 
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
+import { IconBell, IconCirclePlusFilled, type Icon } from "@tabler/icons-react"
 
+import { isSidebarItemActive } from "@/components/layout/sidebar-active"
 import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
@@ -11,6 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function StaffNavMain({
   items,
@@ -23,6 +25,8 @@ export function StaffNavMain({
   }[]
   quickContractLabel?: string
 }) {
+  const pathname = usePathname()
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -40,15 +44,19 @@ export function StaffNavMain({
               className="size-8 group-data-[collapsible=icon]:opacity-0"
               variant="outline"
             >
-              <IconMail />
-              <span className="sr-only">Inbox</span>
+              <IconBell />
+              <span className="sr-only">Thông báo</span>
             </Button>
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} asChild>
+              <SidebarMenuButton
+                tooltip={item.title}
+                isActive={isSidebarItemActive(pathname, item.url)}
+                asChild
+              >
                 <Link href={item.url}>
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>

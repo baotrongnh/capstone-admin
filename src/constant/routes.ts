@@ -11,3 +11,10 @@ export const ROUTE_ADMIN = {
      VERIFY_USER_INFORMATION: '/staff/verify-user-information',
      CHAT: '/staff/chat'
 } as const
+
+export const ROUTE_OPERATOR = {
+     APARTMENT: '/operator/apartments',
+     STAFF_MANAGER: '/operator/staff-manager',
+     REQUEST_PARTNER: '/operator/request-partner',
+     IOT_MANAGER: '/operator/iot-manager'
+}
