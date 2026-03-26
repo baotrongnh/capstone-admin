@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
-import "./globals.css";
 import AuthProvider from "@/components/providers/auth-provider";
 import ReactQueryProvider from "@/components/providers/react-query-provider";
+import SocketProvider from "@/lib/socket/socket-provider";
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,9 +37,11 @@ export default async function RootLayout({
       >
         <ReactQueryProvider>
           <NextIntlClientProvider messages={messages}>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
+            <SocketProvider>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </SocketProvider>
           </NextIntlClientProvider>
         </ReactQueryProvider>
       </body>
