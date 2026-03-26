@@ -1,0 +1,16 @@
+{
+  "StaffSidebar": {
+    "dashboard": "Dashboard",
+    "inquiries": "Inquiries",
+    "schedule": "Schedule",
+    "identityVerification": "Identity Verification",
+    "messages": "Messages",
+    "settings": "Settings",
+    "help": "Help",
+    "quickContract": "Quick Contract"
+  },
+  "Auth": {
+    "loginSuccess": "Login successful!",
+    "loginError": "Login failed. Please check your credentials and try again."
+  }
+}

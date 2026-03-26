@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/app-sidebar"
+import { OperatorSidebar } from "@/components/layout/operator/operator-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import {
      SidebarInset,
@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     } as React.CSSProperties
                }
           >
-               <AppSidebar variant="inset" />
+               <OperatorSidebar variant="inset" />
                <SidebarInset>
                     <SiteHeader />
                     <div className="flex flex-1 flex-col">
