@@ -1,78 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Search,
-  Filter,
-  Eye,
-  Image as ImageIcon,
-  Edit,
-  ChevronDown,
-  Clock,
-  ClipboardList,
-  CheckCircle2,
-  Send,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ClipboardList,
+  Clock,
+  Search,
+  Send,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 
 import { RequestDetailModal } from "./components/modals/moda-detail-request";
 import { StaffUpdateModal } from "./components/modals/modal-staff-update";
-import { ViewStaffUpdateModal } from "./components/modals/modal-view-staff-update";
 import { TableRequest } from "./components/table-request";
-
-const statusConfig: Record<
-  string,
-  {
-    label: string;
-    color: string;
-    bgColor: string;
-    borderColor: string;
-    order: number;
-  }
-> = {
-  pending: {
-    label: "Chờ duyệt",
-    color: "bg-orange-100 text-orange-800",
-    bgColor: "bg-orange-50",
-    borderColor: "border-orange-200",
-    order: 1,
-  },
-  inspecting: {
-    label: "Đang khảo sát",
-    color: "bg-yellow-100 text-yellow-800",
-    bgColor: "bg-yellow-50",
-    borderColor: "border-yellow-200",
-    order: 2,
-  },
-  verifying: {
-    label: "Đã xác minh",
-    color: "bg-blue-100 text-blue-800",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    order: 3,
-  },
-  submitted: {
-    label: "Đã gửi yêu cầu",
-    color: "bg-green-100 text-green-800",
-    bgColor: "bg-green-50",
-    borderColor: "border-green-200",
-    order: 4,
-  },
-  completed: {
-    label: "Khảo sát xong",
-    color: "bg-purple-100 text-purple-800",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200",
-    order: 5,
-  },
-};
+import { ApartmentItem, ApartmentQueryParams } from "@/types/apartment";
+import { useApartments } from "@/hooks/query/useApartments";
+import { useRouter } from "next/navigation";
 
 const mockRequests = [
   {
@@ -158,11 +109,12 @@ const mockRequests = [
 export default function RequestStaffPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ApartmentItem | null>(
+    null,
+  );
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [staffUpdateModalOpen, setStaffUpdateModalOpen] = useState(false);
-  const [viewStaffUpdateModalOpen, setViewStaffUpdateModalOpen] =
-    useState(false);
 
   const [requestsWithUpdates, setRequestsWithUpdates] = useState<
     Map<string, any>
@@ -178,52 +130,24 @@ export default function RequestStaffPage() {
     new Map(mockRequests.map((r) => [r.id, r.status])),
   );
 
-  const handleOpenDetail = (request: any) => {
+  const handleOpenDetail = (request: ApartmentItem) => {
     setSelectedRequest(request);
     setDetailModalOpen(true);
   };
 
-  const handleOpenStaffUpdate = (request: any) => {
+  const handleOpenStaffUpdate = (request: ApartmentItem) => {
     setSelectedRequest(request);
     setStaffUpdateModalOpen(true);
   };
 
-  const handleOpenViewStaffUpdate = (request: any) => {
-    setSelectedRequest(request);
-    setViewStaffUpdateModalOpen(true);
+  const handleStaffUpdateSubmit = (success: boolean) => {
+    setStaffUpdateModalOpen(success);
   };
 
-  const handleStaffUpdateSubmit = (staffUpdate: any) => {
-    console.log("DATA", staffUpdate);
-    if (selectedRequest) {
-      requestsWithUpdates.set(selectedRequest.id, staffUpdate);
-      setRequestsWithUpdates(new Map(requestsWithUpdates));
-
-      requestStatuses.set(selectedRequest.id, "verifying");
-      setRequestStatuses(new Map(requestStatuses));
-
-      setStaffUpdateModalOpen(false);
-      console.log("Staff update saved, status changed to verifying");
-    }
-  };
-
-  const handleApproveRequest = (requestId: any) => {
-    console.log("ID", requestId);
-  };
-
-  const handleRejectRequest = (requestId: any) => {
-    console.log("ID", requestId);
-  };
-
-  const handleSendToOperator = (request: any) => {
-    console.log("DATA", request);
-    if (selectedRequest) {
-      requestStatuses.set(selectedRequest.id, "submitted");
-      setRequestStatuses(new Map(requestStatuses));
-      setDetailModalOpen(false);
-      console.log("Request sent to operator, status changed to submitted");
-    }
-  };
+  // Get unique dates from mockRequests
+  const uniqueDates = Array.from(
+    new Set(mockRequests.map((req) => req.submittedDate)),
+  ).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
   const filteredRequests = mockRequests
     .map((req) => ({
@@ -238,7 +162,9 @@ export default function RequestStaffPage() {
 
       const matchStatus = !statusFilter || req.status === statusFilter;
 
-      return matchSearch && matchStatus;
+      const matchDate = !selectedDate || req.submittedDate === selectedDate;
+
+      return matchSearch && matchStatus && matchDate;
     });
 
   const stats = {
@@ -249,14 +175,12 @@ export default function RequestStaffPage() {
     submitted: filteredRequests.filter((r) => r.status === "submitted").length,
   };
 
-  // Hàm chuyển đổi bộ lọc khi click vào thẻ thống kê
   const toggleFilter = (status: string) => {
     setStatusFilter(statusFilter === status ? null : status);
   };
 
   return (
     <div className="space-y-6">
-      {/* --- Tiêu đề trang --- */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
           Duyệt Yêu cầu Căn hộ
@@ -266,16 +190,13 @@ export default function RequestStaffPage() {
         </p>
       </div>
 
-      {/* --- Các thẻ Thống kê (Thiết kế bo góc mới) --- */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Thẻ: Chờ duyệt */}
         <div
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "pending"
               ? "ring-2 ring-orange-400 border-transparent"
               : "border-gray-200"
           }`}
-          onClick={() => toggleFilter("pending")}
         >
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -290,14 +211,12 @@ export default function RequestStaffPage() {
           </div>
         </div>
 
-        {/* Thẻ: Khảo sát */}
         <div
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "inspecting"
               ? "ring-2 ring-yellow-400 border-transparent"
               : "border-gray-200"
           }`}
-          onClick={() => toggleFilter("inspecting")}
         >
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -312,14 +231,12 @@ export default function RequestStaffPage() {
           </div>
         </div>
 
-        {/* Thẻ: Xác minh */}
         <div
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "verifying"
               ? "ring-2 ring-blue-400 border-transparent"
               : "border-gray-200"
           }`}
-          onClick={() => toggleFilter("verifying")}
         >
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -334,14 +251,12 @@ export default function RequestStaffPage() {
           </div>
         </div>
 
-        {/* Thẻ: Đã gửi */}
         <div
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "submitted"
               ? "ring-2 ring-green-400 border-transparent"
               : "border-gray-200"
           }`}
-          onClick={() => toggleFilter("submitted")}
         >
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -357,65 +272,8 @@ export default function RequestStaffPage() {
         </div>
       </div>
 
-      {/* --- Thanh Bộ Lọc (Đồng bộ thiết kế) --- */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border border-gray-200 rounded-2xl bg-white">
-        {/* Trái: Dropdown trạng thái & Thanh tìm kiếm */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              Trạng thái:
-            </span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 justify-between w-full sm:w-48 bg-white"
-                >
-                  <span className="truncate text-gray-700">
-                    {statusFilter
-                      ? statusConfig[statusFilter]?.label
-                      : "Tất cả yêu cầu"}
-                  </span>
-                  <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem
-                  onClick={() => setStatusFilter(null)}
-                  className={!statusFilter ? "bg-gray-100" : ""}
-                >
-                  <div className="flex items-center gap-3 w-full">
-                    <div className="w-2.5 h-2.5 rounded-full bg-gray-400"></div>
-                    <span>Tất cả yêu cầu</span>
-                    {!statusFilter && (
-                      <span className="ml-auto text-blue-600">✓</span>
-                    )}
-                  </div>
-                </DropdownMenuItem>
-
-                {Object.entries(statusConfig)
-                  .sort(([, a], [, b]) => a.order - b.order)
-                  .map(([status, config]) => (
-                    <DropdownMenuItem
-                      key={status}
-                      onClick={() => setStatusFilter(status)}
-                      className={statusFilter === status ? "bg-gray-100" : ""}
-                    >
-                      <div className="flex items-center gap-3 w-full">
-                        <div
-                          className={`w-2.5 h-2.5 rounded-full ${config.borderColor} border`}
-                        ></div>
-                        <span>{config.label}</span>
-                        {statusFilter === status && (
-                          <span className="ml-auto text-blue-600">✓</span>
-                        )}
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
+      <div className="flex flex-col gap-4 p-4 border border-gray-200 rounded-2xl bg-white">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
@@ -425,33 +283,72 @@ export default function RequestStaffPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-        </div>
 
-        <div className="text-sm text-gray-500 whitespace-nowrap">
-          Hiển thị{" "}
-          <span className="font-semibold text-gray-900">
-            {filteredRequests.length}
-          </span>{" "}
-          / {mockRequests.length}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 justify-between w-full sm:w-48 bg-white"
+              >
+                {selectedDate ? `${selectedDate}` : "Chọn ngày"}
+                <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-48 max-h-60 overflow-y-auto"
+            >
+              <DropdownMenuItem
+                onClick={() => setSelectedDate(null)}
+                className={!selectedDate ? "bg-gray-100" : ""}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <span>Tất cả ngày</span>
+                  {!selectedDate && (
+                    <span className="ml-auto text-blue-600">✓</span>
+                  )}
+                </div>
+              </DropdownMenuItem>
+
+              {uniqueDates.map((date) => (
+                <DropdownMenuItem
+                  key={date}
+                  onClick={() => setSelectedDate(date)}
+                  className={selectedDate === date ? "bg-gray-100" : ""}
+                >
+                  <div className="flex items-center gap-3 w-full">
+                    <span>{date}</span>
+                    {selectedDate === date && (
+                      <span className="ml-auto text-blue-600">✓</span>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="ml-auto text-sm text-gray-500 whitespace-nowrap">
+            Hiển thị{" "}
+            <span className="font-semibold text-gray-900">
+              {filteredRequests.length}
+            </span>{" "}
+            / {mockRequests.length}
+          </div>
         </div>
       </div>
 
       <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
         <TableRequest
           filteredRequests={filteredRequests}
-          statusConfig={statusConfig}
-          onOpenDetail={handleOpenDetail}
-          onOpenStaffUpdate={handleOpenStaffUpdate}
-          onOpenViewStaffUpdate={handleOpenViewStaffUpdate}
+          onOpenDetail={(request) => handleOpenDetail(request)}
+          onOpenStaffUpdate={(request) => handleOpenStaffUpdate(request)}
         />
       </div>
 
       <RequestDetailModal
         open={detailModalOpen}
-        request={selectedRequest}
+        id={String(selectedRequest?.id)}
         onClose={() => setDetailModalOpen(false)}
-        onApprove={() => handleApproveRequest(selectedRequest?.id)}
-        onReject={() => handleRejectRequest(selectedRequest.id)}
       />
 
       <StaffUpdateModal
@@ -459,15 +356,6 @@ export default function RequestStaffPage() {
         request={selectedRequest}
         onClose={() => setStaffUpdateModalOpen(false)}
         onUpdate={handleStaffUpdateSubmit}
-      />
-
-      <ViewStaffUpdateModal
-        open={viewStaffUpdateModalOpen}
-        request={selectedRequest}
-        staffUpdate={selectedRequest?.staffUpdate}
-        onClose={() => setViewStaffUpdateModalOpen(false)}
-        onSendToOperator={() => handleSendToOperator(selectedRequest)}
-        statusRequest={selectedRequest?.status || ""}
       />
     </div>
   );
