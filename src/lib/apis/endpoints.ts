@@ -8,5 +8,6 @@ export const endpoints = {
   auth: createEndpoints("auth"),
   apartments: createEndpoints('apartments'),
   user: createEndpoints('users'),
+  iot: createEndpoints("iot"),
   chat: createEndpoints("chat"),
 }
