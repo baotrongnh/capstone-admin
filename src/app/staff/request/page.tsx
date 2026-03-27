@@ -16,14 +16,12 @@ import {
   Search,
   Send,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { RequestDetailModal } from "./components/modals/moda-detail-request";
-import { StaffUpdateModal } from "./components/modals/modal-staff-update";
-import { TableRequest } from "./components/table-request";
-import { ApartmentItem, ApartmentQueryParams } from "@/types/apartment";
-import { useApartments } from "@/hooks/query/useApartments";
-import { useRouter } from "next/navigation";
+import { TableRequest } from "../../../components/table/table-request-staff";
+import { ApartmentItem } from "@/types/apartment";
+import { RequestDetailModal } from "@/components/modal/request-detail-staff-modal";
+import { StaffUpdateModal } from "@/components/modal/update-staff-modal";
 
 const mockRequests = [
   {
@@ -110,25 +108,21 @@ export default function RequestStaffPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilter(statusFilter === status ? null : status);
+  };
   const [selectedRequest, setSelectedRequest] = useState<ApartmentItem | null>(
     null,
   );
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [staffUpdateModalOpen, setStaffUpdateModalOpen] = useState(false);
 
-  const [requestsWithUpdates, setRequestsWithUpdates] = useState<
-    Map<string, any>
-  >(
-    new Map(
-      mockRequests
-        .filter((r) => r.staffUpdate)
-        .map((r) => [r.id, r.staffUpdate]),
-    ),
+  const requestsWithUpdates = new Map(
+    mockRequests.filter((r) => r.staffUpdate).map((r) => [r.id, r.staffUpdate]),
   );
 
-  const [requestStatuses, setRequestStatuses] = useState<Map<string, string>>(
-    new Map(mockRequests.map((r) => [r.id, r.status])),
-  );
+  const requestStatuses = new Map(mockRequests.map((r) => [r.id, r.status]));
 
   const handleOpenDetail = (request: ApartmentItem) => {
     setSelectedRequest(request);
@@ -175,10 +169,6 @@ export default function RequestStaffPage() {
     submitted: filteredRequests.filter((r) => r.status === "submitted").length,
   };
 
-  const toggleFilter = (status: string) => {
-    setStatusFilter(statusFilter === status ? null : status);
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -192,6 +182,7 @@ export default function RequestStaffPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div
+          onClick={() => toggleStatusFilter("pending")}
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "pending"
               ? "ring-2 ring-orange-400 border-transparent"
@@ -212,6 +203,7 @@ export default function RequestStaffPage() {
         </div>
 
         <div
+          onClick={() => toggleStatusFilter("inspecting")}
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "inspecting"
               ? "ring-2 ring-yellow-400 border-transparent"
@@ -232,6 +224,7 @@ export default function RequestStaffPage() {
         </div>
 
         <div
+          onClick={() => toggleStatusFilter("verifying")}
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "verifying"
               ? "ring-2 ring-blue-400 border-transparent"
@@ -252,6 +245,7 @@ export default function RequestStaffPage() {
         </div>
 
         <div
+          onClick={() => toggleStatusFilter("submitted")}
           className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
             statusFilter === "submitted"
               ? "ring-2 ring-green-400 border-transparent"
@@ -339,7 +333,7 @@ export default function RequestStaffPage() {
 
       <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
         <TableRequest
-          filteredRequests={filteredRequests}
+          filteredRequests={filteredRequests as unknown as ApartmentItem[]}
           onOpenDetail={(request) => handleOpenDetail(request)}
           onOpenStaffUpdate={(request) => handleOpenStaffUpdate(request)}
         />

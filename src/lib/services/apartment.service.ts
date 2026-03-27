@@ -52,7 +52,7 @@ export const apartmentService = {
     apartmentId: string | number,
     cooperationData: object,
   ) => {
-    const { data } = await apiClient.post(
+    const { data } = await apiClient.patch(
       `${endpoints.apartments}/${apartmentId}/cooperation-media`,
       cooperationData,
       {
@@ -61,6 +61,7 @@ export const apartmentService = {
         },
       },
     );
+
     return data;
   },
 };

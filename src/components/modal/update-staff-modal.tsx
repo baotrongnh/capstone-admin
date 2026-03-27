@@ -1,6 +1,5 @@
 "use client";
 
-import { uploadFile } from "@/utils/uploadFile";
 import { useCreateCooperationMedia } from "@/hooks/query/useApartments";
 import { useDistricts, useProvinces } from "@/hooks/query/useProvinces";
 import { ApartmentItem } from "@/types/apartment";
@@ -34,29 +33,21 @@ interface StaffUpdateModalProps {
   request: ApartmentItem | null;
   onClose: () => void;
   onUpdate: (success: boolean) => void;
-  loading?: boolean;
 }
-
-const conditionOptions = [
-  { value: "excellent", label: "Xuất sắc - Như mới" },
-  { value: "very_good", label: "Rất tốt - Nhẹ hao mòn" },
-  { value: "good", label: "Tốt - Bình thường" },
-  { value: "fair", label: "Khá - Có vết cũ" },
-  { value: "poor", label: "Kém - Cần sửa chữa" },
-];
 
 export function StaffUpdateModal({
   open,
   request,
   onClose,
   onUpdate,
-  loading = false,
 }: StaffUpdateModalProps) {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [videoList, setVideoList] = useState<UploadFile[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  console.log("REWQUEST", request);
 
   const [selectedProvince, setSelectedProvince] = useState<number | null>(null);
 
@@ -68,17 +59,21 @@ export function StaffUpdateModal({
 
   if (!request) return null;
 
-  const provinceOptions = provinces?.map((item: any) => ({
-    label: item.name,
-    value: item.code,
-  }));
+  const provinceOptions = provinces?.map(
+    (item: { name: string; code: number }) => ({
+      label: item.name,
+      value: item.code,
+    }),
+  );
 
-  const districtOptions = districts?.map((item: any) => ({
-    label: item.name,
-    value: item.code,
-  }));
+  const districtOptions = districts?.map(
+    (item: { name: string; code: number }) => ({
+      label: item.name,
+      value: item.code,
+    }),
+  );
 
-  const handleUploadChange = (info: any) => {
+  const handleUploadChange = (info: { fileList: UploadFile[] }) => {
     const newFileList = info.fileList.slice(-20);
     setFileList(newFileList);
     form.setFieldValue("surveyImages", newFileList);
@@ -88,7 +83,7 @@ export function StaffUpdateModal({
     }
   };
 
-  const handleVideoChange = (info: any) => {
+  const handleVideoChange = (info: { fileList: UploadFile[] }) => {
     const newVideoList = info.fileList.slice(-1);
     setVideoList(newVideoList);
     form.setFieldValue("surveyVideo", newVideoList);
@@ -141,13 +136,10 @@ export function StaffUpdateModal({
 
       onUpdate(true);
       handleClose();
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       console.error("Lỗi:", err);
-      const errorMessage =
-        err?.response?.data?.message || err?.message || "Lỗi hệ thống";
-      setError(
-        Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage,
-      );
+      const errorMessage = err instanceof Error ? err.message : "Lỗi hệ thống";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

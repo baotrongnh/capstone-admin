@@ -15,7 +15,7 @@ import { useMemo } from "react";
 import { ApartmentItem, ApartmentQueryParams } from "@/types/apartment";
 
 interface TableRequestProps {
-  filteredRequests: any[];
+  filteredRequests: ApartmentItem[];
   onOpenDetail: (request: ApartmentItem) => void;
   onOpenStaffUpdate: (request: ApartmentItem) => void;
 }
@@ -91,7 +91,7 @@ export function TableRequest({
 
                 {/* ĐỊA CHỈ */}
                 <TableCell className="text-sm">
-                  {item.address || "N/A"}
+                  {/* {item.address || "N/A"} */}
                 </TableCell>
 
                 {/* TIỀN CỌC */}

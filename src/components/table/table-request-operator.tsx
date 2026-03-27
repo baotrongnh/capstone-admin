@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye } from "lucide-react";
+import type { Request } from "../../app/operator/request/types";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/table";
 
 interface TableRequestOperatorProps {
-  filteredRequests: any[];
+  filteredRequests: Request[];
   statusConfig: Record<
     string,
     {
@@ -20,7 +21,7 @@ interface TableRequestOperatorProps {
       color: string;
     }
   >;
-  onOpenApprove: (request: any) => void;
+  onOpenApprove: (request: Request) => void;
 }
 
 export function TableRequestOperator({

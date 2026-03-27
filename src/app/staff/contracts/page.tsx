@@ -1,13 +1,16 @@
 "use client";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -16,41 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  MoreHorizontalIcon,
-  Plus,
-  Eye,
-  Edit,
-  CheckCircle,
-  XCircle,
-  Trash2,
-  FileText,
-  Calendar,
-  DollarSign,
-  Home,
-  User,
-  Download,
-  PenTool,
-} from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
-import { CreateContractModal } from "@/components/modal/modalContracts/modalCreateContract";
-import { ContractDetailModal } from "@/components/modal/modalContracts/modalDetailContract";
-import { ContractEditModal } from "@/components/modal/modalContracts/modalEditContract";
-import { ContractActivateModal } from "@/components/modal/modalContracts/modalActiveContract";
-import { ContractTerminateModal } from "@/components/modal/modalContracts/modalTerminateContract";
-import { ContractPreviewModal } from "@/components/modal/modalContracts/modalPreviewContract";
 
 // Mock data
 const MOCK_CONTRACTS = [
@@ -331,9 +301,6 @@ export default function ContractsPageStaff() {
                   <TableCell className="text-sm text-muted-foreground">
                     {formatDate(contract.createdAt)}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <ActionMenu contract={contract} />
-                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -341,7 +308,6 @@ export default function ContractsPageStaff() {
         </Table>
       </div>
 
-      {/* Summary */}
       {filteredContracts.length > 0 && (
         <div className="grid grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-lg border shadow-sm">
@@ -378,95 +344,6 @@ export default function ContractsPageStaff() {
           </div>
         </div>
       )}
-
-      {/* Create Contract Modal */}
-      <CreateContractModal
-        open={showCreateModal}
-        onOpenChange={setShowCreateModal}
-      />
     </div>
-  );
-}
-
-// ACTION MENU COMPONENT
-function ActionMenu({ contract }: { contract: Contract }) {
-  const [modalType, setModalType] = useState<
-    "detail" | "edit" | "activate" | "terminate" | "preview" | null
-  >(null);
-
-  const handleDelete = () => {
-    if (
-      window.confirm(
-        "Bạn chắc chắn muốn xóa hợp đồng này? Hành động này không thể hoàn tác.",
-      )
-    ) {
-      toast.success("Xóa hợp đồng thành công");
-    }
-  };
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 outline-none">
-            <MoreHorizontalIcon className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-55">
-          <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setModalType("detail")}>
-            <Eye className="mr-2 h-4 w-4 text-blue-500" /> Xem chi tiết
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setModalType("preview")}>
-            <FileText className="mr-2 h-4 w-4 text-purple-500" /> Xem trước hợp
-            đồng
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setModalType("edit")}>
-            <Edit className="mr-2 h-4 w-4 text-orange-500" /> Chỉnh sửa
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {contract.status !== "active" && (
-            <DropdownMenuItem onClick={() => setModalType("activate")}>
-              <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> Kích hoạt
-            </DropdownMenuItem>
-          )}
-          {contract.status !== "terminated" && (
-            <DropdownMenuItem onClick={() => setModalType("terminate")}>
-              <XCircle className="mr-2 h-4 w-4 text-red-500" /> Hủy hợp đồng
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
-            <Trash2 className="mr-2 h-4 w-4" /> Xóa
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ContractDetailModal
-        contract={contract}
-        open={modalType === "detail"}
-        onOpenChange={() => setModalType(null)}
-      />
-      <ContractEditModal
-        contract={contract}
-        open={modalType === "edit"}
-        onOpenChange={() => setModalType(null)}
-      />
-      <ContractActivateModal
-        contract={contract}
-        open={modalType === "activate"}
-        onOpenChange={() => setModalType(null)}
-      />
-      <ContractTerminateModal
-        contract={contract}
-        open={modalType === "terminate"}
-        onOpenChange={() => setModalType(null)}
-      />
-      <ContractPreviewModal
-        contract={contract}
-        open={modalType === "preview"}
-        onOpenChange={() => setModalType(null)}
-      />
-    </>
   );
 }

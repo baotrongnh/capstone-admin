@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Request } from "./types";
 import {
   Search,
   ChevronDown,
@@ -17,8 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ModalApproveRequest } from "./components/modals/modal-approve-request";
-import { TableRequestOperator } from "./components/table-request-operator";
+import { ModalApproveRequest } from "../../../components/modal/approve-request-operator-modal";
+import { TableRequestOperator } from "../../../components/table/table-request-operator";
 
 const statusConfig: Record<
   string,
@@ -53,7 +54,7 @@ const statusConfig: Record<
   },
 };
 
-const mockOperatorRequests = [
+const mockOperatorRequests: Request[] = [
   {
     id: "REQ-001",
     apartmentName: "Vinhome Grand Park - A101",
@@ -62,7 +63,7 @@ const mockOperatorRequests = [
     bedrooms: 2,
     area: "78 m²",
     price: "15,000,000",
-    status: "submitted" as const,
+    status: "submitted",
     submittedDate: "2026-03-16",
     staffUpdate: {
       exteriorCondition: "very_good",
@@ -80,7 +81,7 @@ const mockOperatorRequests = [
     bedrooms: 3,
     area: "95 m²",
     price: "22,500,000",
-    status: "submitted" as const,
+    status: "submitted",
     submittedDate: "2026-03-13",
     staffUpdate: {
       exteriorCondition: "good",
@@ -98,7 +99,7 @@ const mockOperatorRequests = [
     bedrooms: 1,
     area: "52 m²",
     price: "8,500,000",
-    status: "approved" as const,
+    status: "approved",
     submittedDate: "2026-03-11",
     staffUpdate: {
       exteriorCondition: "good",
@@ -116,7 +117,7 @@ const mockOperatorRequests = [
     bedrooms: 2,
     area: "85 m²",
     price: "18,500,000",
-    status: "rejected" as const,
+    status: "rejected",
     submittedDate: "2026-03-09",
     staffUpdate: {
       exteriorCondition: "fair",
@@ -131,14 +132,14 @@ const mockOperatorRequests = [
 export default function RequestOperatorPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [approveModalOpen, setApproveModalOpen] = useState(false);
 
   const [requestStatuses, setRequestStatuses] = useState<Map<string, string>>(
     new Map(mockOperatorRequests.map((r) => [r.id, r.status])),
   );
 
-  const handleOpenApproveModal = (request: any) => {
+  const handleOpenApproveModal = (request: Request) => {
     setSelectedRequest(request);
     setApproveModalOpen(true);
   };
@@ -154,10 +155,13 @@ export default function RequestOperatorPage() {
 
   const handleReject = () => {};
 
-  const filteredRequests = mockOperatorRequests
+  const filteredRequests: Request[] = mockOperatorRequests
     .map((req) => ({
       ...req,
-      status: requestStatuses.get(req.id) || req.status,
+      status: (requestStatuses.get(req.id) || req.status) as
+        | "submitted"
+        | "approved"
+        | "rejected",
     }))
     .filter((req) => {
       const matchSearch =
@@ -260,7 +264,7 @@ export default function RequestOperatorPage() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-2 min-w-[160px] justify-between h-9 bg-white border-gray-200 text-gray-700"
+                className="flex items-center gap-2 min-w-40 justify-between h-9 bg-white border-gray-200 text-gray-700"
               >
                 <span className="font-normal text-sm">
                   {statusFilter
@@ -291,9 +295,9 @@ export default function RequestOperatorPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="hidden sm:block w-[1px] h-6 bg-gray-200 mx-1"></div>
+          <div className="hidden sm:block w-px h-6 bg-gray-200 mx-1"></div>
 
-          <div className="relative flex-1 sm:min-w-[300px]">
+          <div className="relative flex-1 sm:min-w-75">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Tìm kiếm căn hộ, đối tác..."
