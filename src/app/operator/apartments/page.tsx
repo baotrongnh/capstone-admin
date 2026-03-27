@@ -21,11 +21,8 @@ import { useApartments } from "@/hooks/query/useApartments"
 import { formatVND } from "@/utils/format"
 import { message } from "antd"
 import { MoreHorizontalIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { useState } from "react"
-import { ApartmentDetailModal } from "../../../components/modal/apartment-detail-modal"
-
-type DetailMode = "view" | "edit"
 
 const STATUS_LABELS: Record<string, string> = {
      available: "Còn trống",
@@ -43,33 +40,18 @@ const formatStatus = (status?: string | null) => {
 export default function OperatorApartmentsPage() {
      const { data: apartmentListResponse, isLoading: isListLoading } = useApartments()
      const apartments = apartmentListResponse?.data || []
-
-     const [selectedApartmentId, setSelectedApartmentId] = useState<string | null>(null)
-     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-     const [detailMode, setDetailMode] = useState<DetailMode>("view")
+     const router = useRouter()
 
      const handleOpenDetail = (id: string) => {
-          setSelectedApartmentId(id)
-          setDetailMode("view")
-          setIsDetailModalOpen(true)
+          router.push(`/operator/apartments/${id}`)
      }
 
      const handleEdit = (id: string) => {
-          setSelectedApartmentId(id)
-          setDetailMode("edit")
-          setIsDetailModalOpen(true)
+          router.push(`/operator/apartments/${id}?mode=edit`)
      }
 
      const handleDelete = (id: string) => {
           message.info(`Sẽ mở xác nhận xóa căn hộ: ${id}`)
-     }
-
-     const handleCloseDetail = (open: boolean) => {
-          setIsDetailModalOpen(open)
-          if (!open) {
-               setSelectedApartmentId(null)
-               setDetailMode("view")
-          }
      }
 
      return (
@@ -162,13 +144,6 @@ export default function OperatorApartmentsPage() {
                          ))}
                     </TableBody>
                </Table>
-
-               <ApartmentDetailModal
-                    open={isDetailModalOpen}
-                    apartmentId={selectedApartmentId}
-                    mode={detailMode}
-                    onOpenChange={handleCloseDetail}
-               />
           </>
      )
 }

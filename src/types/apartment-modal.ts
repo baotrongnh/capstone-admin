@@ -31,8 +31,8 @@ export const formatDateTime = (value?: string | null) => {
 
 export const getDisplayAddress = (apartment?: ApartmentDetailResponse["data"]) => {
      return (
+          apartment?.streetAddress ||
           apartment?.address ||
-          apartment?.newAddress?.fullAddress ||
           "-"
      )
 }
@@ -67,7 +67,9 @@ export const buildApartmentForm = (
      images: detail.images || [],
      videoTourUrl: detail.videoTourUrl || undefined,
      yearBuilt: detail.yearBuilt || undefined,
-     newWardCode: detail.newWardCode || undefined,
+     wardCode: detail.wardCode || undefined,
+     streetAddress: detail.streetAddress || undefined,
+     ownerId: detail.ownerId || undefined,
 })
 
 export const readFileAsDataUrl = (file: File) => {
