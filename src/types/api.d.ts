@@ -571,15 +571,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
         /**
          * Upload media for partner cooperation apartment
          * @description Partner or staff uploads images/video for a partner cooperation apartment. Staff can also update apartment information in this same request.
          */
-        post: operations["ApartmentsController_uploadCooperationMedia"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
+        patch: operations["ApartmentsController_uploadCooperationMedia"];
         trace?: never;
     };
     "/api/v1/apartments/owner/{ownerId}": {
@@ -2264,8 +2264,8 @@ export interface paths {
         get: operations["ChatController_getConversations"];
         put?: never;
         /**
-         * Create a new chat conversation
-         * @description REST alternative to socket event chat:create_conversation.
+         * Create or resume a chat conversation
+         * @description REST alternative to socket event chat:create_conversation. Logged-in users and guests with an existing session will reuse their latest non-archived conversation instead of creating a new one.
          */
         post: operations["ChatController_createConversation"];
         delete?: never;
@@ -2311,23 +2311,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/chat/conversations/{id}/close": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Close a conversation (staff only) */
-        patch: operations["ChatController_closeConversation"];
-        trace?: never;
-    };
     "/api/v1/chat/conversations/{id}/archive": {
         parameters: {
             query?: never;
@@ -2343,23 +2326,6 @@ export interface paths {
         head?: never;
         /** Archive a conversation (staff only) */
         patch: operations["ChatController_archiveConversation"];
-        trace?: never;
-    };
-    "/api/v1/chat/conversations/{id}/reopen": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Reopen a closed conversation (staff only) */
-        patch: operations["ChatController_reopenConversation"];
         trace?: never;
     };
 }
@@ -2580,9 +2546,7 @@ export interface components {
             /** @example A101 */
             apartmentNumber: string;
             /** @example 26728 */
-            newWardCode?: number | null;
-            /** @example 26731 */
-            oldWardCode?: number | null;
+            wardCode?: number | null;
         };
         ContractSummaryDto: {
             id: string;
@@ -3097,22 +3061,6 @@ export interface components {
             /** @example pending */
             status: string;
         };
-        WardAddressDto: {
-            /** @example 26728 */
-            wardCode: number;
-            /** @example Xã Châu Pha */
-            wardName?: string | null;
-            /** @example 754 */
-            districtCode?: number | null;
-            /** @example Thị xã Phú Mỹ */
-            districtName?: string | null;
-            /** @example 79 */
-            provinceCode?: number | null;
-            /** @example Thành phố Hồ Chí Minh */
-            provinceName?: string | null;
-            /** @example Xã Châu Pha, Thành phố Hồ Chí Minh */
-            fullAddress?: string | null;
-        };
         ApartmentListItemDto: {
             /** @example d6e0a098-c1e9-4b5d-9207-e507e9a5974d */
             id: string;
@@ -3123,15 +3071,20 @@ export interface components {
             /** @example 8 */
             floorNumber?: number | null;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number | null;
+            wardCode?: number | null;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Mã tỉnh/thành (v2), auto-resolved từ wardCode
+             * @example 79
              */
-            oldWardCode?: number | null;
+            provinceCode?: number | null;
+            /**
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
+             */
+            streetAddress?: string | null;
             /** @example 55 */
             totalArea: string;
             /** @example 1 */
@@ -3163,12 +3116,6 @@ export interface components {
              *     ]
              */
             cooperationContracts?: components["schemas"]["ApartmentCooperationContractDto"][] | null;
-            /** @description Địa chỉ đã resolve từ mã địa chỉ sau sáp nhập (v2) */
-            newAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Địa chỉ đã resolve từ mã địa chỉ trước sáp nhập (v1) */
-            oldAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Dia chi hien thi theo addressType dang filter (new/old/both) */
-            address?: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -3257,15 +3204,20 @@ export interface components {
             /** @example 8 */
             floorNumber?: number | null;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number | null;
+            wardCode?: number | null;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Mã tỉnh/thành (v2), auto-resolved từ wardCode
+             * @example 79
              */
-            oldWardCode?: number | null;
+            provinceCode?: number | null;
+            /**
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
+             */
+            streetAddress?: string | null;
             /** @example 10.788 */
             latitude?: string | null;
             /** @example 106.7195 */
@@ -3302,12 +3254,6 @@ export interface components {
             images?: string[] | null;
             videoTourUrl?: string | null;
             yearBuilt?: number | null;
-            /** @description Dia chi resolve theo ma phuong/xa sau sap nhap (v2) */
-            newAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Dia chi resolve theo ma phuong/xa truoc sap nhap (v1) */
-            oldAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Dia chi hien thi theo addressType query (new/old/both) khi lay chi tiet can ho */
-            address?: string | null;
             ownerId?: string | null;
             approvedByOperatorId?: string | null;
             /** Format: date-time */
@@ -3364,30 +3310,20 @@ export interface components {
             /** @example R1-801 */
             apartmentNumber: string;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number | null;
+            wardCode?: number | null;
             /**
-             * @description Mã tỉnh/thành sau sáp nhập (v2), auto-resolved từ wardCode
+             * @description Mã tỉnh/thành (v2), auto-resolved từ wardCode
              * @example 79
              */
-            newProvinceCode?: number | null;
+            provinceCode?: number | null;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
              */
-            oldWardCode?: number | null;
-            /**
-             * @description Mã quận/huyện trước sáp nhập (v1), auto-resolved từ wardCode
-             * @example 760
-             */
-            oldDistrictCode?: number | null;
-            /**
-             * @description Mã tỉnh/thành trước sáp nhập (v1), auto-resolved từ wardCode
-             * @example 77
-             */
-            oldProvinceCode?: number | null;
+            streetAddress?: string | null;
             /** @example 12000000 */
             baseRentPrice: string;
             /** @example available */
@@ -3403,15 +3339,15 @@ export interface components {
             /** @example 15 */
             floorNumber?: number;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number;
+            wardCode?: number;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
              */
-            oldWardCode?: number;
+            streetAddress?: string;
             /** @example 10.8012 */
             latitude?: number;
             /** @example 106.72 */
@@ -3511,15 +3447,15 @@ export interface components {
             /** @example 15 */
             floorNumber?: number;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number;
+            wardCode?: number;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
              */
-            oldWardCode?: number;
+            streetAddress?: string;
             /** @example 10.8012 */
             latitude?: number;
             /** @example 106.72 */
@@ -3665,15 +3601,15 @@ export interface components {
             /** @example 15 */
             floorNumber?: number;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number;
+            wardCode?: number;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
              */
-            oldWardCode?: number;
+            streetAddress?: string;
             /** @example 10.8012 */
             latitude?: number;
             /** @example 106.72 */
@@ -3737,15 +3673,15 @@ export interface components {
             /** @example 15 */
             floorNumber?: number;
             /**
-             * @description Mã phường/xã sau sáp nhập (v2)
+             * @description Mã phường/xã (v2)
              * @example 26728
              */
-            newWardCode?: number;
+            wardCode?: number;
             /**
-             * @description Mã phường/xã trước sáp nhập (v1)
-             * @example 26731
+             * @description Địa chỉ cụ thể (số nhà, ngõ, hẻm, đường...)
+             * @example 12 Nguyễn Huệ, Phường Bến Nghé
              */
-            oldWardCode?: number;
+            streetAddress?: string;
             /** @example 10.8012 */
             latitude?: number;
             /** @example 106.72 */
@@ -3991,15 +3927,11 @@ export interface components {
             /** @example A101 */
             apartmentNumber: string;
             /** @example 26728 */
-            newWardCode?: number | null;
-            /** @example 26731 */
-            oldWardCode?: number | null;
-            /** @description Resolved address from new ward code (v2) */
-            newAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Resolved address from old ward code (v1) */
-            oldAddress?: components["schemas"]["WardAddressDto"] | null;
-            /** @description Display address derived from resolved ward data */
-            displayAddress?: string | null;
+            wardCode?: number | null;
+            /** @example 79 */
+            provinceCode?: number | null;
+            /** @example 12 Nguyễn Huệ, Phường Bến Nghé */
+            streetAddress?: string | null;
         };
         ContractListMemberUserDto: {
             id: string;
@@ -4998,9 +4930,7 @@ export interface components {
             /** @example Intelli Tower A */
             buildingName?: string | null;
             /** @example 26728 */
-            newWardCode?: number | null;
-            /** @example 26731 */
-            oldWardCode?: number | null;
+            wardCode?: number | null;
         };
         UserMyViewingContactRequestDto: {
             /** @example d7a8e15e-e4b7-4df5-83d4-f7d7e4d4a31a */
@@ -6343,6 +6273,7 @@ export interface components {
             /** @description Guest email */
             guestEmail?: string;
             /**
+             * @description `closed` chi ton tai voi du lieu cu; luong hien tai su dung `active` va `archived`.
              * @example active
              * @enum {string}
              */
@@ -7371,14 +7302,10 @@ export interface operations {
     ApartmentsController_search: {
         parameters: {
             query?: {
-                /** @description Province code filter. Matches apartments by newProvinceCode (v2) OR oldProvinceCode (v1). */
+                /** @description Province code filter. */
                 provinceCode?: number;
-                /** @description District code filter (v1 - pre-merger only). Filters apartments by oldDistrictCode. */
-                districtCode?: number;
-                /** @description Ward code filter. Uses newWardCode when addressType=new, oldWardCode when addressType=old, both when addressType=both */
+                /** @description Ward code filter. */
                 wardCode?: number;
-                /** @description Address type to search: new (post-merger), old (pre-merger), both (default: both) */
-                addressType?: "new" | "old" | "both";
                 keyword?: string;
                 /** @description Minimum bedrooms */
                 minBedrooms?: number;
@@ -7437,10 +7364,7 @@ export interface operations {
     };
     ApartmentsController_findOne: {
         parameters: {
-            query?: {
-                /** @description Address type for display address: new (v2), old (v1), both (default) */
-                addressType?: "new" | "old" | "both";
-            };
+            query?: never;
             header?: never;
             path: {
                 id: string;
@@ -7786,14 +7710,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Apartment media uploaded successfully */
-            201: {
+            /** @description Apartment media updated successfully */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example 201 */
+                        /** @example 200 */
                         statusCode?: number;
                         /** @example Success */
                         message?: string;
@@ -12216,7 +12140,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Conversation created */
+            /** @description Conversation created or resumed */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -12292,36 +12216,6 @@ export interface operations {
             };
         };
     };
-    ChatController_closeConversation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Conversation UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Conversation closed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConversationResponseDto"];
-                };
-            };
-            /** @description Conversation not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ChatController_archiveConversation: {
         parameters: {
             query?: never;
@@ -12335,36 +12229,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Conversation archived */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConversationResponseDto"];
-                };
-            };
-            /** @description Conversation not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ChatController_reopenConversation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Conversation UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Conversation reopened */
             200: {
                 headers: {
                     [name: string]: unknown;

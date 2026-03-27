@@ -4,12 +4,15 @@ export type ApartmentListResponse = paths["/api/v1/apartments/search"]["get"]["r
 export type ApartmentDetailResponse = paths["/api/v1/apartments/{id}"]["get"]["responses"]["200"]["content"]["application/json"];
 export type ApartmentUpdateRequestBody = paths["/api/v1/apartments/{id}"]["patch"]["requestBody"]["content"]["application/json"];
 export type ApartmentUpdateResponse = paths["/api/v1/apartments/{id}"]["patch"]["responses"]["200"]["content"]["application/json"];
+export type ApartmentCreateRequestBody = paths["/api/v1/apartments"]["post"]["requestBody"]["content"]["application/json"];
+export type ApartmentCreateResponse = paths["/api/v1/apartments"]["post"]["responses"]["201"]["content"]["application/json"];
 export type ApartmentSearchQueryParams = paths["/api/v1/apartments/search"]["get"]["parameters"]["query"]
 
 export type ApartmentItem = NonNullable<ApartmentListResponse['data']>[number]
 export type ApartmenList = ApartmentItem[]
 export type ApartmentQueryParams = NonNullable<ApartmentSearchQueryParams>
 export type FurnishingType = NonNullable<ApartmentQueryParams['furnishingStatus']>
+export type ApartmentCreateFurnishingType = ApartmentCreateRequestBody["furnishingStatus"]
 
 export type ApartmentFilterPatch = paths["/api/v1/apartments/search"]["get"]["parameters"]["query"]
 

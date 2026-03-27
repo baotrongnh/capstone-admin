@@ -52,7 +52,7 @@ export function ApartmentCardMessage({ apartmentId }: ApartmentCardMessageProps)
                               {formatVND(apartment.baseRentPrice)}/tháng
                          </p>
                          <p className="truncate text-xs text-gray-400">
-                              {apartment.address || "Chưa có địa chỉ"}
+                              {/* {apartment.address || "Chưa có địa chỉ"} */}
                          </p>
                     </div>
                </button>
