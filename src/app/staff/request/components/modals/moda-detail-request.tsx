@@ -1,22 +1,19 @@
 "use client";
 
 import { useApartment } from "@/hooks/query/useApartments";
-import { Modal, Button, Space, Steps, Tag } from "antd";
+import { Button, Modal, Tag } from "antd";
 import {
-  Building2,
-  MapPin,
-  BedDouble,
-  Maximize,
   Banknote,
-  User,
-  Phone,
-  Mail,
-  Clock,
-  Briefcase,
-  Image as ImageIcon,
-  Home,
-  Pen,
   Bath,
+  BedDouble,
+  Briefcase,
+  Building2,
+  Clock,
+  Home,
+  MapPin,
+  Maximize,
+  Pen,
+  User
 } from "lucide-react";
 
 interface RequestDetailModalProps {

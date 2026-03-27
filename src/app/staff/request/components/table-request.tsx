@@ -15,7 +15,7 @@ import { useMemo } from "react";
 import { ApartmentItem, ApartmentQueryParams } from "@/types/apartment";
 
 interface TableRequestProps {
-  filteredRequests: any[];
+  filteredRequests: ApartmentItem[];
   onOpenDetail: (request: ApartmentItem) => void;
   onOpenStaffUpdate: (request: ApartmentItem) => void;
 }

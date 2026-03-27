@@ -11,8 +11,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+interface Request {
+  id: string;
+  apartmentName: string;
+  partner: string;
+  location: string;
+  bedrooms: number;
+  area: string;
+  price: string;
+  status: string;
+  submittedDate: string;
+}
+
 interface TableRequestOperatorProps {
-  filteredRequests: any[];
+  filteredRequests: Request[];
   statusConfig: Record<
     string,
     {
@@ -20,7 +32,7 @@ interface TableRequestOperatorProps {
       color: string;
     }
   >;
-  onOpenApprove: (request: any) => void;
+  onOpenApprove: (request: Request) => void;
 }
 
 export function TableRequestOperator({
