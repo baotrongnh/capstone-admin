@@ -29,7 +29,6 @@ export function LoginForm({
     loginMutation.mutate({
       identifier,
       password,
-      actorType: 'admin'
     })
   }
 

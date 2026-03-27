@@ -91,7 +91,7 @@ export function TableRequest({
 
                 {/* ĐỊA CHỈ */}
                 <TableCell className="text-sm">
-                  {item.address || "N/A"}
+                  {/* {item.address || "N/A"} */}
                 </TableCell>
 
                 {/* TIỀN CỌC */}

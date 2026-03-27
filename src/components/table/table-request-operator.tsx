@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye } from "lucide-react";
+import type { Request } from "../../app/operator/request/types";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,18 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-interface Request {
-  id: string;
-  apartmentName: string;
-  partner: string;
-  location: string;
-  bedrooms: number;
-  area: string;
-  price: string;
-  status: string;
-  submittedDate: string;
-}
 
 interface TableRequestOperatorProps {
   filteredRequests: Request[];

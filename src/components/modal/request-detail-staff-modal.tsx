@@ -13,8 +13,9 @@ import {
   MapPin,
   Maximize,
   Pen,
-  User
+  User,
 } from "lucide-react";
+import Image from "next/image";
 
 interface RequestDetailModalProps {
   open: boolean;
@@ -24,62 +25,15 @@ interface RequestDetailModalProps {
   loading?: boolean;
 }
 
-const statusConfig: Record<
-  string,
-  {
-    label: string;
-    color: string;
-    bgColor: string;
-    borderColor: string;
-    order: number;
-  }
-> = {
-  pending: {
-    label: "Chờ duyệt",
-    color: "text-orange-700",
-    bgColor: "bg-orange-50",
-    borderColor: "border-orange-200",
-    order: 1,
-  },
-
-  verifying: {
-    label: "Đã xác minh",
-    color: "text-blue-700",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    order: 3,
-  },
-
-  completed: {
-    label: "Đã duyệt",
-    color: "text-emerald-700",
-    bgColor: "bg-emerald-50",
-    borderColor: "border-emerald-200",
-    order: 5,
-  },
-};
-
 export function RequestDetailModal({
   open,
   id,
   onClose,
-
-  loading = false,
 }: RequestDetailModalProps) {
-  if (!id) return null;
-
-  const { data: apartmentRequest, isLoading } = useApartment(id);
+  const { data: apartmentRequest } = useApartment(id || "");
   const request = apartmentRequest?.data;
 
-  const status = request
-    ? statusConfig[request.status] || {
-        label: "Không xác định",
-        color: "text-gray-700",
-        bgColor: "bg-gray-100",
-        borderColor: "border-gray-200",
-        order: 0,
-      }
-    : null;
+  if (!id || !request) return null;
 
   return (
     <Modal
@@ -87,7 +41,7 @@ export function RequestDetailModal({
       onCancel={onClose}
       width={850}
       centered
-      bodyStyle={{
+      style={{
         maxHeight: "70vh",
         overflowY: "auto",
         paddingRight: "8px",
@@ -159,9 +113,10 @@ export function RequestDetailModal({
                               key={idx}
                               className="overflow-hidden rounded-lg h-62"
                             >
-                              <img
+                              <Image
                                 src={image}
                                 alt={`Hình ${idx + 1}`}
+                                width={400}
                                 height={700}
                                 className="w-full h-full object-cover hover:scale-105 transition duration-300"
                               />

@@ -1,13 +1,13 @@
 "use client";
 
-import { Modal, Button, Alert, Divider, Empty, Image } from "antd";
-import { FileText, ImageIcon, MapPin, Maximize, Info } from "lucide-react";
-import React from "react";
+import { Alert, Button, Divider, Empty, Modal } from "antd";
+import { FileText, ImageIcon, Info, MapPin, Maximize } from "lucide-react";
+import type { Request, StaffUpdate } from "../../app/operator/request/types";
 
 interface ModalApproveRequestProps {
   open: boolean;
-  request: any;
-  staffUpdate: any;
+  request: Request | null;
+  staffUpdate: StaffUpdate | undefined;
   onClose: () => void;
   onApprove: () => void;
   onReject: () => void;
@@ -246,32 +246,7 @@ export function ModalApproveRequest({
           </div>
 
           {staffUpdate.files && staffUpdate.files.length > 0 ? (
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <Image.PreviewGroup>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {staffUpdate.files.map((file: any, idx: number) => {
-                    const imageUrl =
-                      file.thumbUrl ||
-                      (file.originFileObj
-                        ? URL.createObjectURL(file.originFileObj)
-                        : "");
-                    return (
-                      <div
-                        key={idx}
-                        className="aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white"
-                      >
-                        <Image
-                          src={imageUrl}
-                          alt={`Ảnh hiện trường ${idx + 1}`}
-                          className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-                          fallback="https://via.placeholder.com/300?text=Error"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </Image.PreviewGroup>
-            </div>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200"></div>
           ) : (
             <div className="bg-gray-50 border border-dashed border-gray-300 rounded-xl py-8">
               <Empty

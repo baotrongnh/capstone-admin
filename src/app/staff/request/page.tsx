@@ -18,10 +18,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { RequestDetailModal } from "./components/modals/moda-detail-request";
-import { StaffUpdateModal } from "./components/modals/modal-staff-update";
-import { TableRequest } from "./components/table-request";
+import { TableRequest } from "../../../components/table/table-request-staff";
 import { ApartmentItem } from "@/types/apartment";
+import { RequestDetailModal } from "@/components/modal/request-detail-staff-modal";
+import { StaffUpdateModal } from "@/components/modal/update-staff-modal";
 
 const mockRequests = [
   {

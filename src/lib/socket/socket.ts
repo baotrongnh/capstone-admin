@@ -2,22 +2,19 @@ import { io, Socket } from 'socket.io-client'
 import {
      ChatConversation,
      ChatConversationDataPayload,
-     ChatCreateConversationPayload,
-     ChatMessageDto,
+     ChatConversationRoomPayload,
+     ChatConversationUpdatedPayload,
+     ChatCreateConversationRequest,
+     ChatServerErrorPayload,
+     ChatSocketMessage,
      ChatSendMessagePayload,
 } from '@/types/chat'
 
 interface ServerToClientEvents {
      'chat:conversation_created': (payload: ChatConversation) => void
      'chat:new_conversation': (payload: ChatConversation) => void
-     'chat:new_message': (payload: ChatMessageDto) => void
-     'chat:conversation_updated': (payload: {
-          conversationId: string
-          lastMessageAt?: string
-          lastMessageText?: string
-          senderName?: string
-          senderType?: string
-     }) => void
+     'chat:new_message': (payload: ChatSocketMessage) => void
+     'chat:conversation_updated': (payload: ChatConversationUpdatedPayload) => void
      'chat:conversation_data': (payload: ChatConversationDataPayload) => void
      'chat:staff_joined': (payload: {
           conversationId: string
@@ -46,17 +43,18 @@ interface ServerToClientEvents {
           actorId: string
           isOnline: boolean
      }) => void
-     'chat:error': (payload: { message: string }) => void
+     'chat:error': (payload: ChatServerErrorPayload) => void
+     'staff:inbox': (payload: { message: string }) => void
 }
 
 interface ClientToServerEvents {
-     'chat:create_conversation': (payload: ChatCreateConversationPayload) => void
+     'chat:create_conversation': (payload: ChatCreateConversationRequest) => void
      'chat:send_message': (payload: ChatSendMessagePayload) => void
-     'chat:join_conversation': (payload: { conversationId: string }) => void
-     'chat:leave_conversation': (payload: { conversationId: string }) => void
-     'chat:typing': (payload: { conversationId: string }) => void
-     'chat:stop_typing': (payload: { conversationId: string }) => void
-     'chat:mark_read': (payload: { conversationId: string }) => void
+     'chat:join_conversation': (payload: ChatConversationRoomPayload) => void
+     'chat:leave_conversation': (payload: ChatConversationRoomPayload) => void
+     'chat:typing': (payload: ChatConversationRoomPayload) => void
+     'chat:stop_typing': (payload: ChatConversationRoomPayload) => void
+     'chat:mark_read': (payload: ChatConversationRoomPayload) => void
      'chat:heartbeat': () => void
 }
 

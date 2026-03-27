@@ -1,4 +1,6 @@
 import {
+  ApartmentCreateRequestBody,
+  ApartmentCreateResponse,
   ApartmentDetailResponse,
   ApartmentListResponse,
   ApartmentSearchQueryParams,
@@ -23,7 +25,9 @@ export const apartmentService = {
     return data;
   },
 
-  create: async (apartmentData: string) => {
+  create: async (
+    apartmentData: ApartmentCreateRequestBody,
+  ): Promise<ApartmentCreateResponse> => {
     const { data } = await apiClient.post(endpoints.apartments, apartmentData);
     return data;
   },
