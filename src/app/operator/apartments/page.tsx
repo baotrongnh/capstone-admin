@@ -21,6 +21,7 @@ import { useApartments } from "@/hooks/query/useApartments"
 import { formatVND } from "@/utils/format"
 import { message } from "antd"
 import { MoreHorizontalIcon } from "lucide-react"
+import Link from "next/link"
 import { useState } from "react"
 import { ApartmentDetailModal } from "../../../components/modal/apartment-detail-modal"
 
@@ -73,6 +74,12 @@ export default function OperatorApartmentsPage() {
 
      return (
           <>
+               <div className="mb-4 flex justify-end">
+                    <Button asChild>
+                         <Link href="/operator/apartments/create">Tạo căn hộ</Link>
+                    </Button>
+               </div>
+
                <Table>
                     <TableHeader>
                          <TableRow>
