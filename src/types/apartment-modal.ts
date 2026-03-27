@@ -29,23 +29,10 @@ export const formatDateTime = (value?: string | null) => {
      return date.toLocaleString("vi-VN")
 }
 
-export const getDisplayAddress = (apartment?: ApartmentDetailResponse["data"]) => {
-     return (
-          apartment?.streetAddress ||
-          apartment?.address ||
-          "-"
-     )
-}
-
 export const parseNumber = (value: string) => {
      if (!value.trim()) return undefined
      const parsed = Number(value)
      return Number.isNaN(parsed) ? undefined : parsed
-}
-
-export const toInputValue = (value?: number | string) => {
-     if (value === undefined || value === null) return ""
-     return String(value)
 }
 
 export const buildApartmentForm = (
@@ -71,12 +58,3 @@ export const buildApartmentForm = (
      streetAddress: detail.streetAddress || undefined,
      ownerId: detail.ownerId || undefined,
 })
-
-export const readFileAsDataUrl = (file: File) => {
-     return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(String(reader.result || ""))
-          reader.onerror = () => reject(new Error("Không thể đọc file ảnh"))
-          reader.readAsDataURL(file)
-     })
-}
