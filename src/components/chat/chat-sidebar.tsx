@@ -2,6 +2,7 @@
 
 import { useChatConversations } from "@/hooks/query/useChat"
 import { formatTimeFromString } from "@/utils/format"
+import { Avatar } from "antd"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect } from "react"
 
@@ -61,17 +62,26 @@ export default function ChatSidebar() {
                                         ${isActive ? 'bg-blue-50' : 'hover:bg-gray-50'}`
                                    }
                               >
-                                   <div className="flex items-center justify-between gap-2">
-                                        <p className="truncate text-sm font-medium text-gray-900">
-                                             {conversation.user?.fullName}
-                                        </p>
+                                   <div className="flex items-start justify-between gap-2">
+                                        <div className="flex items-start gap-2 min-w-0">
+                                             <Avatar
+                                                  src={conversation.user?.profileImageUrl}
+                                                  alt={conversation.user?.fullName}
+                                                  size={32}
+                                             />
+                                             <div className="flex flex-col min-w-0">
+                                                  <p className="truncate text-sm font-medium text-gray-900">
+                                                       {conversation.user?.fullName}
+                                                  </p>
+                                                  <p className="truncate text-xs text-gray-500">
+                                                       {conversation.lastMessageText || "Đã gửi 1 file đính kèm"}
+                                                  </p>
+                                             </div>
+                                        </div>
                                         <span className="shrink-0 text-xs text-gray-400">
                                              {formatTimeFromString(conversation.lastMessageAt)}
                                         </span>
                                    </div>
-                                   <p className="mt-1 truncate text-xs text-gray-500">
-                                        {conversation.lastMessageText || "Chưa có tin nhắn"}
-                                   </p>
                               </button>
                          )
                     })}

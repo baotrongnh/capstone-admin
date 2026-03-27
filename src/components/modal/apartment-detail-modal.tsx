@@ -36,13 +36,14 @@ import {
      parseNumber,
      readFileAsDataUrl,
      toInputValue,
-} from "./apartment-modal.utils"
+} from "./apartment-modal"
 
 type ApartmentDetailModalProps = {
      open: boolean
      apartmentId: string | null
      mode: "view" | "edit"
      onOpenChange: (open: boolean) => void
+     allowEdit?: boolean
 }
 
 type DetailItemProps = {
@@ -64,6 +65,7 @@ export function ApartmentDetailModal({
      apartmentId,
      mode,
      onOpenChange,
+     allowEdit = true,
 }: ApartmentDetailModalProps) {
      const {
           data: apartmentDetailResponse,
@@ -99,7 +101,7 @@ export function ApartmentDetailModal({
      }
 
      const handleStartEdit = () => {
-          if (!initialForm) return
+          if (!initialForm || !allowEdit) return
           setDraftForm(initialForm)
           setManualEditMode(true)
      }
@@ -535,9 +537,9 @@ export function ApartmentDetailModal({
                                                   {updateApartment.isPending ? "Đang lưu..." : "Lưu thay đổi"}
                                              </Button>
                                         </>
-                                   ) : (
+                                   ) : allowEdit ? (
                                         <Button onClick={handleStartEdit}>Chỉnh sửa</Button>
-                                   )}
+                                   ) : null}
                               </DialogFooter>
                          </div>
                     )}
