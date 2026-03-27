@@ -22,7 +22,7 @@ import { formatVND } from "@/utils/format"
 import { message } from "antd"
 import { MoreHorizontalIcon } from "lucide-react"
 import { useState } from "react"
-import { ApartmentDetailModal } from "./ApartmentDetailModal"
+import { ApartmentDetailModal } from "../../../components/modal/apartment-detail-modal"
 
 type DetailMode = "view" | "edit"
 
