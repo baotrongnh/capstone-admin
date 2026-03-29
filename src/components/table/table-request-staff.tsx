@@ -1,7 +1,14 @@
 "use client";
 
-import { Eye, Edit } from "lucide-react";
+import { MoreHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -15,15 +22,17 @@ import { useMemo } from "react";
 import { ApartmentItem, ApartmentQueryParams } from "@/types/apartment";
 
 interface TableRequestProps {
-  filteredRequests: ApartmentItem[];
-  onOpenDetail: (request: ApartmentItem) => void;
-  onOpenStaffUpdate: (request: ApartmentItem) => void;
+  filteredRequests?: ApartmentItem[];
+  onViewDetail: (request: ApartmentItem) => void;
+  onEdit: (request: ApartmentItem) => void;
+  onDelete: (request: ApartmentItem) => void;
 }
 
 export function TableRequest({
   filteredRequests,
-  onOpenDetail,
-  onOpenStaffUpdate,
+  onViewDetail,
+  onEdit,
+  onDelete,
 }: TableRequestProps) {
   const params = useMemo<ApartmentQueryParams>(
     () => ({
@@ -35,8 +44,7 @@ export function TableRequest({
   );
 
   const { data: apartments } = useApartments(params);
-
-  const displayData = apartments?.data || filteredRequests;
+  const displayData = filteredRequests || apartments?.data || [];
 
   const statusConfig: Record<string, { label: string; className: string }> = {
     inactive: {
@@ -84,17 +92,12 @@ export function TableRequest({
                   </div>
                 </TableCell>
 
-                {/* TÒA NHÀ */}
                 <TableCell className="text-sm">
                   {item.buildingName || "N/A"}
                 </TableCell>
 
-                {/* ĐỊA CHỈ */}
-                <TableCell className="text-sm">
-                  {/* {item.address || "N/A"} */}
-                </TableCell>
+                <TableCell className="text-sm">{item.streetAddress}</TableCell>
 
-                {/* TIỀN CỌC */}
                 <TableCell className="text-sm">
                   {formatCurrency(item.depositAmount || "N/A")}
                 </TableCell>
@@ -123,27 +126,29 @@ export function TableRequest({
                 </TableCell>
 
                 <TableCell className="text-right">
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      title="Xem chi tiết"
-                      onClick={() => onOpenDetail(item)}
-                      className="hover:bg-blue-50 cursor-pointer"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      title="Cập nhật"
-                      onClick={() => onOpenStaffUpdate(item)}
-                      className="hover:bg-indigo-50"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="size-8">
+                        <MoreHorizontalIcon className="size-4" />
+                        <span className="sr-only">Mở menu thao tác</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onViewDetail(item)}>
+                        Xem chi tiết
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEdit(item)}>
+                        Chỉnh sửa
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => onDelete(item)}
+                      >
+                        Xóa
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))

@@ -64,4 +64,11 @@ export const apartmentService = {
 
     return data;
   },
+
+  approveCooperation: async (apartmentId: string | number) => {
+    const { data } = await apiClient.patch(
+      `${endpoints.apartments}/${apartmentId}/approve-cooperation`,
+    );
+    return data;
+  },
 };

@@ -97,3 +97,18 @@ export const useCreateCooperationMedia = () => {
     },
   });
 };
+
+export const useApproveCooperation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (apartmentId: string) =>
+      apartmentService.approveCooperation(apartmentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartments"] });
+      message.success("Duyệt hợp tác thành công!");
+    },
+    onError: (error) => {
+      message.error(error?.message || "Có lỗi xảy ra!");
+    },
+  });
+};

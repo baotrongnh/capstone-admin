@@ -16,6 +16,7 @@ export interface Request {
   bedrooms: number;
   area: string;
   price: string;
+  deposit: string;
   status: "submitted" | "approved" | "rejected";
   submittedDate: string;
   staffUpdate?: StaffUpdate;
