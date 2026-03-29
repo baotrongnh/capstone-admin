@@ -1,172 +1,97 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ClipboardList,
-  Clock,
-  Search,
-  Send,
-} from "lucide-react";
-import { useState } from "react";
-
+import { useApartments } from "@/hooks/query/useApartments";
+import { ApartmentItem, ApartmentQueryParams } from "@/types/apartment";
+import { message } from "antd";
+import { useRouter } from "next/navigation";
 import { TableRequest } from "../../../components/table/table-request-staff";
-import { ApartmentItem } from "@/types/apartment";
-import { RequestDetailModal } from "@/components/modal/request-detail-staff-modal";
-import { StaffUpdateModal } from "@/components/modal/update-staff-modal";
-
-const mockRequests = [
-  {
-    id: "REQ-001",
-    apartmentName: "Vinhome Grand Park - A101",
-    partner: "ABC Real Estate",
-    location: "Quận 9, TP.HCM",
-    bedrooms: 2,
-    area: "78 m²",
-    price: "15,000,000",
-    status: "verifying" as const,
-    submittedDate: "2026-03-15",
-    staffUpdate: {
-      exteriorCondition: "very_good",
-      interiorCondition: "good",
-      notes: "Căn hộ sạch, tường hơi trầy xước ở một vài chỗ",
-      files: [],
-      updatedDate: "2026-03-16",
-    },
-  },
-  {
-    id: "REQ-002",
-    apartmentName: "The Global City - B205",
-    partner: "XYZ Partners",
-    location: "Quận 2, TP.HCM",
-    bedrooms: 3,
-    area: "95 m²",
-    price: "22,500,000",
-    status: "inspecting" as const,
-    submittedDate: "2026-03-12",
-    staffUpdate: null,
-  },
-  {
-    id: "REQ-003",
-    apartmentName: "Midtown - C502",
-    partner: "Premier Property",
-    location: "Quận 1, TP.HCM",
-    bedrooms: 1,
-    area: "52 m²",
-    price: "8,500,000",
-    status: "submitted" as const,
-    submittedDate: "2026-03-10",
-    staffUpdate: {
-      exteriorCondition: "good",
-      interiorCondition: "excellent",
-      notes: "Căn hộ như mới, sạch sẽ, full nội thất cao cấp",
-      files: [],
-      updatedDate: "2026-03-11",
-    },
-  },
-  {
-    id: "REQ-004",
-    apartmentName: "Landmark 81 - D1001",
-    partner: "Elite Realty",
-    location: "Bình Thạnh, TP.HCM",
-    bedrooms: 4,
-    area: "180 m²",
-    price: "45,000,000",
-    status: "pending" as const,
-    submittedDate: "2026-03-18",
-    staffUpdate: null,
-  },
-  {
-    id: "REQ-005",
-    apartmentName: "Sunwah Pearl - E1203",
-    partner: "Global Partners",
-    location: "Quận 1, TP.HCM",
-    bedrooms: 2,
-    area: "85 m²",
-    price: "18,500,000",
-    status: "submitted" as const,
-    submittedDate: "2026-03-08",
-    staffUpdate: {
-      exteriorCondition: "fair",
-      interiorCondition: "good",
-      notes: "Cần sơn lại một số bức tường, sàn sạch",
-      files: [],
-      updatedDate: "2026-03-09",
-    },
-  },
-];
 
 export default function RequestStaffPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
 
-  const toggleStatusFilter = (status: string) => {
-    setStatusFilter(statusFilter === status ? null : status);
-  };
-  const [selectedRequest, setSelectedRequest] = useState<ApartmentItem | null>(
-    null,
-  );
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
-  const [staffUpdateModalOpen, setStaffUpdateModalOpen] = useState(false);
-
-  const requestsWithUpdates = new Map(
-    mockRequests.filter((r) => r.staffUpdate).map((r) => [r.id, r.staffUpdate]),
+  const params = useMemo<ApartmentQueryParams>(
+    () => ({
+      sortBy: "baseRentPrice",
+      sortOrder: "asc",
+      status: "inactive",
+    }),
+    [],
   );
 
-  const requestStatuses = new Map(mockRequests.map((r) => [r.id, r.status]));
+  const { data: apartments } = useApartments(params);
+  const allRequests = useMemo(() => apartments?.data || [], [apartments?.data]);
 
-  const handleOpenDetail = (request: ApartmentItem) => {
-    setSelectedRequest(request);
-    setDetailModalOpen(true);
+  const handleViewDetail = (request: ApartmentItem) => {
+    router.push(`/staff/request/${request.id}`);
   };
 
-  const handleOpenStaffUpdate = (request: ApartmentItem) => {
-    setSelectedRequest(request);
-    setStaffUpdateModalOpen(true);
+  const handleEdit = (request: ApartmentItem) => {
+    router.push(`/staff/request/${request.id}?mode=edit`);
   };
 
-  const handleStaffUpdateSubmit = (success: boolean) => {
-    setStaffUpdateModalOpen(success);
+  const handleDelete = (request: ApartmentItem) => {
+    message.info(`Sẽ xóa yêu cầu: ${request.id}`);
   };
 
-  // Get unique dates from mockRequests
-  const uniqueDates = Array.from(
-    new Set(mockRequests.map((req) => req.submittedDate)),
-  ).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-
-  const filteredRequests = mockRequests
-    .map((req) => ({
-      ...req,
-      status: requestStatuses.get(req.id) || req.status,
-      staffUpdate: requestsWithUpdates.get(req.id) || req.staffUpdate,
-    }))
-    .filter((req) => {
+  const filteredRequests = useMemo(() => {
+    return allRequests.filter((req) => {
       const matchSearch =
-        req.apartmentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.partner.toLowerCase().includes(searchTerm.toLowerCase());
+        req.apartmentNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.buildingName?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchStatus = !statusFilter || req.status === statusFilter;
 
-      const matchDate = !selectedDate || req.submittedDate === selectedDate;
+      const matchDate = !selectedDate || req.createdAt === selectedDate;
 
       return matchSearch && matchStatus && matchDate;
     });
+  }, [searchTerm, statusFilter, selectedDate, allRequests]);
 
-  const stats = {
-    pending: filteredRequests.filter((r) => r.status === "pending").length,
-    inspecting: filteredRequests.filter((r) => r.status === "inspecting")
-      .length,
-    verifying: filteredRequests.filter((r) => r.status === "verifying").length,
-    submitted: filteredRequests.filter((r) => r.status === "submitted").length,
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedRequests = filteredRequests.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const uniqueDates = useMemo(() => {
+    return Array.from(new Set(allRequests.map((req) => req.createdAt))).sort(
+      (a, b) => new Date(b).getTime() - new Date(a).getTime(),
+    );
+  }, [allRequests]);
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   return (
@@ -180,101 +105,18 @@ export default function RequestStaffPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div
-          onClick={() => toggleStatusFilter("pending")}
-          className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
-            statusFilter === "pending"
-              ? "ring-2 ring-orange-400 border-transparent"
-              : "border-gray-200"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Chờ duyệt
-            </span>
-            <span className="text-2xl font-semibold text-gray-900">
-              {stats.pending}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div
-          onClick={() => toggleStatusFilter("inspecting")}
-          className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
-            statusFilter === "inspecting"
-              ? "ring-2 ring-yellow-400 border-transparent"
-              : "border-gray-200"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Khảo sát
-            </span>
-            <span className="text-2xl font-semibold text-gray-900">
-              {stats.inspecting}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
-            <ClipboardList className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div
-          onClick={() => toggleStatusFilter("verifying")}
-          className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
-            statusFilter === "verifying"
-              ? "ring-2 ring-blue-400 border-transparent"
-              : "border-gray-200"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Xác minh
-            </span>
-            <span className="text-2xl font-semibold text-gray-900">
-              {stats.verifying}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div
-          onClick={() => toggleStatusFilter("submitted")}
-          className={`border rounded-2xl p-4 flex items-center justify-between bg-white cursor-pointer transition-all hover:shadow-md ${
-            statusFilter === "submitted"
-              ? "ring-2 ring-green-400 border-transparent"
-              : "border-gray-200"
-          }`}
-        >
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Đã gửi
-            </span>
-            <span className="text-2xl font-semibold text-gray-900">
-              {stats.submitted}
-            </span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
-            <Send className="w-5 h-5" />
-          </div>
-        </div>
-      </div>
-
       <div className="flex flex-col gap-4 p-4 border border-gray-200 rounded-2xl bg-white">
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Tìm kiếm căn hộ, đối tác..."
+              placeholder="Tìm kiếm căn hộ, tòa nhà..."
               className="pl-9 bg-gray-50/50 w-full"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
 
@@ -284,17 +126,23 @@ export default function RequestStaffPage() {
                 variant="outline"
                 className="flex items-center gap-2 justify-between w-full sm:w-48 bg-white"
               >
-                {selectedDate ? `${selectedDate}` : "Chọn ngày"}
+                {selectedDate ? formatDateTime(selectedDate) : "Chọn ngày"}
                 <ChevronDown className="h-4 w-4 text-gray-400 shrink-0" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-48 max-h-60 overflow-y-auto"
+              className="w-48 max-h-60 overflow-y-auto p-0"
             >
+              <div className="px-3 py-2 text-sm font-medium text-gray-700 border-b">
+                Chọn ngày
+              </div>
               <DropdownMenuItem
-                onClick={() => setSelectedDate(null)}
-                className={!selectedDate ? "bg-gray-100" : ""}
+                onClick={() => {
+                  setSelectedDate(null);
+                  setCurrentPage(1);
+                }}
+                className={`cursor-pointer ${!selectedDate ? "bg-gray-100" : ""}`}
               >
                 <div className="flex items-center gap-3 w-full">
                   <span>Tất cả ngày</span>
@@ -307,11 +155,14 @@ export default function RequestStaffPage() {
               {uniqueDates.map((date) => (
                 <DropdownMenuItem
                   key={date}
-                  onClick={() => setSelectedDate(date)}
-                  className={selectedDate === date ? "bg-gray-100" : ""}
+                  onClick={() => {
+                    setSelectedDate(date);
+                    setCurrentPage(1);
+                  }}
+                  className={`cursor-pointer ${selectedDate === date ? "bg-gray-100" : ""}`}
                 >
                   <div className="flex items-center gap-3 w-full">
-                    <span>{date}</span>
+                    <span>{formatDateTime(date)}</span>
                     {selectedDate === date && (
                       <span className="ml-auto text-blue-600">✓</span>
                     )}
@@ -324,33 +175,73 @@ export default function RequestStaffPage() {
           <div className="ml-auto text-sm text-gray-500 whitespace-nowrap">
             Hiển thị{" "}
             <span className="font-semibold text-gray-900">
-              {filteredRequests.length}
+              {filteredRequests.length === 0 ? 0 : startIndex + 1}
             </span>{" "}
-            / {mockRequests.length}
+            -{" "}
+            <span className="font-semibold text-gray-900">
+              {Math.min(endIndex, filteredRequests.length)}
+            </span>{" "}
+            của{" "}
+            <span className="font-semibold text-gray-900">
+              {filteredRequests.length}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
         <TableRequest
-          filteredRequests={filteredRequests as unknown as ApartmentItem[]}
-          onOpenDetail={(request) => handleOpenDetail(request)}
-          onOpenStaffUpdate={(request) => handleOpenStaffUpdate(request)}
+          filteredRequests={paginatedRequests}
+          onViewDetail={(request) => handleViewDetail(request)}
+          onEdit={(request) => handleEdit(request)}
+          onDelete={(request) => handleDelete(request)}
         />
       </div>
 
-      <RequestDetailModal
-        open={detailModalOpen}
-        id={String(selectedRequest?.id)}
-        onClose={() => setDetailModalOpen(false)}
-      />
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Trước
+          </Button>
 
-      <StaffUpdateModal
-        open={staffUpdateModalOpen}
-        request={selectedRequest}
-        onClose={() => setStaffUpdateModalOpen(false)}
-        onUpdate={handleStaffUpdateSubmit}
-      />
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(page)}
+                className={`min-w-10 ${
+                  currentPage === page
+                    ? "bg-gray-900 text-white"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1"
+          >
+            Sau
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
