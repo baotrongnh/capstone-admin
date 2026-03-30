@@ -540,7 +540,14 @@ export function RequestDetailContent({
                 </div>
               </>
             ) : allowEdit ? (
-              <Button onClick={handleStartEdit}>Chỉnh sửa</Button>
+              <>
+                <div className="flex justify-between">
+                  <div></div>
+                  <Button onClick={handleStartEdit}>
+                    Xác thực lại yêu cầu
+                  </Button>
+                </div>
+              </>
             ) : null}
           </div>
         )}
