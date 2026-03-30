@@ -387,6 +387,13 @@ export function RequestDetailContent({
       return;
     }
 
+    const hasExistingVideo = !!form.videoTourUrl;
+    const hasNewVideo = !!selectedVideoFile;
+    if (!hasExistingVideo && !hasNewVideo) {
+      message.error("Vui lòng chọn ít nhất 1 video");
+      return;
+    }
+
     const formData = new FormData();
 
     formData.append("buildingName", form.buildingName || "");
@@ -527,7 +534,7 @@ export function RequestDetailContent({
                       onClick={handleSave}
                       disabled={isPending || !canSaveChanges}
                     >
-                      {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                      {isPending ? "Đang duyệt..." : "Duyệt yêu cầu"}
                     </Button>
                   </div>
                 </div>
