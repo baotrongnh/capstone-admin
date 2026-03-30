@@ -38,9 +38,15 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
 
   const navMain = [
     { title: t('dashboard'), url: "#", icon: IconLayoutDashboard },
-    { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
     { title: t('schedule'), url: ROUTE_STAFF.SCHEDULE, icon: IconCalendarStats },
+  ]
+
+  const navMain2 = [
     { title: t('messages'), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
+    { title: t('inquiries'), url: ROUTE_STAFF.INQUIRY, icon: IconMessage2Question },
+  ]
+
+  const navMain3 = [
     { title: 'Xác thực căn hộ', url: ROUTE_STAFF.VERIFY, icon: IconHomeQuestion },
     { title: 'Hợp đồng', url: ROUTE_STAFF.CONTRACT, icon: IconContract },
   ]
@@ -67,7 +73,9 @@ export function StaffSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <StaffNavMain items={navMain} quickContractLabel={t('quickContract')} />
+        <StaffNavMain items={navMain} groupLable='Vận hành' />
+        <StaffNavMain items={navMain2} groupLable='Giao tiếp' />
+        <StaffNavMain items={navMain3} groupLable='Cư trú' />
         <StaffNavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
