@@ -3,9 +3,10 @@
 import { ApartmentDetailContent } from "@/components/apartment/apartment-detail-content"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useParams, useSearchParams } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 
 export default function OperatorApartmentDetailPage() {
+     const router = useRouter()
      const params = useParams<{ id: string | string[] }>()
      const searchParams = useSearchParams()
 
@@ -15,8 +16,8 @@ export default function OperatorApartmentDetailPage() {
      return (
           <div className="space-y-4">
                <div>
-                    <Button variant="outline" asChild>
-                         <Link href="/operator/apartments">Quay lại danh sách</Link>
+                    <Button variant="outline" onClick={() => router.back()}>
+                         Quay lại danh sách
                     </Button>
                </div>
 

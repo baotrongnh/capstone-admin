@@ -16,6 +16,6 @@ export const ROUTE_ADMIN = {
 export const ROUTE_OPERATOR = {
      APARTMENT: '/operator/apartments',
      STAFF_MANAGER: '/operator/staff-manager',
-     REQUEST_PARTNER: '/operator/request-partner',
+     REQUEST_PARTNER: '/operator/request',
      IOT_MANAGER: '/operator/iot-manager'
 }
