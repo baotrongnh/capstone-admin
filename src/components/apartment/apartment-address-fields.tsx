@@ -53,6 +53,8 @@ export function ApartmentAddressFields({
           onChange({ wardCode: nextCode })
      }
 
+     console.log(initialCodes);
+
      return (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                <div className="space-y-1">
@@ -66,7 +68,7 @@ export function ApartmentAddressFields({
                          </SelectTrigger>
                          <SelectContent>
                               {provinces?.map((province) => (
-                                   <SelectItem key={province.code} value={String(province.code)}>
+                                   <SelectItem key={province.code} value={String(province.code)} defaultValue={initialCodes.provinceCode}>
                                         {province.name}
                                    </SelectItem>
                               ))}
@@ -86,7 +88,7 @@ export function ApartmentAddressFields({
                          </SelectTrigger>
                          <SelectContent>
                               {wards?.map((ward) => (
-                                   <SelectItem key={ward.code} value={String(ward.code)}>
+                                   <SelectItem key={ward.code} value={String(ward.code)} defaultValue={initialCodes.wardCode}>
                                         {ward.name}
                                    </SelectItem>
                               ))}
