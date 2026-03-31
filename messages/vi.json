@@ -12,5 +12,68 @@
   "Auth": {
     "loginSuccess": "Đăng nhập thành công!",
     "loginError": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin và thử lại."
+  },
+  "StaffSchedule": {
+    "title": "Lịch hẹn",
+    "subtitle": "Theo dõi và quản lý các lịch hẹn được giao.",
+    "errorTitle": "Tải lịch hẹn thất bại",
+    "errorDescription": "Vui lòng thử lại.",
+    "empty": "Chưa có lịch hẹn.",
+    "pastNotice": "Tất cả lịch hẹn đã qua. Bạn vẫn có thể đánh dấu hoàn thành.",
+    "calendar": {
+      "pending": "{count} chờ xác nhận",
+      "confirmed": "{count} đã xác nhận",
+      "completed": "{count} hoàn thành",
+      "cancelled": "{count} đã hủy"
+    },
+    "summary": {
+      "upcomingTotal": "{count} lịch hẹn sắp tới",
+      "currentFocus": "Tiếp theo: {date} lúc {time}",
+      "nextAriaLabel": "Chuyển đến lịch hẹn tiếp theo"
+    },
+    "modal": {
+      "title": "Lịch hẹn ngày {date}"
+    },
+    "appointment": {
+      "label": "Lịch hẹn {id}"
+    },
+    "status": {
+      "scheduled": "Đã lên lịch",
+      "confirmed": "Đã xác nhận",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy",
+      "noShow": "Không đến"
+    },
+    "fields": {
+      "apartment": "Căn hộ",
+      "time": "Thời gian",
+      "minutes": "phút",
+      "location": "Địa điểm",
+      "guestNotes": "Ghi chú khách",
+      "staffNotes": "Ghi chú nhân viên"
+    },
+    "actions": {
+      "confirm": "Xác nhận",
+      "deny": "Từ chối",
+      "cancel": "Hủy",
+      "done": "Hoàn thành"
+    },
+    "reasonModal": {
+      "cancelTitle": "Hủy lịch hẹn",
+      "denyTitle": "Từ chối lịch hẹn",
+      "titleLabel": "Tiêu đề",
+      "detailLabel": "Chi tiết",
+      "titlePlaceholder": "Chọn lý do",
+      "detailPlaceholder": "Chi tiết (không bắt buộc)",
+      "titleRequired": "Vui lòng chọn tiêu đề lý do.",
+      "submitCancel": "Hủy",
+      "submitDeny": "Từ chối"
+    },
+    "reasonOptions": {
+      "staffUnavailable": "Nhân viên không có mặt",
+      "emergencyMaintenance": "Bảo trì khẩn cấp",
+      "schedulingConflict": "Trùng lịch",
+      "other": "Khác"
+    }
   }
 }
