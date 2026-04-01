@@ -3,7 +3,9 @@ import {
      ApartmentUpdateRequestBody,
 } from "@/types/apartment"
 
-export type ApartmentForm = ApartmentUpdateRequestBody
+export type ApartmentForm = ApartmentUpdateRequestBody & {
+     videoTourUrl?: string
+}
 export type ApartmentStatus = NonNullable<ApartmentUpdateRequestBody["status"]>
 export type FurnishingStatus = ApartmentUpdateRequestBody["furnishingStatus"]
 
@@ -43,8 +45,8 @@ export const buildApartmentForm = (
      floorNumber: detail.floorNumber || undefined,
      totalArea: detail.totalArea ? Number(detail.totalArea) : undefined,
      usableArea: detail.usableArea ? Number(detail.usableArea) : undefined,
-     numberOfBedrooms: detail.numberOfBedrooms || undefined,
-     numberOfBathrooms: detail.numberOfBathrooms || undefined,
+     numberOfBedrooms: detail.numberOfBedrooms ?? undefined,
+     numberOfBathrooms: detail.numberOfBathrooms ?? undefined,
      furnishingStatus: (detail.furnishingStatus as FurnishingStatus) || "unfurnished",
      status: (detail.status as ApartmentStatus) || "available",
      baseRentPrice: detail.baseRentPrice ? Number(detail.baseRentPrice) : undefined,

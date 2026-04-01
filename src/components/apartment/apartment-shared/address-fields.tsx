@@ -8,7 +8,7 @@ import {
      SelectValue,
 } from "@/components/ui/select"
 import { useProvinces, useWards } from "@/hooks/query/useAddress"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 type AddressCodes = {
      provinceCode?: number
@@ -38,6 +38,24 @@ export function ApartmentAddressFields({
      const { data: provinces } = useProvinces()
      const { data: wards } = useWards(provinceCode)
 
+     const provinceOptions = useMemo(
+          () =>
+               provinces?.map((province) => ({
+                    label: province.name,
+                    value: String(province.code),
+               })) || [],
+          [provinces],
+     )
+
+     const wardOptions = useMemo(
+          () =>
+               wards?.map((ward) => ({
+                    label: ward.name,
+                    value: String(ward.code),
+               })) || [],
+          [wards],
+     )
+
      const toOptionalNumber = (value: string) => (value ? Number(value) : undefined)
 
      const handleProvinceChange = (value: string) => {
@@ -53,8 +71,6 @@ export function ApartmentAddressFields({
           onChange({ wardCode: nextCode })
      }
 
-     console.log(initialCodes);
-
      return (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                <div className="space-y-1">
@@ -67,9 +83,9 @@ export function ApartmentAddressFields({
                               <SelectValue placeholder="Chọn tỉnh/thành phố" />
                          </SelectTrigger>
                          <SelectContent>
-                              {provinces?.map((province) => (
-                                   <SelectItem key={province.code} value={String(province.code)} defaultValue={initialCodes.provinceCode}>
-                                        {province.name}
+                              {provinceOptions.map((option) => (
+                                   <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
                                    </SelectItem>
                               ))}
                          </SelectContent>
@@ -87,9 +103,9 @@ export function ApartmentAddressFields({
                               <SelectValue placeholder="Chọn phường/xã" />
                          </SelectTrigger>
                          <SelectContent>
-                              {wards?.map((ward) => (
-                                   <SelectItem key={ward.code} value={String(ward.code)} defaultValue={initialCodes.wardCode}>
-                                        {ward.name}
+                              {wardOptions.map((option) => (
+                                   <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
                                    </SelectItem>
                               ))}
                          </SelectContent>

@@ -3,7 +3,6 @@
 import { apartmentService } from "@/lib/services/apartment.service";
 import {
   ApartmentQueryParams,
-  ApartmentUpdateRequestBody,
 } from "@/types/apartment";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
@@ -49,7 +48,7 @@ export const useUpdateApartment = () => {
       data,
     }: {
       id: string | number;
-      data: ApartmentUpdateRequestBody;
+      data: FormData;
     }) => apartmentService.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["apartments"] });

@@ -33,11 +33,11 @@ import {
   Users,
 } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { ApartmentBasicInfoSection } from "../apartment/apartment-basic-info-section";
+import { ApartmentBasicInfoSection } from "../apartment/apartment-basic-section";
 import {
   ApartmentAmenitySection,
   ApartmentOwnerSection,
-} from "../apartment/apartment-detail-sections";
+} from "../apartment/apartment-profile-sections";
 import { ApartmentMediaSection } from "../apartment/apartment-media-section";
 import { useRouter } from "next/navigation";
 

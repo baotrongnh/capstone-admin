@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
      Select,
@@ -6,11 +7,17 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select"
+import { ApartmentAddressFields } from "@/components/apartment/apartment-shared/address-fields"
+import {
+     DetailItem,
+     SectionCard,
+     SectionTitle,
+} from "@/components/apartment/apartment-shared/section-primitives"
+import type { DepositPreset } from "@/hooks/apartment/use-apartment-editor-state"
+import type { ApartmentFieldErrors } from "@/lib/apartment/apartment-validation"
 import type { ApartmentForm, ApartmentStatus, FurnishingStatus } from "@/types/apartment-modal"
 import { formatVNDInput } from "@/utils/format"
 import { Info, type LucideIcon } from "lucide-react"
-import { ApartmentAddressFields } from "./apartment-address-fields"
-import { DetailItem, SectionCard, SectionTitle } from "./apartment-detail-shared"
 
 type DetailEntry = {
      label: string
@@ -24,31 +31,42 @@ type SetNumberField = <K extends keyof ApartmentForm>(key: K, raw: string) => vo
 
 type SetCurrencyField = <K extends keyof ApartmentForm>(key: K, raw: string) => void
 
-type BasicInfoSectionProps = {
+type BasicSectionProps = {
      editMode: boolean
      form: ApartmentForm
+     fieldErrors?: ApartmentFieldErrors
      detailItems: DetailEntry[]
      fullAddress: string
      availableYears: number[]
      usableAreaInvalid: boolean
      initialProvinceCode?: number
+     selectedDepositPreset?: DepositPreset | null
      onSetField: SetField
      onSetNumberField: SetNumberField
      onSetCurrencyField: SetCurrencyField
+     onSelectDepositPreset?: (value: DepositPreset) => void
 }
 
-export function ApartmentBasicInfoSection({
+export function ApartmentBasicSection({
      editMode,
      form,
+     fieldErrors,
      detailItems,
      fullAddress,
      availableYears,
      usableAreaInvalid,
      initialProvinceCode,
+     selectedDepositPreset,
      onSetField,
      onSetNumberField,
      onSetCurrencyField,
-}: BasicInfoSectionProps) {
+     onSelectDepositPreset,
+}: BasicSectionProps) {
+     const baseRentPrice = typeof form.baseRentPrice === "number" ? form.baseRentPrice : 0
+     const canPickDepositPreset = baseRentPrice > 0
+
+     const getFieldError = (field: keyof ApartmentFieldErrors) => fieldErrors?.[field]
+
      return (
           <SectionCard className="bg-muted/20">
                <SectionTitle
@@ -67,7 +85,14 @@ export function ApartmentBasicInfoSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Mã căn hộ</p>
-                                   <Input value={form.apartmentNumber || ""} onChange={(e) => onSetField("apartmentNumber", e.target.value || undefined)} />
+                                   <Input
+                                        value={form.apartmentNumber || ""}
+                                        onChange={(e) => onSetField("apartmentNumber", e.target.value || undefined)}
+                                        aria-invalid={getFieldError("apartmentNumber") ? true : undefined}
+                                   />
+                                   {getFieldError("apartmentNumber") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("apartmentNumber")}</p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1">
@@ -94,7 +119,7 @@ export function ApartmentBasicInfoSection({
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Nội thất</p>
                                    <Select value={form.furnishingStatus || "unfurnished"} onValueChange={(value) => onSetField("furnishingStatus", value as FurnishingStatus)}>
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger className="w-full" aria-invalid={getFieldError("furnishingStatus") ? true : undefined}>
                                              <SelectValue placeholder="Chọn nội thất" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -103,6 +128,9 @@ export function ApartmentBasicInfoSection({
                                              <SelectItem value="fully_furnished">Đầy đủ nội thất</SelectItem>
                                         </SelectContent>
                                    </Select>
+                                   {getFieldError("furnishingStatus") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("furnishingStatus")}</p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1">
@@ -127,7 +155,14 @@ export function ApartmentBasicInfoSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Diện tích tổng (m²)</p>
-                                   <Input value={form.totalArea ?? ""} onChange={(e) => onSetNumberField("totalArea", e.target.value)} />
+                                   <Input
+                                        value={form.totalArea ?? ""}
+                                        onChange={(e) => onSetNumberField("totalArea", e.target.value)}
+                                        aria-invalid={getFieldError("totalArea") ? true : undefined}
+                                   />
+                                   {getFieldError("totalArea") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("totalArea")}</p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1">
@@ -140,22 +175,68 @@ export function ApartmentBasicInfoSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Số phòng ngủ</p>
-                                   <Input value={form.numberOfBedrooms ?? ""} onChange={(e) => onSetNumberField("numberOfBedrooms", e.target.value)} />
+                                   <Input
+                                        value={form.numberOfBedrooms ?? ""}
+                                        onChange={(e) => onSetNumberField("numberOfBedrooms", e.target.value)}
+                                        aria-invalid={getFieldError("numberOfBedrooms") ? true : undefined}
+                                   />
+                                   {getFieldError("numberOfBedrooms") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("numberOfBedrooms")}</p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Số phòng tắm</p>
-                                   <Input value={form.numberOfBathrooms ?? ""} onChange={(e) => onSetNumberField("numberOfBathrooms", e.target.value)} />
+                                   <Input
+                                        value={form.numberOfBathrooms ?? ""}
+                                        onChange={(e) => onSetNumberField("numberOfBathrooms", e.target.value)}
+                                        aria-invalid={getFieldError("numberOfBathrooms") ? true : undefined}
+                                   />
+                                   {getFieldError("numberOfBathrooms") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("numberOfBathrooms")}</p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Giá thuê (VNĐ)</p>
-                                   <Input value={formatVNDInput(form.baseRentPrice)} onChange={(e) => onSetCurrencyField("baseRentPrice", e.target.value)} />
+                                   <Input
+                                        value={formatVNDInput(form.baseRentPrice)}
+                                        onChange={(e) => onSetCurrencyField("baseRentPrice", e.target.value)}
+                                        aria-invalid={getFieldError("baseRentPrice") ? true : undefined}
+                                   />
+                                   {getFieldError("baseRentPrice") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("baseRentPrice")}</p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Tiền cọc (VNĐ)</p>
                                    <Input value={formatVNDInput(form.depositAmount)} onChange={(e) => onSetCurrencyField("depositAmount", e.target.value)} />
+                                   {onSelectDepositPreset ? (
+                                        <div className="pt-1">
+                                             <p className="mb-1 text-[11px] text-muted-foreground">Chọn nhanh theo giá thuê</p>
+                                             <div className="flex flex-wrap gap-2">
+                                                  <Button
+                                                       type="button"
+                                                       size="sm"
+                                                       variant={selectedDepositPreset === 1 ? "default" : "outline"}
+                                                       disabled={!canPickDepositPreset}
+                                                       onClick={() => onSelectDepositPreset(1)}
+                                                  >
+                                                       1 tháng
+                                                  </Button>
+                                                  <Button
+                                                       type="button"
+                                                       size="sm"
+                                                       variant={selectedDepositPreset === 2 ? "default" : "outline"}
+                                                       disabled={!canPickDepositPreset}
+                                                       onClick={() => onSelectDepositPreset(2)}
+                                                  >
+                                                       2 tháng
+                                                  </Button>
+                                             </div>
+                                        </div>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1 md:col-span-2 xl:col-span-3">
@@ -183,3 +264,5 @@ export function ApartmentBasicInfoSection({
           </SectionCard>
      )
 }
+
+export { ApartmentBasicSection as ApartmentBasicInfoSection }
