@@ -18,24 +18,12 @@ import {
      TableRow,
 } from "@/components/ui/table"
 import { useApartments } from "@/hooks/query/useApartments"
+import { formatStatus } from "@/types/apartment-modal"
 import { formatVND } from "@/utils/format"
 import { message } from "antd"
 import { MoreHorizontalIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-
-const STATUS_LABELS: Record<string, string> = {
-     available: "Còn trống",
-     occupied: "Đang thuê",
-     maintenance: "Bảo trì",
-     reserved: "Đã giữ chỗ",
-     inactive: "Ngừng hoạt động",
-}
-
-const formatStatus = (status?: string | null) => {
-     if (!status) return "-"
-     return STATUS_LABELS[status] || status
-}
 
 export default function OperatorApartmentsPage() {
      const { data: apartmentListResponse, isLoading: isListLoading } = useApartments()

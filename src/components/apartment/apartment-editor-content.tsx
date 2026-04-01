@@ -27,15 +27,15 @@ import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/qu
 import { useFullAddress } from "@/hooks/query/useAddress"
 import { useUser, useUsers } from "@/hooks/query/useUsers"
 import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
+import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
 import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-state"
 import {
      ApartmentForm,
-     ApartmentStatus,
      buildApartmentForm,
      formatDateTime,
      formatStatus,
-     FurnishingStatus,
 } from "@/types/apartment-modal"
+import type { ApartmentDetailData } from "@/types/apartment"
 import { formatVND } from "@/utils/format"
 import { message } from "antd"
 import {
@@ -67,10 +67,116 @@ type ApartmentDetailContentProps = {
 }
 
 const DEFAULT_CREATE_FORM: ApartmentForm = {
-     furnishingStatus: "unfurnished" as FurnishingStatus,
-     status: "available" as ApartmentStatus,
+     furnishingStatus: "unfurnished",
+     status: "available",
      amenities: [],
      images: [],
+}
+
+const hasApartmentFormChanged = (
+     initialForm: ApartmentForm | null,
+     currentForm: ApartmentForm | null,
+) => {
+     if (!initialForm || !currentForm) return false
+
+     const initialData = initialForm as Record<string, unknown>
+     const currentData = currentForm as Record<string, unknown>
+     const keys = Array.from(new Set([...Object.keys(initialData), ...Object.keys(currentData)]))
+
+     return keys.some((key) => {
+          const before = initialData[key] ?? null
+          const after = currentData[key] ?? null
+          return JSON.stringify(before) !== JSON.stringify(after)
+     })
+}
+
+const buildAmenityOptions = (
+     detailAmenities?: string[] | null,
+     formAmenities?: string[] | null,
+) => {
+     return Array.from(new Set([...(detailAmenities || []), ...(formAmenities || [])]))
+}
+
+const AVAILABLE_YEARS = (() => {
+     const currentYear = new Date().getFullYear()
+     return Array.from({ length: currentYear - 1950 + 1 }, (_, idx) => currentYear - idx)
+})()
+
+const findInitialIotBoardId = (detailApartment?: ApartmentDetailData | null) => {
+     if (!detailApartment?.iotDevices?.length) {
+          return undefined
+     }
+
+     for (const item of detailApartment.iotDevices) {
+          const id = String((item as { id?: string | null } | null | undefined)?.id || "")
+          if (id && MOCK_IOT_BOARDS.some((board) => board.id === id)) {
+               return id
+          }
+     }
+
+     return undefined
+}
+
+const IOT_BOARD_OPTIONS = MOCK_IOT_BOARDS.map((board) => ({
+     id: board.id,
+     label: `${board.boardName} (${board.boardType}) - ${board.id}`,
+}))
+
+const buildApartmentDetailItems = (
+     detailApartment: ApartmentDetailData,
+     fullAddress: string,
+) => {
+     return [
+          { label: "ID", value: detailApartment.id, icon: Hash },
+          { label: "Mã căn hộ", value: detailApartment.apartmentNumber, icon: Home },
+          { label: "Tên tòa nhà", value: detailApartment.buildingName, icon: Building2 },
+          { label: "Tầng", value: detailApartment.floorNumber, icon: Building2 },
+          { label: "Trạng thái", value: formatStatus(detailApartment.status), icon: Info },
+          { label: "Đánh giá trung bình", value: detailApartment.rating, icon: Star },
+          { label: "Nội thất", value: detailApartment.furnishingStatus, icon: Home },
+          {
+               label: "Giá thuê",
+               value: formatVND(detailApartment.baseRentPrice, true),
+               icon: CircleDollarSign,
+          },
+          {
+               label: "Tiền cọc",
+               value: detailApartment.depositAmount
+                    ? formatVND(detailApartment.depositAmount, true)
+                    : "-",
+               icon: Landmark,
+          },
+          { label: "Diện tích tổng", value: `${detailApartment.totalArea} m²`, icon: Ruler },
+          {
+               label: "Diện tích sử dụng",
+               value: detailApartment.usableArea ? `${detailApartment.usableArea} m²` : "-",
+               icon: Ruler,
+          },
+          { label: "Số phòng ngủ", value: detailApartment.numberOfBedrooms, icon: BedDouble },
+          { label: "Số phòng tắm", value: detailApartment.numberOfBathrooms, icon: Bath },
+          { label: "Địa chỉ đầy đủ", value: fullAddress, icon: MapPin },
+          { label: "Mã phường/xã", value: detailApartment.wardCode, icon: Hash },
+          { label: "Mã tỉnh/thành", value: detailApartment.provinceCode, icon: Hash },
+          { label: "Vĩ độ", value: detailApartment.latitude, icon: MapPin },
+          { label: "Kinh độ", value: detailApartment.longitude, icon: MapPin },
+          { label: "Năm xây dựng", value: detailApartment.yearBuilt, icon: CalendarDays },
+          {
+               label: "Số lượt xem đồng thời tối đa",
+               value: detailApartment.maxConcurrentViewings,
+               icon: Users,
+          },
+          {
+               label: "Ngày duyệt",
+               value: formatDateTime(detailApartment.approvedAt),
+               icon: Clock3,
+          },
+          { label: "Ngày tạo", value: formatDateTime(detailApartment.createdAt), icon: Clock3 },
+          {
+               label: "Cập nhật lần cuối",
+               value: formatDateTime(detailApartment.updatedAt),
+               icon: Clock3,
+          },
+     ]
 }
 
 export function ApartmentDetailContent({
@@ -104,15 +210,8 @@ export function ApartmentDetailContent({
      }, [detailApartment, isCreateMode])
 
      const initialIotBoardId = useMemo(
-          () =>
-               detailApartment?.iotDevices
-                    .map((item) =>
-                         typeof item === "object" && item && "id" in item
-                              ? String((item as { id?: string }).id || "")
-                              : "",
-                    )
-                    .find((id) => MOCK_IOT_BOARDS.some((board) => board.id === id)) || undefined,
-          [detailApartment?.iotDevices],
+          () => findInitialIotBoardId(detailApartment),
+          [detailApartment],
      )
 
      const initialRoomTags = useMemo(
@@ -172,13 +271,16 @@ export function ApartmentDetailContent({
      const selectedOwnerFromList = ownerOptions.find((item) => item.id === selectedOwnerId)
      const selectedOwner = selectedOwnerResponse?.data
 
-     const ownerName =
-          selectedOwner?.fullName ||
-          selectedOwnerFromList?.fullName ||
-          detailApartment?.owner?.fullName ||
-          "-"
-
-     const ownerCompany = selectedOwner?.companyName || detailApartment?.owner?.companyName || "-"
+     const ownerSummary = {
+          id: detailApartment?.ownerId || form?.ownerId || null,
+          fullName:
+               selectedOwner?.fullName ||
+               selectedOwnerFromList?.fullName ||
+               detailApartment?.owner?.fullName ||
+               "-",
+          companyName:
+               selectedOwner?.companyName || detailApartment?.owner?.companyName || "-",
+     }
 
      const fullAddress = useFullAddress(
           form?.streetAddress || detailApartment?.streetAddress || undefined,
@@ -186,118 +288,51 @@ export function ApartmentDetailContent({
           form?.wardCode || detailApartment?.wardCode || undefined,
      )
 
+     const {
+          geocodeStatus,
+          geocodeErrorMessage,
+          markManualCoordinatePick,
+          resetGeocodeTracking,
+     } = useApartmentGeocoding({
+          editMode,
+          form,
+          fullAddress,
+          onAutoCoordinate: ({ latitude, longitude }) => {
+               setField("latitude", latitude)
+               setField("longitude", longitude)
+          },
+     })
+
      const usableAreaInvalid =
           form?.usableArea !== undefined &&
           form?.totalArea !== undefined &&
           form.usableArea > form.totalArea
 
-     const iotBoardOptions = useMemo(
-          () =>
-               MOCK_IOT_BOARDS.map((board) => ({
-                    id: board.id,
-                    label: `${board.boardName} (${board.boardType}) - ${board.id}`,
-               })),
-          [],
-     )
-
-     const selectedIotBoard = useMemo(
-          () => MOCK_IOT_BOARDS.find((board) => board.id === selectedIotBoardId),
-          [selectedIotBoardId],
-     )
+     const iotBoardOptions = IOT_BOARD_OPTIONS
+     const selectedIotBoard = MOCK_IOT_BOARDS.find((board) => board.id === selectedIotBoardId)
 
      const selectedIotBoardDevices = selectedIotBoard?.devices || []
 
-     const roomOptions = useMemo(
-          () => detailApartment?.rooms.map((room) => room.roomNumber).filter(Boolean) || [],
-          [detailApartment?.rooms],
-     )
-
-     const amenityPresetOptions = useMemo(
-          () =>
-               Array.from(
-                    new Set([...(detailApartment?.amenities || []), ...(form?.amenities || [])]),
-               ),
-          [detailApartment?.amenities, form?.amenities],
-     )
-
-     const detailItems = useMemo(() => {
-          if (!detailApartment) return []
-
-          return [
-               { label: "ID", value: detailApartment.id, icon: Hash },
-               { label: "Mã căn hộ", value: detailApartment.apartmentNumber, icon: Home },
-               { label: "Tên tòa nhà", value: detailApartment.buildingName, icon: Building2 },
-               { label: "Tầng", value: detailApartment.floorNumber, icon: Building2 },
-               { label: "Trạng thái", value: formatStatus(detailApartment.status), icon: Info },
-               { label: "Đánh giá trung bình", value: detailApartment.rating, icon: Star },
-               { label: "Nội thất", value: detailApartment.furnishingStatus, icon: Home },
-               { label: "Giá thuê", value: formatVND(detailApartment.baseRentPrice, true), icon: CircleDollarSign },
-               {
-                    label: "Tiền cọc",
-                    value: detailApartment.depositAmount ? formatVND(detailApartment.depositAmount, true) : "-",
-                    icon: Landmark,
-               },
-               { label: "Diện tích tổng", value: `${detailApartment.totalArea} m²`, icon: Ruler },
-               {
-                    label: "Diện tích sử dụng",
-                    value: detailApartment.usableArea ? `${detailApartment.usableArea} m²` : "-",
-                    icon: Ruler,
-               },
-               { label: "Số phòng ngủ", value: detailApartment.numberOfBedrooms, icon: BedDouble },
-               { label: "Số phòng tắm", value: detailApartment.numberOfBathrooms, icon: Bath },
-               { label: "Địa chỉ đầy đủ", value: fullAddress, icon: MapPin },
-               { label: "Mã phường/xã", value: detailApartment.wardCode, icon: Hash },
-               { label: "Mã tỉnh/thành", value: detailApartment.provinceCode, icon: Hash },
-               { label: "Vĩ độ", value: detailApartment.latitude, icon: MapPin },
-               { label: "Kinh độ", value: detailApartment.longitude, icon: MapPin },
-               { label: "Năm xây dựng", value: detailApartment.yearBuilt, icon: CalendarDays },
-               { label: "Số lượt xem đồng thời tối đa", value: detailApartment.maxConcurrentViewings, icon: Users },
-               { label: "Ngày duyệt", value: formatDateTime(detailApartment.approvedAt), icon: Clock3 },
-               { label: "Ngày tạo", value: formatDateTime(detailApartment.createdAt), icon: Clock3 },
-               { label: "Cập nhật lần cuối", value: formatDateTime(detailApartment.updatedAt), icon: Clock3 },
-          ]
-     }, [detailApartment, fullAddress])
-
-     const availableYears = useMemo(() => {
-          const currentYear = new Date().getFullYear()
-          return Array.from({ length: currentYear - 1950 + 1 }, (_, idx) => currentYear - idx)
-     }, [])
+     const roomOptions = detailApartment?.rooms.map((room) => room.roomNumber).filter(Boolean) || []
+     const amenityPresetOptions = buildAmenityOptions(detailApartment?.amenities, form?.amenities)
+     const detailItems = detailApartment ? buildApartmentDetailItems(detailApartment, fullAddress) : []
+     const availableYears = AVAILABLE_YEARS
 
      const isSaving = updateApartment.isPending || createApartment.isPending
 
      const hasMediaChanges = selectedImageFiles.length > 0 || !!selectedVideoFile
 
-     const hasFormChanges = useMemo(() => {
-          if (!initialForm || !form) return false
+     const hasFormChanges = hasApartmentFormChanged(initialForm, form)
 
-          const keys = Array.from(
-               new Set([...Object.keys(initialForm), ...Object.keys(form)]),
-          ) as Array<keyof ApartmentForm>
+     const hasClientChanges =
+          !isCreateMode &&
+          (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags) ||
+               selectedIotBoardId !== initialIotBoardId)
 
-          return keys.some((key) => {
-               const before = initialForm[key] ?? null
-               const after = form[key] ?? null
-               return JSON.stringify(before) !== JSON.stringify(after)
-          })
-     }, [form, initialForm])
-
-     const hasClientChanges = useMemo(() => {
-          if (isCreateMode) return false
-          const roomChanged = JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags)
-          const iotChanged = selectedIotBoardId !== initialIotBoardId
-
-          return roomChanged || iotChanged
-     }, [initialIotBoardId, initialRoomTags, isCreateMode, roomTags, selectedIotBoardId])
-
-     const canSaveChanges = useMemo(() => {
-          if (!form || usableAreaInvalid) return false
-
-          if (isCreateMode) {
-               return true
-          }
-
-          return hasFormChanges || hasMediaChanges || hasClientChanges
-     }, [form, hasClientChanges, hasFormChanges, hasMediaChanges, isCreateMode, usableAreaInvalid])
+     const canSaveChanges =
+          !!form &&
+          !usableAreaInvalid &&
+          (isCreateMode || hasFormChanges || hasMediaChanges || hasClientChanges)
 
      const clearFieldError = (field: ApartmentValidationField) => {
           setFieldErrors((prev) => {
@@ -311,28 +346,78 @@ export function ApartmentDetailContent({
           })
      }
 
-     const setFieldWithValidation = <K extends keyof ApartmentForm>(
-          key: K,
-          value: ApartmentForm[K],
-     ) => {
-          setField(key, value)
-          clearFieldError(key as ApartmentValidationField)
+     const handleFieldChange = (field: string, value: unknown) => {
+          setField(field, value)
+          clearFieldError(field as ApartmentValidationField)
      }
 
-     const setNumberFieldWithValidation = <K extends keyof ApartmentForm>(
-          key: K,
-          raw: string,
-     ) => {
+     const handleNumberFieldChange = (key: string, raw: string) => {
           setNumberField(key, raw)
           clearFieldError(key as ApartmentValidationField)
      }
 
-     const setCurrencyFieldWithValidation = <K extends keyof ApartmentForm>(
-          key: K,
-          raw: string,
-     ) => {
+     const handleCurrencyFieldChange = (key: string, raw: string) => {
           setCurrencyField(key, raw)
           clearFieldError(key as ApartmentValidationField)
+     }
+
+     const validateBeforeSave = (targetForm: ApartmentForm) => {
+          const validationErrors = validateApartmentForm(targetForm)
+          if (validationErrors.length > 0) {
+               setFieldErrors(toApartmentFieldErrors(validationErrors))
+               message.error(validationErrors[0].message)
+               return false
+          }
+
+          setFieldErrors({})
+
+          if (usableAreaInvalid) {
+               message.error("Diện tích sử dụng không được lớn hơn diện tích tổng")
+               return false
+          }
+
+          return true
+     }
+
+     const handleCreateApartment = async (payloadData: FormData) => {
+          try {
+               await createApartment.mutateAsync(payloadData)
+               resetMediaState()
+               resetTransientState()
+               resetCreateDraft()
+               if (onCreateSuccess) {
+                    onCreateSuccess()
+               } else {
+                    router.push("/operator/apartments")
+               }
+          } catch {
+               // Error toast is already handled in useCreateApartment
+          }
+     }
+
+     const handleUpdateApartment = async (payloadData: FormData) => {
+          if (!apartmentId) return
+
+          if (!canSaveChanges) {
+               message.info("Chưa có thay đổi để lưu")
+               return
+          }
+
+          try {
+               await updateApartment.mutateAsync({ id: apartmentId, data: payloadData })
+               if (hasClientChanges) {
+                    message.info("Mạch IoT/phòng đã cập nhật trên UI và sẵn sàng nối BE.")
+               }
+               handleCancelEdit()
+          } catch {
+               // Error toast is already handled in useUpdateApartment
+          }
+     }
+
+     const handlePickCoordinate = (value: { latitude: number; longitude: number }) => {
+          handleFieldChange("latitude", value.latitude)
+          handleFieldChange("longitude", value.longitude)
+          markManualCoordinatePick()
      }
 
      const handleStartEdit = () => {
@@ -341,10 +426,11 @@ export function ApartmentDetailContent({
 
           if (!startEditDraft()) return
 
-          setTenantCount(detailApartment?.userApartments.length || 0)
+          setTenantCount(detailApartment?.userApartments.length ?? 0)
           setRoomTags(initialRoomTags)
           setSelectedIotBoardId(initialIotBoardId)
           setFieldErrors({})
+          resetGeocodeTracking()
           setManualEditMode(true)
      }
 
@@ -352,6 +438,7 @@ export function ApartmentDetailContent({
           resetMediaState()
           resetTransientState()
           setFieldErrors({})
+          resetGeocodeTracking()
 
           if (isCreateMode) {
                resetCreateDraft()
@@ -379,17 +466,7 @@ export function ApartmentDetailContent({
      const handleSave = async () => {
           if (!form) return
 
-          const validationErrors = validateApartmentForm(form)
-          if (validationErrors.length > 0) {
-               setFieldErrors(toApartmentFieldErrors(validationErrors))
-               message.error(validationErrors[0].message)
-               return
-          }
-
-          setFieldErrors({})
-
-          if (usableAreaInvalid) {
-               message.error("Diện tích sử dụng không được lớn hơn diện tích tổng")
+          if (!validateBeforeSave(form)) {
                return
           }
 
@@ -400,38 +477,11 @@ export function ApartmentDetailContent({
           })
 
           if (isCreateMode) {
-               try {
-                    await createApartment.mutateAsync(payloadData)
-                    resetMediaState()
-                    resetTransientState()
-                    resetCreateDraft()
-                    if (onCreateSuccess) {
-                         onCreateSuccess()
-                    } else {
-                         router.push("/operator/apartments")
-                    }
-               } catch {
-                    // Error toast is already handled in useCreateApartment
-               }
+               await handleCreateApartment(payloadData)
                return
           }
 
-          if (!apartmentId) return
-
-          if (!canSaveChanges) {
-               message.info("Chưa có thay đổi để lưu")
-               return
-          }
-
-          try {
-               await updateApartment.mutateAsync({ id: apartmentId, data: payloadData })
-               if (hasClientChanges) {
-                    message.info("Mạch IoT/phòng đã cập nhật trên UI và sẵn sàng nối BE.")
-               }
-               handleCancelEdit()
-          } catch {
-               // Error toast is already handled in useUpdateApartment
-          }
+          await handleUpdateApartment(payloadData)
      }
 
      const handleSelectDepositPreset = (value: 1 | 2) => {
@@ -489,22 +539,21 @@ export function ApartmentDetailContent({
                                    usableAreaInvalid={usableAreaInvalid}
                                    initialProvinceCode={detailApartment?.provinceCode || undefined}
                                    selectedDepositPreset={selectedDepositPreset}
-                                   onSetField={setFieldWithValidation}
-                                   onSetNumberField={setNumberFieldWithValidation}
-                                   onSetCurrencyField={setCurrencyFieldWithValidation}
+                                   geocodeStatus={geocodeStatus}
+                                   geocodeErrorMessage={geocodeErrorMessage}
+                                   setField={handleFieldChange}
+                                   setNumberField={handleNumberFieldChange}
+                                   setCurrencyField={handleCurrencyFieldChange}
                                    onSelectDepositPreset={handleSelectDepositPreset}
+                                   onPickCoordinate={handlePickCoordinate}
                               />
 
                               <ApartmentOwnerSection
                                    editMode={editMode}
-                                   ownerOptions={ownerOptions}
+                                   ownerSummary={ownerSummary}
                                    ownerId={form.ownerId || undefined}
-                                   ownerName={ownerName}
-                                   ownerCompany={ownerCompany}
+                                   ownerOptions={ownerOptions}
                                    usersLoading={usersLoading}
-                                   detailOwnerId={detailApartment?.ownerId}
-                                   detailOwnerName={detailApartment?.owner?.fullName}
-                                   detailOwnerCompany={detailApartment?.owner?.companyName}
                                    onOwnerChange={(value) => setField("ownerId", value)}
                               />
 

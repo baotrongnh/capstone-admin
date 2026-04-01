@@ -8,14 +8,19 @@ import {
      SelectValue,
 } from "@/components/ui/select"
 import { ApartmentAddressFields } from "@/components/apartment/apartment-shared/address-fields"
+import { ApartmentCoordinateMap } from "@/components/apartment/apartment-coordinate-map"
 import {
      DetailItem,
      SectionCard,
      SectionTitle,
 } from "@/components/apartment/apartment-shared/section-primitives"
 import type { DepositPreset } from "@/hooks/apartment/use-apartment-editor-state"
-import type { ApartmentFieldErrors } from "@/lib/apartment/apartment-validation"
-import type { ApartmentForm, ApartmentStatus, FurnishingStatus } from "@/types/apartment-modal"
+import type {
+     ApartmentFieldErrors,
+     ApartmentValidationField,
+} from "@/lib/apartment/apartment-validation"
+import type { ApartmentForm } from "@/types/apartment-modal"
+import type { GeocodeStatus } from "@/types/apartment"
 import { formatVNDInput } from "@/utils/format"
 import { Info, type LucideIcon } from "lucide-react"
 
@@ -24,12 +29,6 @@ type DetailEntry = {
      value?: string | number | null
      icon?: LucideIcon
 }
-
-type SetField = <K extends keyof ApartmentForm>(key: K, value: ApartmentForm[K]) => void
-
-type SetNumberField = <K extends keyof ApartmentForm>(key: K, raw: string) => void
-
-type SetCurrencyField = <K extends keyof ApartmentForm>(key: K, raw: string) => void
 
 type BasicSectionProps = {
      editMode: boolean
@@ -41,10 +40,33 @@ type BasicSectionProps = {
      usableAreaInvalid: boolean
      initialProvinceCode?: number
      selectedDepositPreset?: DepositPreset | null
-     onSetField: SetField
-     onSetNumberField: SetNumberField
-     onSetCurrencyField: SetCurrencyField
+     geocodeStatus?: GeocodeStatus
+     geocodeErrorMessage?: string | null
+     setField: (field: string, value: unknown) => void
+     setNumberField: (field: string, raw: string) => void
+     setCurrencyField: (field: string, raw: string) => void
      onSelectDepositPreset?: (value: DepositPreset) => void
+     onPickCoordinate?: (value: { latitude: number; longitude: number }) => void
+}
+
+const getGeocodeStatusText = (status: GeocodeStatus, errorMessage?: string | null) => {
+     if (status === "loading") {
+          return "Đang tự động lấy tọa độ từ địa chỉ..."
+     }
+
+     if (status === "success") {
+          return "Đã cập nhật tọa độ tự động theo địa chỉ."
+     }
+
+     if (status === "not_found") {
+          return "Không tìm thấy tọa độ từ địa chỉ hiện tại. Bạn có thể chọn trực tiếp trên bản đồ."
+     }
+
+     if (status === "error") {
+          return errorMessage || "Không thể tự động lấy tọa độ. Vui lòng thử lại hoặc chọn trên bản đồ."
+     }
+
+     return null
 }
 
 export function ApartmentBasicSection({
@@ -57,15 +79,21 @@ export function ApartmentBasicSection({
      usableAreaInvalid,
      initialProvinceCode,
      selectedDepositPreset,
-     onSetField,
-     onSetNumberField,
-     onSetCurrencyField,
+     geocodeStatus = "idle",
+     geocodeErrorMessage,
+     setField,
+     setNumberField,
+     setCurrencyField,
      onSelectDepositPreset,
+     onPickCoordinate,
 }: BasicSectionProps) {
-     const baseRentPrice = typeof form.baseRentPrice === "number" ? form.baseRentPrice : 0
+     const baseRentPrice = form.baseRentPrice || 0
      const canPickDepositPreset = baseRentPrice > 0
 
-     const getFieldError = (field: keyof ApartmentFieldErrors) => fieldErrors?.[field]
+     const getFieldError = (field: ApartmentValidationField) => fieldErrors?.[field]
+
+     const geocodeStatusText = getGeocodeStatusText(geocodeStatus, geocodeErrorMessage)
+     const isGeocodeErrorStatus = geocodeStatus === "error" || geocodeStatus === "not_found"
 
      return (
           <SectionCard className="bg-muted/20">
@@ -80,14 +108,14 @@ export function ApartmentBasicSection({
                          <>
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Tên tòa nhà</p>
-                                   <Input value={form.buildingName || ""} onChange={(e) => onSetField("buildingName", e.target.value || undefined)} />
+                                   <Input value={form.buildingName || ""} onChange={(e) => setField("buildingName", e.target.value || undefined)} />
                               </div>
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Mã căn hộ</p>
                                    <Input
                                         value={form.apartmentNumber || ""}
-                                        onChange={(e) => onSetField("apartmentNumber", e.target.value || undefined)}
+                                        onChange={(e) => setField("apartmentNumber", e.target.value || undefined)}
                                         aria-invalid={getFieldError("apartmentNumber") ? true : undefined}
                                    />
                                    {getFieldError("apartmentNumber") ? (
@@ -97,12 +125,12 @@ export function ApartmentBasicSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Tầng</p>
-                                   <Input value={form.floorNumber ?? ""} onChange={(e) => onSetNumberField("floorNumber", e.target.value)} />
+                                   <Input value={form.floorNumber ?? ""} onChange={(e) => setNumberField("floorNumber", e.target.value)} />
                               </div>
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Trạng thái</p>
-                                   <Select value={form.status || "available"} onValueChange={(value) => onSetField("status", value as ApartmentStatus)}>
+                                   <Select value={form.status || "available"} onValueChange={(value) => setField("status", value)}>
                                         <SelectTrigger className="w-full">
                                              <SelectValue placeholder="Chọn trạng thái" />
                                         </SelectTrigger>
@@ -118,7 +146,7 @@ export function ApartmentBasicSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Nội thất</p>
-                                   <Select value={form.furnishingStatus || "unfurnished"} onValueChange={(value) => onSetField("furnishingStatus", value as FurnishingStatus)}>
+                                   <Select value={form.furnishingStatus || "unfurnished"} onValueChange={(value) => setField("furnishingStatus", value)}>
                                         <SelectTrigger className="w-full" aria-invalid={getFieldError("furnishingStatus") ? true : undefined}>
                                              <SelectValue placeholder="Chọn nội thất" />
                                         </SelectTrigger>
@@ -137,7 +165,7 @@ export function ApartmentBasicSection({
                                    <p className="text-xs text-muted-foreground">Năm xây dựng</p>
                                    <Select
                                         value={form.yearBuilt ? String(form.yearBuilt) : "__empty__"}
-                                        onValueChange={(value) => onSetField("yearBuilt", value === "__empty__" ? undefined : Number(value))}
+                                        onValueChange={(value) => setField("yearBuilt", value === "__empty__" ? undefined : Number(value))}
                                    >
                                         <SelectTrigger className="w-full">
                                              <SelectValue placeholder="Chọn năm" />
@@ -157,7 +185,7 @@ export function ApartmentBasicSection({
                                    <p className="text-xs text-muted-foreground">Diện tích tổng (m²)</p>
                                    <Input
                                         value={form.totalArea ?? ""}
-                                        onChange={(e) => onSetNumberField("totalArea", e.target.value)}
+                                        onChange={(e) => setNumberField("totalArea", e.target.value)}
                                         aria-invalid={getFieldError("totalArea") ? true : undefined}
                                    />
                                    {getFieldError("totalArea") ? (
@@ -167,7 +195,7 @@ export function ApartmentBasicSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Diện tích sử dụng (m²)</p>
-                                   <Input value={form.usableArea ?? ""} onChange={(e) => onSetNumberField("usableArea", e.target.value)} />
+                                   <Input value={form.usableArea ?? ""} onChange={(e) => setNumberField("usableArea", e.target.value)} />
                                    {usableAreaInvalid ? (
                                         <p className="text-xs text-destructive">Diện tích sử dụng không được lớn hơn diện tích tổng.</p>
                                    ) : null}
@@ -177,7 +205,7 @@ export function ApartmentBasicSection({
                                    <p className="text-xs text-muted-foreground">Số phòng ngủ</p>
                                    <Input
                                         value={form.numberOfBedrooms ?? ""}
-                                        onChange={(e) => onSetNumberField("numberOfBedrooms", e.target.value)}
+                                        onChange={(e) => setNumberField("numberOfBedrooms", e.target.value)}
                                         aria-invalid={getFieldError("numberOfBedrooms") ? true : undefined}
                                    />
                                    {getFieldError("numberOfBedrooms") ? (
@@ -189,7 +217,7 @@ export function ApartmentBasicSection({
                                    <p className="text-xs text-muted-foreground">Số phòng tắm</p>
                                    <Input
                                         value={form.numberOfBathrooms ?? ""}
-                                        onChange={(e) => onSetNumberField("numberOfBathrooms", e.target.value)}
+                                        onChange={(e) => setNumberField("numberOfBathrooms", e.target.value)}
                                         aria-invalid={getFieldError("numberOfBathrooms") ? true : undefined}
                                    />
                                    {getFieldError("numberOfBathrooms") ? (
@@ -201,7 +229,7 @@ export function ApartmentBasicSection({
                                    <p className="text-xs text-muted-foreground">Giá thuê (VNĐ)</p>
                                    <Input
                                         value={formatVNDInput(form.baseRentPrice)}
-                                        onChange={(e) => onSetCurrencyField("baseRentPrice", e.target.value)}
+                                        onChange={(e) => setCurrencyField("baseRentPrice", e.target.value)}
                                         aria-invalid={getFieldError("baseRentPrice") ? true : undefined}
                                    />
                                    {getFieldError("baseRentPrice") ? (
@@ -211,7 +239,7 @@ export function ApartmentBasicSection({
 
                               <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Tiền cọc (VNĐ)</p>
-                                   <Input value={formatVNDInput(form.depositAmount)} onChange={(e) => onSetCurrencyField("depositAmount", e.target.value)} />
+                                   <Input value={formatVNDInput(form.depositAmount)} onChange={(e) => setCurrencyField("depositAmount", e.target.value)} />
                                    {onSelectDepositPreset ? (
                                         <div className="pt-1">
                                              <p className="mb-1 text-[11px] text-muted-foreground">Chọn nhanh theo giá thuê</p>
@@ -243,13 +271,51 @@ export function ApartmentBasicSection({
                                    <p className="text-xs text-muted-foreground">Địa chỉ hành chính</p>
                                    <ApartmentAddressFields
                                         initialCodes={{ provinceCode: initialProvinceCode, wardCode: form.wardCode }}
-                                        onChange={({ wardCode }: { wardCode?: number }) => onSetField("wardCode", wardCode)}
+                                        onChange={({ wardCode }: { wardCode?: number }) => setField("wardCode", wardCode)}
                                    />
                               </div>
 
                               <div className="space-y-1 md:col-span-2 xl:col-span-3">
                                    <p className="text-xs text-muted-foreground">Số nhà, đường</p>
-                                   <Input value={form.streetAddress || ""} onChange={(e) => onSetField("streetAddress", e.target.value || undefined)} />
+                                   <Input value={form.streetAddress || ""} onChange={(e) => setField("streetAddress", e.target.value || undefined)} />
+                              </div>
+
+                              <div className="space-y-1 md:col-span-1 xl:col-span-1">
+                                   <p className="text-xs text-muted-foreground">Vĩ độ</p>
+                                   <Input
+                                        value={form.latitude ?? ""}
+                                        onChange={(e) => setNumberField("latitude", e.target.value)}
+                                        placeholder="VD: 10.7769"
+                                   />
+                              </div>
+
+                              <div className="space-y-1 md:col-span-1 xl:col-span-1">
+                                   <p className="text-xs text-muted-foreground">Kinh độ</p>
+                                   <Input
+                                        value={form.longitude ?? ""}
+                                        onChange={(e) => setNumberField("longitude", e.target.value)}
+                                        placeholder="VD: 106.7009"
+                                   />
+                              </div>
+
+                              <div className="space-y-2 md:col-span-2 xl:col-span-3">
+                                   <div className="flex items-center justify-between gap-2">
+                                        <p className="text-xs text-muted-foreground">Bản đồ chọn tọa độ</p>
+                                        <p className="text-[11px] text-muted-foreground">
+                                             Nhấp vào bản đồ hoặc kéo ghim để chỉnh vị trí.
+                                        </p>
+                                   </div>
+                                   <ApartmentCoordinateMap
+                                        latitude={form.latitude}
+                                        longitude={form.longitude}
+                                        disabled={!onPickCoordinate}
+                                        onPickCoordinate={(value) => onPickCoordinate?.(value)}
+                                   />
+                                   {geocodeStatusText ? (
+                                        <p className={isGeocodeErrorStatus ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
+                                             {geocodeStatusText}
+                                        </p>
+                                   ) : null}
                               </div>
 
                               <div className="space-y-1 md:col-span-2 xl:col-span-3">

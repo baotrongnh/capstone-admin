@@ -1,12 +1,7 @@
 import { ApartmentForm } from "@/types/apartment-modal"
+import type { ApartmentValidationField } from "@/types/apartment"
 
-export type ApartmentValidationField =
-     | "apartmentNumber"
-     | "totalArea"
-     | "numberOfBedrooms"
-     | "numberOfBathrooms"
-     | "baseRentPrice"
-     | "furnishingStatus"
+export type { ApartmentValidationField } from "@/types/apartment"
 
 export type ApartmentValidationError = {
      field: ApartmentValidationField

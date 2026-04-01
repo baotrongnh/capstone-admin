@@ -5,40 +5,32 @@ import {
      SectionCard,
      SectionTitle,
 } from "@/components/apartment/apartment-shared/section-primitives"
+import type {
+     ApartmentOwnerOption,
+     ApartmentOwnerSummary,
+} from "@/types/apartment"
 import { Select as AntdSelect } from "antd"
 import { Building2, Hash, Info, UserCircle2 } from "lucide-react"
 
-type OwnerOption = {
-     id: string
-     fullName: string
-     email: string
-}
-
 type ApartmentOwnerSectionProps = {
      editMode: boolean
-     ownerOptions: OwnerOption[]
+     ownerSummary: ApartmentOwnerSummary
      ownerId?: string
-     ownerName: string
-     ownerCompany: string
+     ownerOptions: ApartmentOwnerOption[]
      usersLoading: boolean
-     detailOwnerId?: string | null
-     detailOwnerName?: string | null
-     detailOwnerCompany?: string | null
      onOwnerChange: (ownerId?: string) => void
 }
 
 export function ApartmentOwnerSection({
      editMode,
-     ownerOptions,
+     ownerSummary,
      ownerId,
-     ownerName,
-     ownerCompany,
+     ownerOptions,
      usersLoading,
-     detailOwnerId,
-     detailOwnerName,
-     detailOwnerCompany,
      onOwnerChange,
 }: ApartmentOwnerSectionProps) {
+     const currentOwnerId = ownerId || ownerSummary.id || undefined
+
      return (
           <SectionCard>
                <SectionTitle
@@ -68,16 +60,16 @@ export function ApartmentOwnerSection({
                          </div>
 
                          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                              <DetailItem label="Owner ID" value={ownerId || "-"} icon={Hash} />
-                              <DetailItem label="Họ tên" value={ownerName} icon={UserCircle2} />
-                              <DetailItem label="Công ty" value={ownerCompany} icon={Building2} />
+                              <DetailItem label="Owner ID" value={currentOwnerId || "-"} icon={Hash} />
+                              <DetailItem label="Họ tên" value={ownerSummary.fullName || "-"} icon={UserCircle2} />
+                              <DetailItem label="Công ty" value={ownerSummary.companyName || "-"} icon={Building2} />
                          </div>
                     </div>
                ) : (
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                         <DetailItem label="Owner ID" value={detailOwnerId} icon={Hash} />
-                         <DetailItem label="Họ tên" value={detailOwnerName} icon={UserCircle2} />
-                         <DetailItem label="Công ty" value={detailOwnerCompany} icon={Building2} />
+                         <DetailItem label="Owner ID" value={ownerSummary.id} icon={Hash} />
+                         <DetailItem label="Họ tên" value={ownerSummary.fullName} icon={UserCircle2} />
+                         <DetailItem label="Công ty" value={ownerSummary.companyName} icon={Building2} />
                     </div>
                )}
           </SectionCard>

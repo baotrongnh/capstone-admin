@@ -31,33 +31,33 @@ export function useApartmentEditorState({
 
      const form = useMemo(() => draftForm || initialForm, [draftForm, initialForm])
 
-     const setField = <K extends keyof ApartmentForm>(key: K, value: ApartmentForm[K]) => {
+     const setField = (key: string, value: unknown) => {
           setDraftForm((prev) => ({
                ...(prev || initialForm || defaultCreateForm),
                [key]: value,
-          }))
+          } as ApartmentForm))
      }
 
-     const setNumberField = <K extends keyof ApartmentForm>(key: K, raw: string) => {
-          setField(key, parseNumber(raw) as ApartmentForm[K])
+     const setNumberField = (key: string, raw: string) => {
+          setField(key, parseNumber(raw))
      }
 
-     const setCurrencyField = <K extends keyof ApartmentForm>(key: K, raw: string) => {
-          const parsedValue = parseVNDInput(raw) as ApartmentForm[K]
+     const setCurrencyField = (key: string, raw: string) => {
+          const parsedValue = parseVNDInput(raw)
 
           if (key === "depositAmount") {
                setSelectedDepositPreset(null)
           }
 
-          if (key === "baseRentPrice" && selectedDepositPreset && typeof parsedValue === "number") {
+          if (key === "baseRentPrice" && selectedDepositPreset && parsedValue !== undefined) {
                setDraftForm((prev) => {
                     const baseForm = prev || initialForm || defaultCreateForm
-                    const nextRent = parsedValue as number
+                    const nextRent = parsedValue
                     return {
                          ...baseForm,
                          baseRentPrice: nextRent,
                          depositAmount: nextRent > 0 ? nextRent * selectedDepositPreset : undefined,
-                    }
+                    } as ApartmentForm
                })
                return
           }

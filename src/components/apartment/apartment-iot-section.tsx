@@ -76,6 +76,7 @@ export function ApartmentIotSection({
      iotDeviceCount,
      onBoardChange,
 }: ApartmentIotSectionProps) {
+
      return (
           <SectionCard>
                <SectionTitle
@@ -142,5 +143,3 @@ export function ApartmentIotSection({
           </SectionCard>
      )
 }
-
-export { ApartmentIotSection as ApartmentIotBoardSection }

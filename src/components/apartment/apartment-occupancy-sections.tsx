@@ -5,7 +5,7 @@ import {
      SectionTitle,
 } from "@/components/apartment/apartment-shared/section-primitives"
 import { Input } from "@/components/ui/input"
-import type { ApartmentDetailResponse } from "@/types/apartment"
+import type { ApartmentRooms, ApartmentTenants } from "@/types/apartment"
 import { formatDateTime } from "@/types/apartment-modal"
 import { Select as AntdSelect } from "antd"
 import { Home, Users } from "lucide-react"
@@ -14,7 +14,7 @@ type ApartmentRoomsSectionProps = {
      editMode: boolean
      roomTags: string[]
      roomOptions: string[]
-     rooms: NonNullable<ApartmentDetailResponse["data"]>["rooms"]
+     rooms: ApartmentRooms
      onRoomTagsChange: (value: string[]) => void
 }
 
@@ -75,7 +75,7 @@ export function ApartmentRoomsSection({
 }
 
 type ApartmentTenantSectionProps = {
-     tenants: NonNullable<ApartmentDetailResponse["data"]>["userApartments"]
+     tenants: ApartmentTenants
 }
 
 export function ApartmentTenantSection({ tenants }: ApartmentTenantSectionProps) {

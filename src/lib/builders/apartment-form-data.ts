@@ -1,8 +1,4 @@
-import { ApartmentCreateRequestBody, ApartmentUpdateRequestBody } from "@/types/apartment";
-
-type ApartmentPayload = Partial<ApartmentCreateRequestBody & ApartmentUpdateRequestBody> & {
-     videoTourUrl?: string;
-};
+import type { ApartmentPayload } from "@/types/apartment";
 
 type BuildApartmentFormDataOptions = {
      mode: "create" | "update";
@@ -10,16 +6,16 @@ type BuildApartmentFormDataOptions = {
      videoFile?: File | null;
 };
 
-const STRING_FIELDS: Array<keyof ApartmentPayload> = [
+const STRING_FIELDS = [
      "buildingName",
      "apartmentNumber",
      "streetAddress",
      "furnishingStatus",
      "description",
      "ownerId",
-];
+] as const
 
-const NUMBER_FIELDS: Array<keyof ApartmentPayload> = [
+const NUMBER_FIELDS = [
      "floorNumber",
      "wardCode",
      "latitude",
@@ -31,23 +27,24 @@ const NUMBER_FIELDS: Array<keyof ApartmentPayload> = [
      "baseRentPrice",
      "depositAmount",
      "yearBuilt",
-];
+] as const
 
 export const buildApartmentFormData = (
      payload: ApartmentPayload,
      options: BuildApartmentFormDataOptions,
 ): FormData => {
      const formData = new FormData();
+     const payloadData = payload as Record<string, unknown>
 
      for (const key of STRING_FIELDS) {
-          const value = payload[key];
+          const value = payloadData[key]
           if (typeof value === "string" && value.trim()) {
                formData.append(key, value.trim());
           }
      }
 
      for (const key of NUMBER_FIELDS) {
-          const value = payload[key];
+          const value = payloadData[key]
           if (typeof value === "number" && Number.isFinite(value)) {
                formData.append(key, String(value));
           }

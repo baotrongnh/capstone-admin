@@ -1,13 +1,8 @@
 "use client"
 
-import {
-     Select,
-     SelectContent,
-     SelectItem,
-     SelectTrigger,
-     SelectValue,
-} from "@/components/ui/select"
 import { useProvinces, useWards } from "@/hooks/query/useAddress"
+import { normalizeText } from "@/utils/format"
+import { Select as AntdSelect } from "antd"
 import { useMemo, useState } from "react"
 
 type AddressCodes = {
@@ -71,45 +66,43 @@ export function ApartmentAddressFields({
           onChange({ wardCode: nextCode })
      }
 
+     const filterAddressOption = (input: string, option?: { label?: string | number }) => {
+          const normalizedInput = normalizeText(input || "")
+          const normalizedLabel = normalizeText(String(option?.label || ""))
+          return normalizedLabel.includes(normalizedInput)
+     }
+
      return (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Tỉnh/Thành phố</p>
-                    <Select
+                    <AntdSelect
+                         showSearch
+                         allowClear
                          value={provinceCode ? String(provinceCode) : undefined}
-                         onValueChange={handleProvinceChange}
-                    >
-                         <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Chọn tỉnh/thành phố" />
-                         </SelectTrigger>
-                         <SelectContent>
-                              {provinceOptions.map((option) => (
-                                   <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                   </SelectItem>
-                              ))}
-                         </SelectContent>
-                    </Select>
+                         placeholder="Chọn tỉnh/thành phố"
+                         optionFilterProp="label"
+                         filterOption={filterAddressOption}
+                         options={provinceOptions}
+                         onChange={(value) => handleProvinceChange(String(value || ""))}
+                         className="w-full"
+                    />
                </div>
 
                <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Phường/Xã</p>
-                    <Select
+                    <AntdSelect
+                         showSearch
+                         allowClear
                          value={wardCode ? String(wardCode) : undefined}
-                         onValueChange={handleWardChange}
+                         placeholder="Chọn phường/xã"
+                         optionFilterProp="label"
+                         filterOption={filterAddressOption}
+                         options={wardOptions}
+                         onChange={(value) => handleWardChange(String(value || ""))}
                          disabled={!provinceCode}
-                    >
-                         <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Chọn phường/xã" />
-                         </SelectTrigger>
-                         <SelectContent>
-                              {wardOptions.map((option) => (
-                                   <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                   </SelectItem>
-                              ))}
-                         </SelectContent>
-                    </Select>
+                         className="w-full"
+                    />
                </div>
           </div>
      )

@@ -1,13 +1,13 @@
 import {
-     ApartmentDetailResponse,
+     ApartmentDetailData,
+     ApartmentStatus,
+     FurnishingStatus,
      ApartmentUpdateRequestBody,
 } from "@/types/apartment"
 
 export type ApartmentForm = ApartmentUpdateRequestBody & {
      videoTourUrl?: string
 }
-export type ApartmentStatus = NonNullable<ApartmentUpdateRequestBody["status"]>
-export type FurnishingStatus = ApartmentUpdateRequestBody["furnishingStatus"]
 
 const STATUS_LABELS: Record<string, string> = {
      available: "Còn trống",
@@ -38,7 +38,7 @@ export const parseNumber = (value: string) => {
 }
 
 export const buildApartmentForm = (
-     detail: NonNullable<ApartmentDetailResponse["data"]>,
+     detail: ApartmentDetailData,
 ): ApartmentForm => ({
      buildingName: detail.buildingName || undefined,
      apartmentNumber: detail.apartmentNumber || undefined,
@@ -58,5 +58,7 @@ export const buildApartmentForm = (
      yearBuilt: detail.yearBuilt || undefined,
      wardCode: detail.wardCode || undefined,
      streetAddress: detail.streetAddress || undefined,
+     latitude: detail.latitude !== undefined && detail.latitude !== null ? Number(detail.latitude) : undefined,
+     longitude: detail.longitude !== undefined && detail.longitude !== null ? Number(detail.longitude) : undefined,
      ownerId: detail.ownerId || undefined,
 })
