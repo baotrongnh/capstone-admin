@@ -1,10 +1,8 @@
 import {
-  ApartmentCreateRequestBody,
   ApartmentCreateResponse,
   ApartmentDetailResponse,
   ApartmentListResponse,
   ApartmentSearchQueryParams,
-  ApartmentUpdateRequestBody,
   ApartmentUpdateResponse,
 } from "@/types/apartment";
 import { apiClient } from "../apis/client";
@@ -26,19 +24,28 @@ export const apartmentService = {
   },
 
   create: async (
-    apartmentData: ApartmentCreateRequestBody,
+    apartmentData: FormData,
   ): Promise<ApartmentCreateResponse> => {
-    const { data } = await apiClient.post(endpoints.apartments, apartmentData);
+    const { data } = await apiClient.post(endpoints.apartments, apartmentData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return data;
   },
 
   update: async (
     id: string | number,
-    apartmentData: ApartmentUpdateRequestBody,
+    apartmentData: FormData,
   ): Promise<ApartmentUpdateResponse> => {
     const { data } = await apiClient.patch(
       `${endpoints.apartments}/${id}`,
       apartmentData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
     );
     return data;
   },

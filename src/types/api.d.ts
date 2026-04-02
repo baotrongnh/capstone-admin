@@ -270,6 +270,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/search/by-national-id": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search user by national ID
+         * @description Search one user by CCCD/CMND number from identity data.
+         */
+        get: operations["UsersController_searchByNationalId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/users/profile/verify-identity": {
         parameters: {
             query?: never;
@@ -892,6 +912,26 @@ export interface paths {
         patch: operations["ContractsController_cancelCooperationContract"];
         trace?: never;
     };
+    "/api/v1/contracts/{id}/renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renew rental contract
+         * @description Create a new draft (unsigned) renewal contract from an existing contract. Request may update important fields, append new members by CCCD, or only provide extensionMonths for automatic new date calculation.
+         */
+        post: operations["ContractsController_renewContract"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/contracts/{id}/activate": {
         parameters: {
             query?: never;
@@ -1273,7 +1313,7 @@ export interface paths {
         put?: never;
         /**
          * User books apartment viewing
-         * @description Authenticated user books a viewing by sending apartmentId, appointmentAt, and note.
+         * @description Authenticated user books a viewing by sending apartmentId and appointmentAt. Note is optional.
          */
         post: operations["ViewingRequestsController_createUserViewingBooking"];
         delete?: never;
@@ -2181,7 +2221,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get apartments assigned to current user */
+        /**
+         * Get apartments assigned to current user
+         * @description Tra ve danh sach user-apartment cua user hien tai, bao gom day du thong tin apartment va thong tin truy cap.
+         */
         get: operations["UserApartmentsController_findMy"];
         put?: never;
         post?: never;
@@ -2808,6 +2851,32 @@ export interface components {
             updatedAt: string;
             contractMemberships?: components["schemas"]["ContractMembershipDto"][] | null;
         };
+        SearchUserIdentityByNationalIdDto: {
+            /** @example 079203001234 */
+            nationalId: string;
+            /** @example true */
+            isVerified: boolean;
+            /**
+             * Format: date-time
+             * @example 2026-03-10T10:30:00.000Z
+             */
+            verifiedAt?: string | null;
+        };
+        SearchUserByNationalIdResponseDto: {
+            /** @example a1b2c3d4-e5f6-7890-abcd-ef1234567890 */
+            id: string;
+            /** @example Nguyen Van A */
+            fullName: string;
+            /** @example user@example.com */
+            email: string;
+            /** @example 0901234567 */
+            phone?: string | null;
+            /** @example true */
+            isActive: boolean;
+            /** @example true */
+            isVerified: boolean;
+            identity: components["schemas"]["SearchUserIdentityByNationalIdDto"];
+        };
         AiVerificationSideDto: {
             /** @example true */
             success: boolean;
@@ -3214,8 +3283,19 @@ export interface components {
         ApartmentCooperationContractDto: {
             /** @example 3f5369be-815f-42cb-8a8b-971fbe4a3557 */
             id: string;
+            /** @example COOP-2026-00001 */
+            contractNumber: string;
             /** @example pending */
             status: string;
+            /** Format: date-time */
+            startDate?: string | null;
+            /** Format: date-time */
+            endDate?: string | null;
+            /** Format: date-time */
+            signedDate?: string | null;
+            contractDocumentUrl?: string | null;
+            cooperationContractPdfUrl?: string | null;
+            cooperationContractPublicPdfUrl?: string | null;
         };
         ApartmentListItemDto: {
             /** @example d6e0a098-c1e9-4b5d-9207-e507e9a5974d */
@@ -3268,11 +3348,20 @@ export interface components {
              * @example [
              *       {
              *         "id": "3f5369be-815f-42cb-8a8b-971fbe4a3557",
-             *         "status": "pending"
+             *         "contractNumber": "COOP-2026-00001",
+             *         "status": "pending",
+             *         "startDate": "2026-03-01T00:00:00.000Z",
+             *         "endDate": "2027-03-01T00:00:00.000Z",
+             *         "signedDate": "2026-03-01T10:20:30.000Z",
+             *         "contractDocumentUrl": "https://storage.example.com/cooperation/COOP-2026-00001.pdf",
+             *         "cooperationContractPdfUrl": "/apartments/cooperation-contracts/3f5369be-815f-42cb-8a8b-971fbe4a3557/pdf",
+             *         "cooperationContractPublicPdfUrl": "/apartments/cooperation-contracts/pdf/view?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
              *       }
              *     ]
              */
             cooperationContracts?: components["schemas"]["ApartmentCooperationContractDto"][] | null;
+            /** @description Hop dong hop tac tuong ung moi nhat cua apartment (owner dashboard) */
+            cooperationContract?: components["schemas"]["ApartmentCooperationContractDto"] | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -3701,7 +3790,7 @@ export interface components {
              * @example 2026-03-25T08:00:00.000Z
              */
             signedDate?: string | null;
-            /** @example https://cdn.example.com/apartment-cooperation-contracts/apt-1/partner-signed.pdf */
+            /** @example https://cdn.example.com/apartment-cooperation/cooperation-contracts/apt-1/partner-signed.pdf */
             contractDocumentUrl?: string | null;
             /**
              * @description Internal API URL to download cooperation contract PDF
@@ -4229,7 +4318,7 @@ export interface components {
              * @example 2026-03-24T14:00:00.000Z
              */
             signedDate?: string | null;
-            /** @example https://cdn.example.com/apartment-cooperation-contracts/apt-1/partner-signed.pdf */
+            /** @example https://cdn.example.com/apartment-cooperation/cooperation-contracts/apt-1/partner-signed.pdf */
             contractDocumentUrl?: string | null;
             /**
              * @description Internal API URL to download signed cooperation contract PDF
@@ -4347,6 +4436,104 @@ export interface components {
             specialConditions?: string;
             /** @description List of tenants on this contract */
             members: components["schemas"]["ContractMemberDto"][];
+        };
+        RenewContractResponseDto: {
+            /**
+             * @description Source contract ID used for renewal
+             * @example 9fbc9e7e-5a4d-4f38-9ba8-cc96af4f0eaf
+             */
+            sourceContractId: string;
+            /**
+             * @description Source contract number used for renewal
+             * @example CTR-2026-00001
+             */
+            sourceContractNumber: string;
+            /**
+             * @description Effective extension months used to calculate new endDate
+             * @example 12
+             */
+            extensionMonths?: number | null;
+            /** @description New renewed contract in draft status (unsigned) */
+            renewedContract: components["schemas"]["ContractDetailDto"];
+        };
+        AddContractMemberDto: {
+            /**
+             * @description CCCD number of the user to add into contract
+             * @example 079203001234
+             */
+            nationalId: string;
+            /**
+             * @default co_tenant
+             * @enum {string}
+             */
+            memberType: "primary" | "co_tenant" | "guarantor";
+            /** @example false */
+            isPrimaryContact?: boolean;
+            /**
+             * @description Share percentage
+             * @example 50
+             */
+            sharePercentage?: number;
+        };
+        RenewContractDto: {
+            /**
+             * @description Contract start date
+             * @example 2026-02-01
+             */
+            startDate?: string;
+            /**
+             * @description Contract end date
+             * @example 2027-02-01
+             */
+            endDate?: string;
+            /**
+             * @description Monthly rent in VND
+             * @example 15000000
+             */
+            monthlyRent?: number;
+            /**
+             * @description Deposit amount in VND
+             * @example 30000000
+             */
+            depositAmount?: number;
+            /**
+             * @description Day of month for payment (1-31)
+             * @example 5
+             */
+            paymentDueDay?: number;
+            /**
+             * @default bank_transfer
+             * @enum {string}
+             */
+            paymentMethod: "bank_transfer" | "cash" | "e_wallet" | "auto_debit" | "credit_card" | "debit_card";
+            /**
+             * @description Utilities included in rent
+             * @example {
+             *       "electricity": true,
+             *       "water": true,
+             *       "internet": false
+             *     }
+             */
+            utilitiesIncluded?: Record<string, never>;
+            /**
+             * @description Per-unit utility charges if not included
+             * @example {
+             *       "electricity": 3500,
+             *       "water": 15000
+             *     }
+             */
+            utilitiesCharges?: Record<string, never>;
+            /** @description Contract terms and conditions */
+            contractTerms?: string;
+            /** @description Special conditions */
+            specialConditions?: string;
+            /**
+             * @description Number of months to extend. If startDate/endDate are not provided, system auto-calculates next term from previous endDate.
+             * @example 12
+             */
+            extensionMonths?: number;
+            /** @description Additional members to append into renewed contract by CCCD number. */
+            additionalMembers?: components["schemas"]["AddContractMemberDto"][];
         };
         UpdateContractDto: {
             /**
@@ -5080,7 +5267,7 @@ export interface components {
             /** @example scheduled */
             status: string;
             /** @example Toi muon xem can ho vao buoi sang, vui long lien he truoc 30 phut. */
-            note: string;
+            note?: string | null;
             assignedStaff: components["schemas"]["UserViewingAssignedStaffDto"];
         };
         CreateUserViewingRequestDto: {
@@ -5096,10 +5283,10 @@ export interface components {
              */
             appointmentAt: string;
             /**
-             * @description Ghi chu cua user cho lich hen
+             * @description Ghi chu cua user cho lich hen (khong bat buoc)
              * @example Toi muon xem can ho vao buoi sang, vui long lien he truoc 30 phut.
              */
-            note: string;
+            note?: string;
         };
         UserMyViewingApartmentDto: {
             /** @example 11111111-2222-3333-4444-555555555555 */
@@ -5110,6 +5297,10 @@ export interface components {
             buildingName?: string | null;
             /** @example 26728 */
             wardCode?: number | null;
+            /** @example 79 */
+            provinceCode?: number | null;
+            /** @example 12 Nguyen Hue, Phuong Ben Nghe */
+            streetAddress?: string | null;
         };
         UserMyViewingRequestDto: {
             /** @example b6a52ecf-6f88-4ed4-9aa4-7b8db6bc65d4 */
@@ -5178,6 +5369,20 @@ export interface components {
              */
             reason?: string;
         };
+        DoneViewingRequestDto: {
+            /**
+             * @description Optional note when staff marks viewing as completed
+             * @example Khach da xem nha, se phan hoi trong 2 ngay toi.
+             */
+            note?: string;
+        };
+        CancelViewingRequestDto: {
+            /**
+             * @description Optional cancellation note/reason
+             * @example Nguoi dung ban viec dot xuat, xin doi lich tuan sau.
+             */
+            note?: string;
+        };
         IoTGatewayStatusDto: {
             /** @example true */
             success: boolean;
@@ -5212,10 +5417,10 @@ export interface components {
         DeviceActionDto: {
             /**
              * @description MQTT action to send to the target device channel
-             * @example on
+             * @example ON
              * @enum {string}
              */
-            action: "on" | "off" | "open" | "close";
+            action: "ON" | "OFF" | "OPEN" | "CLOSE";
         };
         SetDoorPasswordDto: {
             /**
@@ -6274,11 +6479,73 @@ export interface components {
             notes?: string;
         };
         UserApartmentApartmentDto: {
+            /** @example d6e0a098-c1e9-4b5d-9207-e507e9a5974d */
             id: string;
             /** @example A-1208 */
             apartmentNumber: string;
             /** @example Intelli Tower A */
             buildingName?: string | null;
+            /** @example 2 */
+            maxConcurrentViewings: number;
+            /** @example 12 */
+            floorNumber?: number | null;
+            /** @example 26728 */
+            wardCode?: number | null;
+            /** @example 79 */
+            provinceCode?: number | null;
+            /** @example 12 Nguyen Hue, Phuong Ben Nghe */
+            streetAddress?: string | null;
+            /** @example 10.78800000 */
+            latitude?: string | null;
+            /** @example 106.71950000 */
+            longitude?: string | null;
+            /** @example 75.00 */
+            totalArea: string;
+            /** @example 68.50 */
+            usableArea?: string | null;
+            /** @example 2 */
+            numberOfBedrooms: number;
+            /** @example 2 */
+            numberOfBathrooms: number;
+            /** @example semi_furnished */
+            furnishingStatus: string;
+            /**
+             * @example [
+             *       "smart_lock",
+             *       "balcony",
+             *       "gym_access"
+             *     ]
+             */
+            amenities?: string[] | null;
+            /** @example 18500000.00 */
+            baseRentPrice: string;
+            /** @example 37000000.00 */
+            depositAmount?: string | null;
+            /** @example available */
+            status: string;
+            /** @example Can goc 2 phong ngu, ban cong huong dong nam. */
+            description?: string | null;
+            /**
+             * @example [
+             *       "https://cdn.example.com/apartments/a-1208-1.jpg",
+             *       "https://cdn.example.com/apartments/a-1208-2.jpg"
+             *     ]
+             */
+            images?: string[] | null;
+            /** @example https://youtu.be/demo-tour-a1208 */
+            videoTourUrl?: string | null;
+            /** @example 2020 */
+            yearBuilt?: number | null;
+            /** @example e33f798c-7978-4a86-b243-b3ac43e020ba */
+            ownerId?: string | null;
+            /** @example 3b6f2e31-417f-4f8f-b251-7d5c03b78468 */
+            approvedByOperatorId?: string | null;
+            /** Format: date-time */
+            approvedAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         UserApartmentContractDto: {
             id: string;
@@ -7164,6 +7431,46 @@ export interface operations {
                 };
             };
             /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_searchByNationalId: {
+        parameters: {
+            query: {
+                /** @description CCCD/CMND number */
+                nationalId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matched user by national ID */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["SearchUserByNationalIdResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description User not found for this national ID */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8785,6 +9092,63 @@ export interface operations {
             };
         };
     };
+    ContractsController_renewContract: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenewContractDto"];
+            };
+        };
+        responses: {
+            /** @description Renewed draft contract created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["RenewContractResponseDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid renewal request data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contract not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cannot renew contract due to status or date overlap */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ContractsController_activate: {
         parameters: {
             query?: never;
@@ -9880,7 +10244,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Requested slot is full */
+            /** @description Requested slot is full or user already has an active appointment for this apartment */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10105,7 +10469,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DoneViewingRequestDto"];
+            };
+        };
         responses: {
             /** @description Appointment completed successfully with full appointment data */
             200: {
@@ -10152,7 +10520,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelViewingRequestDto"];
+            };
+        };
         responses: {
             /** @description Appointment cancelled successfully with full appointment data */
             200: {
@@ -12222,7 +12594,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description User apartment assignments with access info */
+            /** @description User apartment assignments with full apartment information */
             200: {
                 headers: {
                     [name: string]: unknown;
