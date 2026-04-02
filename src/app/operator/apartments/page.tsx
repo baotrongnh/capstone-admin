@@ -18,16 +18,33 @@ import {
      TableRow,
 } from "@/components/ui/table"
 import { useApartments } from "@/hooks/query/useApartments"
+import type { ApartmentQueryParams } from "@/types/apartment"
 import { formatStatus } from "@/types/apartment-modal"
 import { formatVND } from "@/utils/format"
-import { message } from "antd"
+import { message, Pagination } from "antd"
 import { MoreHorizontalIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useMemo, useState } from "react"
 
 export default function OperatorApartmentsPage() {
-     const { data: apartmentListResponse, isLoading: isListLoading } = useApartments()
+     const [currentPage, setCurrentPage] = useState(1)
+     const pageSize = 10
+
+     const params = useMemo<ApartmentQueryParams>(
+          () => ({
+               page: currentPage,
+               limit: pageSize,
+          }),
+          [currentPage],
+     )
+
+     const { data: apartmentListResponse, isLoading: isListLoading } = useApartments(params)
      const apartments = apartmentListResponse?.data || []
+     const paginationMeta = apartmentListResponse?.meta
+     const totalItems = paginationMeta?.total || 0
+     const currentApiPage = paginationMeta?.page || currentPage
+     const currentApiLimit = paginationMeta?.limit || pageSize
      const router = useRouter()
 
      const handleOpenDetail = (id: string) => {
@@ -132,6 +149,18 @@ export default function OperatorApartmentsPage() {
                          ))}
                     </TableBody>
                </Table>
+
+               {totalItems > currentApiLimit ? (
+                    <div className="mt-4 flex justify-center">
+                         <Pagination
+                              current={currentApiPage}
+                              pageSize={currentApiLimit}
+                              total={totalItems}
+                              showSizeChanger={false}
+                              onChange={(page) => setCurrentPage(page)}
+                         />
+                    </div>
+               ) : null}
           </>
      )
 }
