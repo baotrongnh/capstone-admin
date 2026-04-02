@@ -19,3 +19,23 @@ export const ROUTE_OPERATOR = {
   REQUEST_PARTNER: "/operator/request",
   IOT_MANAGER: "/operator/iot-manager",
 };
+
+export type BackofficeRole = "admin" | "operator" | "staff";
+
+const DEFAULT_ROUTE_BY_ROLE: Record<BackofficeRole, string> = {
+  admin: ROUTE_ADMIN.DASHBOARD,
+  operator: ROUTE_OPERATOR.APARTMENT,
+  staff: ROUTE_STAFF.INQUIRY,
+};
+
+export const getDefaultRouteByRole = (role?: string | null) => {
+  if (!role) {
+    return null;
+  }
+
+  if (role in DEFAULT_ROUTE_BY_ROLE) {
+    return DEFAULT_ROUTE_BY_ROLE[role as BackofficeRole];
+  }
+
+  return null;
+};

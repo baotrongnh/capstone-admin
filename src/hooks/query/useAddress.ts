@@ -1,4 +1,5 @@
 import { provincesService } from "@/lib/services/provinces.service";
+import { geocodeService } from "@/lib/services/geocode.service";
 import { useQuery } from "@tanstack/react-query";
 
 export const useProvinces = () =>
@@ -46,3 +47,15 @@ export const useFullAddress = (
 
   return [street, ward, province].filter(Boolean).join(", ");
 };
+
+export const useGeocodeAddress = (
+  address: string | undefined,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: ["address-geocode", address],
+    queryFn: () => geocodeService.geocodeAddress(address!),
+    enabled: enabled && !!address && address.trim().length >= 10,
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
+  });
