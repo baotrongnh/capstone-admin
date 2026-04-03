@@ -8,6 +8,11 @@ import {
 import { apiClient } from "../apis/client";
 import { endpoints } from "../apis/endpoints";
 
+type UploadProgressHandler = (progressEvent: {
+  loaded: number;
+  total?: number;
+}) => void;
+
 export const apartmentService = {
   getList: async (
     params?: ApartmentSearchQueryParams,
@@ -25,11 +30,15 @@ export const apartmentService = {
 
   create: async (
     apartmentData: FormData,
+    options?: {
+      onUploadProgress?: UploadProgressHandler;
+    },
   ): Promise<ApartmentCreateResponse> => {
     const { data } = await apiClient.post(endpoints.apartments, apartmentData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      onUploadProgress: options?.onUploadProgress,
     });
     return data;
   },
@@ -37,6 +46,9 @@ export const apartmentService = {
   update: async (
     id: string | number,
     apartmentData: FormData,
+    options?: {
+      onUploadProgress?: UploadProgressHandler;
+    },
   ): Promise<ApartmentUpdateResponse> => {
     const { data } = await apiClient.patch(
       `${endpoints.apartments}/${id}`,
@@ -45,6 +57,7 @@ export const apartmentService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        onUploadProgress: options?.onUploadProgress,
       },
     );
     return data;

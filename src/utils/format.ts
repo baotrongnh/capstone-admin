@@ -59,3 +59,36 @@ export const formatTimeFromString = (value?: string) => {
     minute: "2-digit",
   })
 }
+
+const APARTMENT_STATUS_LABELS: Record<string, string> = {
+  available: "Còn trống",
+  occupied: "Đang cho thuê",
+  maintenance: "Bảo trì",
+  reserved: "Đã đặt cọc",
+  inactive: "Ngừng hoạt động",
+}
+
+export const formatStatus = (status?: string | null) => {
+  if (!status) return "-"
+  return APARTMENT_STATUS_LABELS[status] || status
+}
+
+export const APARTMENT_FURNITURE_LABELS: Record<string, string> = {
+  unfurnished: "Không nội thất",
+  semi_furnished: "Nội thất cơ bản",
+  fully_furnished: "Đầy đủ nội thất"
+}
+
+export const formatFurniture = (status?: string | null) => {
+  if (!status) return "-"
+  return APARTMENT_FURNITURE_LABELS[status] || status
+}
+
+export const formatDateTime = (value?: string | null) => {
+  if (!value) return "-"
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "-"
+
+  return date.toLocaleString("vi-VN")
+}

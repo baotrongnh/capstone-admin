@@ -136,9 +136,9 @@ export function ApartmentBasicSection({
                                         </SelectTrigger>
                                         <SelectContent>
                                              <SelectItem value="available">Còn trống</SelectItem>
-                                             <SelectItem value="occupied">Đang thuê</SelectItem>
-                                             <SelectItem value="maintenance">Bảo trì</SelectItem>
-                                             <SelectItem value="reserved">Đã giữ chỗ</SelectItem>
+                                             <SelectItem value="occupied">Đang cho thuê</SelectItem>
+                                             {/* <SelectItem value="maintenance">Bảo trì</SelectItem> */}
+                                             <SelectItem value="reserved">Đã đặt cọc</SelectItem>
                                              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
                                         </SelectContent>
                                    </Select>

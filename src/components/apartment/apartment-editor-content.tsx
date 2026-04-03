@@ -2,41 +2,39 @@
 
 import { ApartmentBasicSection } from "@/components/apartment/apartment-basic-section"
 import {
-     ApartmentAmenitySection,
-     ApartmentOwnerSection,
-} from "@/components/apartment/apartment-profile-sections"
+     ApartmentIotSection,
+     MOCK_IOT_BOARDS,
+} from "@/components/apartment/apartment-iot-section"
+import { ApartmentMediaSection } from "@/components/apartment/apartment-media-section"
 import {
      ApartmentRentalSummarySection,
      ApartmentRoomsSection,
      ApartmentTenantSection,
 } from "@/components/apartment/apartment-occupancy-sections"
 import {
-     ApartmentIotSection,
-     MOCK_IOT_BOARDS,
-} from "@/components/apartment/apartment-iot-section"
-import { ApartmentMediaSection } from "@/components/apartment/apartment-media-section"
+     ApartmentAmenitySection,
+     ApartmentOwnerSection,
+} from "@/components/apartment/apartment-profile-sections"
 import { Button } from "@/components/ui/button"
-import { buildApartmentFormData } from "@/lib/builders/apartment-form-data"
+import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
+import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
+import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-state"
+import { useFullAddress } from "@/hooks/query/useAddress"
+import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
+import { useUser, useUsers } from "@/hooks/query/useUsers"
 import {
      ApartmentFieldErrors,
      ApartmentValidationField,
      toApartmentFieldErrors,
      validateApartmentForm,
 } from "@/lib/apartment/apartment-validation"
-import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
-import { useFullAddress } from "@/hooks/query/useAddress"
-import { useUser, useUsers } from "@/hooks/query/useUsers"
-import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
-import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
-import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-state"
+import { buildApartmentFormData } from "@/lib/builders/apartment-form-data"
+import type { ApartmentDetailData } from "@/types/apartment"
 import {
      ApartmentForm,
      buildApartmentForm,
-     formatDateTime,
-     formatStatus,
 } from "@/types/apartment-modal"
-import type { ApartmentDetailData } from "@/types/apartment"
-import { formatVND } from "@/utils/format"
+import { APARTMENT_FURNITURE_LABELS, formatDateTime, formatStatus, formatVND } from "@/utils/format"
 import { message } from "antd"
 import {
      Bath,
@@ -133,7 +131,7 @@ const buildApartmentDetailItems = (
           { label: "Tầng", value: detailApartment.floorNumber, icon: Building2 },
           { label: "Trạng thái", value: formatStatus(detailApartment.status), icon: Info },
           { label: "Đánh giá trung bình", value: detailApartment.rating, icon: Star },
-          { label: "Nội thất", value: detailApartment.furnishingStatus, icon: Home },
+          { label: "Nội thất", value: APARTMENT_FURNITURE_LABELS[detailApartment.furnishingStatus], icon: Home },
           {
                label: "Giá thuê",
                value: formatVND(detailApartment.baseRentPrice, true),
@@ -319,6 +317,12 @@ export function ApartmentDetailContent({
      const availableYears = AVAILABLE_YEARS
 
      const isSaving = updateApartment.isPending || createApartment.isPending
+     const uploadPercent = updateApartment.isPending
+          ? updateApartment.uploadPercent
+          : createApartment.isPending
+               ? createApartment.uploadPercent
+               : 0
+     const displayUploadPercent = Math.min(100, Math.max(0, Math.round(uploadPercent)))
 
      const hasMediaChanges = selectedImageFiles.length > 0 || !!selectedVideoFile
 
@@ -607,19 +611,36 @@ export function ApartmentDetailContent({
 
                               <ApartmentTenantSection tenants={detailApartment?.userApartments || []} />
 
-                              <div className="sticky bottom-0 flex justify-end gap-2 rounded-xl border bg-background/95 p-3 backdrop-blur">
-                                   {editMode ? (
-                                        <>
-                                             <Button variant="outline" onClick={handleCancelEdit}>
-                                                  Hủy
-                                             </Button>
-                                             <Button onClick={handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
-                                                  {isCreateMode ? (isSaving ? "Đang tạo..." : "Tạo căn hộ") : isSaving ? "Đang lưu..." : "Lưu thay đổi"}
-                                             </Button>
-                                        </>
-                                   ) : allowEdit && !isCreateMode ? (
-                                        <Button onClick={handleStartEdit}>Chỉnh sửa</Button>
+                              <div className="sticky bottom-0 space-y-2 rounded-xl border bg-background/95 p-3 backdrop-blur">
+                                   {isSaving ? (
+                                        <div className="space-y-1 rounded-md border bg-muted/20 p-2">
+                                             <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                  <span>Đang tải media lên</span>
+                                                  <span>{displayUploadPercent}%</span>
+                                             </div>
+                                             <div className="h-2 overflow-hidden rounded-full bg-muted">
+                                                  <div
+                                                       className="h-full bg-primary transition-all"
+                                                       style={{ width: `${displayUploadPercent}%` }}
+                                                  />
+                                             </div>
+                                        </div>
                                    ) : null}
+
+                                   <div className="flex justify-end gap-2">
+                                        {editMode ? (
+                                             <>
+                                                  <Button variant="outline" onClick={handleCancelEdit}>
+                                                       Hủy
+                                                  </Button>
+                                                  <Button onClick={handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
+                                                       {isCreateMode ? (isSaving ? "Đang tạo..." : "Tạo căn hộ") : isSaving ? "Đang lưu..." : "Lưu thay đổi"}
+                                                  </Button>
+                                             </>
+                                        ) : allowEdit && !isCreateMode ? (
+                                             <Button onClick={handleStartEdit}>Chỉnh sửa</Button>
+                                        ) : null}
+                                   </div>
                               </div>
                          </div>
                     )}
@@ -629,3 +650,4 @@ export function ApartmentDetailContent({
 }
 
 export { ApartmentDetailContent as ApartmentEditorContent }
+
