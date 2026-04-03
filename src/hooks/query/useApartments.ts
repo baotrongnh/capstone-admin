@@ -6,6 +6,7 @@ import {
 } from "@/types/apartment";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
+import { useState } from "react";
 
 // QUERIES
 export const useApartments = (params?: ApartmentQueryParams) => {
@@ -26,9 +27,16 @@ export const useApartment = (id: string | number) => {
 // MUTATIONS
 export const useCreateApartment = () => {
   const queryClient = useQueryClient();
+  const [uploadPercent, setUploadPercent] = useState(0);
 
-  return useMutation({
-    mutationFn: apartmentService.create,
+  const mutation = useMutation({
+    mutationFn: (data: FormData) =>
+      apartmentService.create(data, {
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          setUploadPercent(Math.round((event.loaded / event.total) * 100));
+        },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartments"] });
       message.success("Tạo căn hộ thành công!");
@@ -36,20 +44,35 @@ export const useCreateApartment = () => {
     onError: (error) => {
       message.error(error?.message || "Có lỗi xảy ra!");
     },
+    onSettled: () => {
+      setUploadPercent(0);
+    },
   });
+
+  return {
+    ...mutation,
+    uploadPercent,
+  };
 };
 
 export const useUpdateApartment = () => {
   const queryClient = useQueryClient();
+  const [uploadPercent, setUploadPercent] = useState(0);
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: ({
       id,
       data,
     }: {
       id: string | number;
       data: FormData;
-    }) => apartmentService.update(id, data),
+    }) =>
+      apartmentService.update(id, data, {
+        onUploadProgress: (event) => {
+          if (!event.total) return;
+          setUploadPercent(Math.round((event.loaded / event.total) * 100));
+        },
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["apartments"] });
       queryClient.invalidateQueries({ queryKey: ["apartments", variables.id] });
@@ -58,7 +81,15 @@ export const useUpdateApartment = () => {
     onError: (error) => {
       message.error(error?.message || "Có lỗi xảy ra!");
     },
+    onSettled: () => {
+      setUploadPercent(0);
+    },
   });
+
+  return {
+    ...mutation,
+    uploadPercent,
+  };
 };
 
 export const useDeleteApartment = () => {

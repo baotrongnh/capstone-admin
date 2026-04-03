@@ -319,6 +319,12 @@ export function ApartmentDetailContent({
      const availableYears = AVAILABLE_YEARS
 
      const isSaving = updateApartment.isPending || createApartment.isPending
+     const uploadPercent = updateApartment.isPending
+          ? updateApartment.uploadPercent
+          : createApartment.isPending
+               ? createApartment.uploadPercent
+               : 0
+     const displayUploadPercent = Math.min(100, Math.max(0, Math.round(uploadPercent)))
 
      const hasMediaChanges = selectedImageFiles.length > 0 || !!selectedVideoFile
 
@@ -607,19 +613,36 @@ export function ApartmentDetailContent({
 
                               <ApartmentTenantSection tenants={detailApartment?.userApartments || []} />
 
-                              <div className="sticky bottom-0 flex justify-end gap-2 rounded-xl border bg-background/95 p-3 backdrop-blur">
-                                   {editMode ? (
-                                        <>
-                                             <Button variant="outline" onClick={handleCancelEdit}>
-                                                  Hủy
-                                             </Button>
-                                             <Button onClick={handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
-                                                  {isCreateMode ? (isSaving ? "Đang tạo..." : "Tạo căn hộ") : isSaving ? "Đang lưu..." : "Lưu thay đổi"}
-                                             </Button>
-                                        </>
-                                   ) : allowEdit && !isCreateMode ? (
-                                        <Button onClick={handleStartEdit}>Chỉnh sửa</Button>
+                              <div className="sticky bottom-0 space-y-2 rounded-xl border bg-background/95 p-3 backdrop-blur">
+                                   {isSaving ? (
+                                        <div className="space-y-1 rounded-md border bg-muted/20 p-2">
+                                             <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                  <span>Đang tải media lên</span>
+                                                  <span>{displayUploadPercent}%</span>
+                                             </div>
+                                             <div className="h-2 overflow-hidden rounded-full bg-muted">
+                                                  <div
+                                                       className="h-full bg-primary transition-all"
+                                                       style={{ width: `${displayUploadPercent}%` }}
+                                                  />
+                                             </div>
+                                        </div>
                                    ) : null}
+
+                                   <div className="flex justify-end gap-2">
+                                        {editMode ? (
+                                             <>
+                                                  <Button variant="outline" onClick={handleCancelEdit}>
+                                                       Hủy
+                                                  </Button>
+                                                  <Button onClick={handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
+                                                       {isCreateMode ? (isSaving ? "Đang tạo..." : "Tạo căn hộ") : isSaving ? "Đang lưu..." : "Lưu thay đổi"}
+                                                  </Button>
+                                             </>
+                                        ) : allowEdit && !isCreateMode ? (
+                                             <Button onClick={handleStartEdit}>Chỉnh sửa</Button>
+                                        ) : null}
+                                   </div>
                               </div>
                          </div>
                     )}
