@@ -6,7 +6,7 @@ import {
 } from "@/components/apartment/apartment-shared/section-primitives"
 import { Input } from "@/components/ui/input"
 import type { ApartmentRooms, ApartmentTenants } from "@/types/apartment"
-import { formatDateTime } from "@/types/apartment-modal"
+import { formatDateTime } from "@/utils/format"
 import { Select as AntdSelect } from "antd"
 import { Home, Users } from "lucide-react"
 

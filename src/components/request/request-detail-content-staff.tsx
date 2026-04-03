@@ -10,11 +10,9 @@ import { useUser, useUsers } from "@/hooks/query/useUsers";
 import {
   ApartmentForm,
   buildApartmentForm,
-  formatDateTime,
-  formatStatus,
   parseNumber,
 } from "@/types/apartment-modal";
-import { formatVND, parseVNDInput } from "@/utils/format";
+import { formatDateTime, formatStatus, formatVND, parseVNDInput } from "@/utils/format";
 import { message } from "antd";
 import {
   Bath,

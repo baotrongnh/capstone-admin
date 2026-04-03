@@ -9,30 +9,14 @@ export type ApartmentForm = ApartmentUpdateRequestBody & {
      videoTourUrl?: string
 }
 
-const STATUS_LABELS: Record<string, string> = {
-     available: "Còn trống",
-     occupied: "Đang thuê",
-     maintenance: "Bảo trì",
-     reserved: "Đã giữ chỗ",
-     inactive: "Ngừng hoạt động",
-}
-
-export const formatStatus = (status?: string | null) => {
-     if (!status) return "-"
-     return STATUS_LABELS[status] || status
-}
-
-export const formatDateTime = (value?: string | null) => {
-     if (!value) return "-"
-
-     const date = new Date(value)
-     if (Number.isNaN(date.getTime())) return "-"
-
-     return date.toLocaleString("vi-VN")
-}
-
 export const parseNumber = (value: string) => {
      if (!value.trim()) return undefined
+     const parsed = Number(value)
+     return Number.isNaN(parsed) ? undefined : parsed
+}
+
+const toOptionalNumber = (value: unknown) => {
+     if (value === undefined || value === null || value === "") return undefined
      const parsed = Number(value)
      return Number.isNaN(parsed) ? undefined : parsed
 }
@@ -43,14 +27,14 @@ export const buildApartmentForm = (
      buildingName: detail.buildingName || undefined,
      apartmentNumber: detail.apartmentNumber || undefined,
      floorNumber: detail.floorNumber || undefined,
-     totalArea: detail.totalArea ? Number(detail.totalArea) : undefined,
-     usableArea: detail.usableArea ? Number(detail.usableArea) : undefined,
+     totalArea: toOptionalNumber(detail.totalArea),
+     usableArea: toOptionalNumber(detail.usableArea),
      numberOfBedrooms: detail.numberOfBedrooms ?? undefined,
      numberOfBathrooms: detail.numberOfBathrooms ?? undefined,
      furnishingStatus: (detail.furnishingStatus as FurnishingStatus) || "unfurnished",
      status: (detail.status as ApartmentStatus) || "available",
-     baseRentPrice: detail.baseRentPrice ? Number(detail.baseRentPrice) : undefined,
-     depositAmount: detail.depositAmount ? Number(detail.depositAmount) : undefined,
+     baseRentPrice: toOptionalNumber(detail.baseRentPrice),
+     depositAmount: toOptionalNumber(detail.depositAmount),
      description: detail.description || undefined,
      amenities: detail.amenities || [],
      images: detail.images || [],
@@ -58,7 +42,7 @@ export const buildApartmentForm = (
      yearBuilt: detail.yearBuilt || undefined,
      wardCode: detail.wardCode || undefined,
      streetAddress: detail.streetAddress || undefined,
-     latitude: detail.latitude !== undefined && detail.latitude !== null ? Number(detail.latitude) : undefined,
-     longitude: detail.longitude !== undefined && detail.longitude !== null ? Number(detail.longitude) : undefined,
+     latitude: toOptionalNumber(detail.latitude),
+     longitude: toOptionalNumber(detail.longitude),
      ownerId: detail.ownerId || undefined,
 })

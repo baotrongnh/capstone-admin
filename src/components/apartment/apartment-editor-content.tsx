@@ -2,41 +2,39 @@
 
 import { ApartmentBasicSection } from "@/components/apartment/apartment-basic-section"
 import {
-     ApartmentAmenitySection,
-     ApartmentOwnerSection,
-} from "@/components/apartment/apartment-profile-sections"
+     ApartmentIotSection,
+     MOCK_IOT_BOARDS,
+} from "@/components/apartment/apartment-iot-section"
+import { ApartmentMediaSection } from "@/components/apartment/apartment-media-section"
 import {
      ApartmentRentalSummarySection,
      ApartmentRoomsSection,
      ApartmentTenantSection,
 } from "@/components/apartment/apartment-occupancy-sections"
 import {
-     ApartmentIotSection,
-     MOCK_IOT_BOARDS,
-} from "@/components/apartment/apartment-iot-section"
-import { ApartmentMediaSection } from "@/components/apartment/apartment-media-section"
+     ApartmentAmenitySection,
+     ApartmentOwnerSection,
+} from "@/components/apartment/apartment-profile-sections"
 import { Button } from "@/components/ui/button"
-import { buildApartmentFormData } from "@/lib/builders/apartment-form-data"
+import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
+import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
+import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-state"
+import { useFullAddress } from "@/hooks/query/useAddress"
+import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
+import { useUser, useUsers } from "@/hooks/query/useUsers"
 import {
      ApartmentFieldErrors,
      ApartmentValidationField,
      toApartmentFieldErrors,
      validateApartmentForm,
 } from "@/lib/apartment/apartment-validation"
-import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
-import { useFullAddress } from "@/hooks/query/useAddress"
-import { useUser, useUsers } from "@/hooks/query/useUsers"
-import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
-import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
-import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-state"
+import { buildApartmentFormData } from "@/lib/builders/apartment-form-data"
+import type { ApartmentDetailData } from "@/types/apartment"
 import {
      ApartmentForm,
      buildApartmentForm,
-     formatDateTime,
-     formatStatus,
 } from "@/types/apartment-modal"
-import type { ApartmentDetailData } from "@/types/apartment"
-import { formatVND } from "@/utils/format"
+import { APARTMENT_FURNITURE_LABELS, formatDateTime, formatStatus, formatVND } from "@/utils/format"
 import { message } from "antd"
 import {
      Bath,
@@ -133,7 +131,7 @@ const buildApartmentDetailItems = (
           { label: "Tầng", value: detailApartment.floorNumber, icon: Building2 },
           { label: "Trạng thái", value: formatStatus(detailApartment.status), icon: Info },
           { label: "Đánh giá trung bình", value: detailApartment.rating, icon: Star },
-          { label: "Nội thất", value: detailApartment.furnishingStatus, icon: Home },
+          { label: "Nội thất", value: APARTMENT_FURNITURE_LABELS[detailApartment.furnishingStatus], icon: Home },
           {
                label: "Giá thuê",
                value: formatVND(detailApartment.baseRentPrice, true),
@@ -652,3 +650,4 @@ export function ApartmentDetailContent({
 }
 
 export { ApartmentDetailContent as ApartmentEditorContent }
+
