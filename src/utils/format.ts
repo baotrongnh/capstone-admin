@@ -68,20 +68,15 @@ const APARTMENT_STATUS_LABELS: Record<string, string> = {
   inactive: "Ngừng hoạt động",
 }
 
-export const formatStatus = (status?: string | null) => {
-  if (!status) return "-"
-  return APARTMENT_STATUS_LABELS[status] || status
-}
-
 export const APARTMENT_FURNITURE_LABELS: Record<string, string> = {
   unfurnished: "Không nội thất",
   semi_furnished: "Nội thất cơ bản",
-  fully_furnished: "Đầy đủ nội thất"
+  fully_furnished: "Đầy đủ nội thất",
 }
 
-export const formatFurniture = (status?: string | null) => {
+export const formatStatus = (status?: string | null) => {
   if (!status) return "-"
-  return APARTMENT_FURNITURE_LABELS[status] || status
+  return APARTMENT_STATUS_LABELS[status] || status
 }
 
 export const formatDateTime = (value?: string | null) => {

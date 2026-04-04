@@ -1,6 +1,6 @@
 import { useGeocodeAddress } from "@/hooks/query/useAddress"
 import type { GeocodeStatus } from "@/types/apartment"
-import type { ApartmentForm } from "@/types/apartment-modal"
+import type { ApartmentForm } from "@/types/apartment-form"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 type UseApartmentGeocodingParams = {

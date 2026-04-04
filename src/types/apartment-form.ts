@@ -36,7 +36,7 @@ export const buildApartmentForm = (
      baseRentPrice: toOptionalNumber(detail.baseRentPrice),
      depositAmount: toOptionalNumber(detail.depositAmount),
      description: detail.description || undefined,
-     amenities: detail.amenities || [],
+     amenityIds: detail.amenities?.map((amenity) => amenity.id) ?? [],
      images: detail.images || [],
      videoTourUrl: detail.videoTourUrl || undefined,
      yearBuilt: detail.yearBuilt || undefined,
