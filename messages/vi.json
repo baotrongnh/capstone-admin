@@ -8,5 +8,9 @@
     "settings": "Cài đặt",
     "help": "Trợ giúp",
     "quickContract": "Tạo hợp đồng nhanh"
+  },
+  "Auth": {
+    "loginSuccess": "Đăng nhập thành công!",
+    "loginError": "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin và thử lại."
   }
 }

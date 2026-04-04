@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ImageViewModal } from "@/components/modal/modalVerify";
+// import { useUsers } from "@/hooks/useUser";
 
 interface Customer {
   id: string;
@@ -127,6 +127,8 @@ export default function VerifyPage() {
     null,
   );
   const [openImageModal, setOpenImageModal] = useState(false);
+
+  // const { data: user, loading, error } = useUsers();
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
@@ -415,13 +417,6 @@ export default function VerifyPage() {
           </Table>
         </div>
       </div>
-
-      <ImageViewModal
-        open={openImageModal}
-        customer={selectedCustomer}
-        onClose={() => setOpenImageModal(false)}
-        onVerify={handleVerifyNow}
-      />
     </div>
   );
 }

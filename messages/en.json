@@ -8,5 +8,9 @@
     "settings": "Settings",
     "help": "Help",
     "quickContract": "Quick Contract"
+  },
+  "Auth": {
+    "loginSuccess": "Login successful!",
+    "loginError": "Login failed. Please check your credentials and try again."
   }
 }
