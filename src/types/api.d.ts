@@ -923,13 +923,33 @@ export interface paths {
         put?: never;
         /**
          * Renew rental contract
-         * @description Create a new draft (unsigned) renewal contract from an existing contract. Request may update important fields, append new members by CCCD, or only provide extensionMonths for automatic new date calculation.
+         * @description Create a new draft (unsigned) renewal contract from an existing contract with 2 options: keep_current (keep old duration and members) or customize (provide extensionMonths and new members by CCCD).
          */
         post: operations["ContractsController_renewContract"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contracts/{id}/pdf-content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update editable PDF content of contract
+         * @description Update fields that are rendered in contract PDF and regenerate PDF immediately.
+         */
+        patch: operations["ContractsController_updatePdfContent"];
         trace?: never;
     };
     "/api/v1/contracts/{id}/activate": {
@@ -947,6 +967,26 @@ export interface paths {
         head?: never;
         /** Activate contract */
         patch: operations["ContractsController_activate"];
+        trace?: never;
+    };
+    "/api/v1/contracts/{id}/activate-paid": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Activate contract after deposit paid
+         * @description Activate pending/signed contract when deposit invoice is paid and contract is not expired.
+         */
+        patch: operations["ContractsController_activatePaid"];
         trace?: never;
     };
     "/api/v1/contracts/{id}/terminate": {
@@ -1573,6 +1613,78 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/iot/boards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List IoT boards with their child devices */
+        get: operations["IoTController_findAllBoards"];
+        put?: never;
+        /** Create IoT board with child devices */
+        post: operations["IoTController_createBoard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/iot/boards/{boardId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get IoT board details with grouped child devices */
+        get: operations["IoTController_findOneBoard"];
+        put?: never;
+        post?: never;
+        /** Deactivate an IoT board and all child devices */
+        delete: operations["IoTController_removeBoard"];
+        options?: never;
+        head?: never;
+        /** Update IoT board metadata */
+        patch: operations["IoTController_updateBoard"];
+        trace?: never;
+    };
+    "/api/v1/iot/boards/{boardId}/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a child device to an IoT board */
+        post: operations["IoTController_createBoardDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/iot/boards/{boardId}/devices/{deviceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Deactivate a child device on an IoT board */
+        delete: operations["IoTController_removeBoardDevice"];
+        options?: never;
+        head?: never;
+        /** Update a child device on an IoT board */
+        patch: operations["IoTController_updateBoardDevice"];
         trace?: never;
     };
     "/api/v1/iot/devices": {
@@ -2527,6 +2639,55 @@ export interface paths {
         patch: operations["ChatController_archiveConversation"];
         trace?: never;
     };
+    "/api/v1/amenities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List amenities
+         * @description Get amenity list for apartment forms and filters.
+         */
+        get: operations["AmenitiesController_findAll"];
+        put?: never;
+        /**
+         * Create amenity
+         * @description Admin/Operator creates a new amenity item.
+         */
+        post: operations["AmenitiesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/amenities/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get amenity detail */
+        get: operations["AmenitiesController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Deactivate amenity
+         * @description Soft delete amenity by setting isActive=false.
+         */
+        delete: operations["AmenitiesController_remove"];
+        options?: never;
+        head?: never;
+        /**
+         * Update amenity
+         * @description Admin/Operator updates amenity metadata.
+         */
+        patch: operations["AmenitiesController_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3280,6 +3441,16 @@ export interface components {
             /** @example Missing ownership proof */
             rejectionReason?: string;
         };
+        ApartmentAmenityDto: {
+            /** @example 11111111-2222-3333-4444-555555555555 */
+            id: string;
+            /** @example wifi */
+            code: string;
+            /** @example Wi-Fi */
+            name: string;
+            /** @example wifi-icon */
+            icon?: string | null;
+        };
         ApartmentCooperationContractDto: {
             /** @example 3f5369be-815f-42cb-8a8b-971fbe4a3557 */
             id: string;
@@ -3343,6 +3514,17 @@ export interface components {
             description?: string | null;
             images?: string[] | null;
             videoTourUrl?: string | null;
+            /**
+             * @example [
+             *       {
+             *         "id": "11111111-2222-3333-4444-555555555555",
+             *         "code": "wifi",
+             *         "name": "Wi-Fi",
+             *         "icon": "wifi-icon"
+             *       }
+             *     ]
+             */
+            amenities?: components["schemas"]["ApartmentAmenityDto"][] | null;
             /**
              * @description Danh sach hop dong hop tac lien quan toi apartment (thuong dung cho owner dashboard)
              * @example [
@@ -3480,11 +3662,21 @@ export interface components {
             furnishingStatus: string;
             /**
              * @example [
-             *       "Hồ bơi",
-             *       "Gym"
+             *       {
+             *         "id": "11111111-2222-3333-4444-555555555555",
+             *         "code": "wifi",
+             *         "name": "Wi-Fi",
+             *         "icon": "wifi-icon"
+             *       },
+             *       {
+             *         "id": "66666666-7777-8888-9999-000000000000",
+             *         "code": "parking",
+             *         "name": "Parking",
+             *         "icon": null
+             *       }
              *     ]
              */
-            amenities?: string[] | null;
+            amenities?: components["schemas"]["ApartmentAmenityDto"][] | null;
             /** @example 12000000 */
             baseRentPrice: string;
             /** @example 24000000 */
@@ -3500,6 +3692,22 @@ export interface components {
             images?: string[] | null;
             videoTourUrl?: string | null;
             yearBuilt?: number | null;
+            /**
+             * @description Cho biet user hien tai co du dieu kien danh gia apartment hay khong
+             * @example false
+             */
+            canRateApartment: boolean;
+            /**
+             * @description Cho biet user hien tai da danh gia apartment nay chua
+             * @example false
+             */
+            hasRatedApartment: boolean;
+            /**
+             * @description Ly do user hien tai khong the danh gia apartment
+             * @example no_active_contract
+             * @enum {string|null}
+             */
+            ratingEligibilityReason?: "not_authenticated" | "not_user_role" | "no_active_contract" | "already_rated" | null;
             ownerId?: string | null;
             approvedByOperatorId?: string | null;
             /** Format: date-time */
@@ -3622,15 +3830,13 @@ export interface components {
              */
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
-             * @description List of amenities
+             * @description List of amenity IDs
              * @example [
-             *       "air_conditioning",
-             *       "wifi",
-             *       "parking",
-             *       "gym"
+             *       "11111111-2222-3333-4444-555555555555",
+             *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenities?: string[];
+            amenityIds?: string[];
             /**
              * @description Monthly rent in VND
              * @example 15000000
@@ -3725,15 +3931,13 @@ export interface components {
              */
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
-             * @description List of amenities
+             * @description List of amenity IDs
              * @example [
-             *       "air_conditioning",
-             *       "wifi",
-             *       "parking",
-             *       "gym"
+             *       "11111111-2222-3333-4444-555555555555",
+             *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenities?: string[];
+            amenityIds?: string[];
             /**
              * @description Monthly rent in VND
              * @example 15000000
@@ -3879,15 +4083,13 @@ export interface components {
              */
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
-             * @description List of amenities
+             * @description List of amenity IDs
              * @example [
-             *       "air_conditioning",
-             *       "wifi",
-             *       "parking",
-             *       "gym"
+             *       "11111111-2222-3333-4444-555555555555",
+             *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenities?: string[];
+            amenityIds?: string[];
             /**
              * @description Monthly rent in VND
              * @example 15000000
@@ -3951,15 +4153,13 @@ export interface components {
              */
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
-             * @description List of amenities
+             * @description List of amenity IDs
              * @example [
-             *       "air_conditioning",
-             *       "wifi",
-             *       "parking",
-             *       "gym"
+             *       "11111111-2222-3333-4444-555555555555",
+             *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenities?: string[];
+            amenityIds?: string[];
             /**
              * @description Monthly rent in VND
              * @example 15000000
@@ -4166,12 +4366,22 @@ export interface components {
             id: string;
             /** @example A101 */
             apartmentNumber: string;
+            /** @example Toa nha IntelliServOps Tower */
+            buildingName?: string | null;
             /** @example 26728 */
             wardCode?: number | null;
             /** @example 79 */
             provinceCode?: number | null;
             /** @example 12 Nguyễn Huệ, Phường Bến Nghé */
             streetAddress?: string | null;
+            /** @example 2 */
+            numberOfBedrooms?: number | null;
+            /** @example 1 */
+            numberOfBathrooms?: number | null;
+            /** @example 55.5 */
+            totalArea?: number | null;
+            /** @example 50.2 */
+            usableArea?: number | null;
         };
         ContractListMemberUserDto: {
             id: string;
@@ -4192,6 +4402,8 @@ export interface components {
             contractNumber: string;
             /** @example active */
             status: string;
+            /** @example renewal */
+            category: string;
             /** Format: date-time */
             startDate: string;
             /** Format: date-time */
@@ -4202,10 +4414,34 @@ export interface components {
             createdAt: string;
             /** @example true */
             hasPdf: boolean;
+            terminationReason?: string | null;
+            /** @example false */
+            isDepositPaid: boolean;
+            /** Format: date-time */
+            depositPaidAt?: string | null;
+            /** @example false */
+            isRenewed: boolean;
+            latestRenewalContractId?: string | null;
             /** @example /contracts/pdf/view?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 */
             pdfUrl?: string | null;
             apartment: components["schemas"]["ContractApartmentDto"];
             members: components["schemas"]["ContractListMemberDto"][];
+        };
+        ContractCreatorDto: {
+            id: string;
+            /** @example Le Van B */
+            fullName: string;
+        };
+        ContractInvoiceDto: {
+            id: string;
+            /** @example INV-202604-00001 */
+            invoiceNumber: string;
+            /** @example 35000000.00 */
+            totalAmount: string;
+            /** @example pending */
+            status: string;
+            /** Format: date-time */
+            dueDate: string;
         };
         ContractMemberUserDto: {
             id: string;
@@ -4220,6 +4456,8 @@ export interface components {
         };
         ContractMemberDto: {
             id: string;
+            userId: string;
+            rentalContractId: string;
             /** @example primary */
             memberType: string;
             isPrimaryContact: boolean;
@@ -4229,10 +4467,21 @@ export interface components {
             moveOutDate?: string | null;
             /** @example active */
             status: string;
+            /** @example true */
+            notificationEnabled: boolean;
+            /** @example full */
+            accessLevel: string;
+            /** @example 50.00 */
+            sharePercentage?: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
             user: components["schemas"]["ContractMemberUserDto"];
         };
         ContractDetailDto: {
             id: string;
+            apartmentId: string;
             /** @example CTR-202601-00001 */
             contractNumber: string;
             /** Format: date-time */
@@ -4251,8 +4500,23 @@ export interface components {
             utilitiesCharges?: Record<string, never> | null;
             contractTerms?: string | null;
             specialConditions?: string | null;
+            /** @example Cong ty TNHH IntelliServOps */
+            landlordName?: string | null;
+            /** @example 0312345678 */
+            landlordIdNumber?: string | null;
+            /** @example 01/01/2020 */
+            landlordIdIssueDate?: string | null;
+            /** @example So KH&DT TP. Ho Chi Minh */
+            landlordIdIssuePlace?: string | null;
+            /** @example TP. Ho Chi Minh, Viet Nam */
+            landlordAddress?: string | null;
+            /** @example 1900 0000 */
+            landlordPhone?: string | null;
             /** @example active */
             status: string;
+            /** @example normal */
+            category: string;
+            renewedFromContractId?: string | null;
             /** Format: date-time */
             signedDate?: string | null;
             contractDocumentUrl?: string | null;
@@ -4266,15 +4530,40 @@ export interface components {
             hasLandlordSignature: boolean;
             /** @example false */
             hasTenantSignature: boolean;
+            /** @example false */
+            isDepositPaid: boolean;
+            /** Format: date-time */
+            depositPaidAt?: string | null;
+            /** @example false */
+            isRenewed: boolean;
+            latestRenewalContractId?: string | null;
+            /**
+             * @description Maximum number of additional members that can still be added to this contract based on apartment bedrooms
+             * @example 1
+             */
+            maxAddableMembers: number;
+            /**
+             * @description Maximum occupants allowed for this contract (from apartment bedrooms)
+             * @example 2
+             */
+            maxOccupants: number;
+            /**
+             * @description Current active occupants in this contract
+             * @example 1
+             */
+            currentOccupants: number;
             /** Format: date-time */
             terminationDate?: string | null;
             terminationReason?: string | null;
             earlyTerminationFee?: string | null;
+            createdByStaffId?: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             apartment: components["schemas"]["ContractApartmentDto"];
+            createdByStaff?: components["schemas"]["ContractCreatorDto"] | null;
+            invoices: components["schemas"]["ContractInvoiceDto"][];
             members: components["schemas"]["ContractMemberDto"][];
         };
         UploadContractPdfDto: {
@@ -4453,87 +4742,108 @@ export interface components {
              * @example 12
              */
             extensionMonths?: number | null;
+            /**
+             * @description Applied renewal option for this request
+             * @example keep_current
+             * @enum {string}
+             */
+            renewalOption: "keep_current" | "customize";
             /** @description New renewed contract in draft status (unsigned) */
             renewedContract: components["schemas"]["ContractDetailDto"];
         };
-        AddContractMemberDto: {
-            /**
-             * @description CCCD number of the user to add into contract
-             * @example 079203001234
-             */
-            nationalId: string;
-            /**
-             * @default co_tenant
-             * @enum {string}
-             */
-            memberType: "primary" | "co_tenant" | "guarantor";
-            /** @example false */
-            isPrimaryContact?: boolean;
-            /**
-             * @description Share percentage
-             * @example 50
-             */
-            sharePercentage?: number;
-        };
         RenewContractDto: {
             /**
-             * @description Contract start date
-             * @example 2026-02-01
+             * @description Renew option. keep_current: keep old duration and members. customize: provide new extensionMonths and optional memberNationalIds.
+             * @example keep_current
+             * @enum {string}
+             */
+            renewalOption: "keep_current" | "customize";
+            /**
+             * @description Number of months to extend. Required when renewalOption is customize.
+             * @example 12
+             */
+            extensionMonths?: number;
+            /**
+             * @description List of member CCCD numbers. Only applied when renewalOption is customize. Final members will be current user + this list, old members are not kept.
+             * @example [
+             *       "079203009999",
+             *       "079203008888"
+             *     ]
+             */
+            memberNationalIds?: string[];
+        };
+        UpdateContractPdfContentDto: {
+            /**
+             * @description Landlord name displayed in PDF (Party A)
+             * @example Cong ty TNHH IntelliServOps
+             */
+            landlordName?: string;
+            /**
+             * @description Landlord/company ID number displayed in PDF
+             * @example 0312345678
+             */
+            landlordIdNumber?: string;
+            /**
+             * @description Issue date of landlord ID/license
+             * @example 01/01/2020
+             */
+            landlordIdIssueDate?: string;
+            /**
+             * @description Issue place of landlord ID/license
+             * @example So KH&DT TP. Ho Chi Minh
+             */
+            landlordIdIssuePlace?: string;
+            /**
+             * @description Landlord registered address displayed in PDF
+             * @example TP. Ho Chi Minh, Viet Nam
+             */
+            landlordAddress?: string;
+            /**
+             * @description Landlord phone number displayed in PDF
+             * @example 1900 0000
+             */
+            landlordPhone?: string;
+            /**
+             * @description Contract start date used in PDF
+             * @example 2026-04-01
              */
             startDate?: string;
             /**
-             * @description Contract end date
-             * @example 2027-02-01
+             * @description Contract end date used in PDF
+             * @example 2027-03-31
              */
             endDate?: string;
             /**
-             * @description Monthly rent in VND
+             * @description Monthly rental fee
              * @example 15000000
              */
             monthlyRent?: number;
             /**
-             * @description Deposit amount in VND
+             * @description Deposit amount
              * @example 30000000
              */
             depositAmount?: number;
             /**
-             * @description Day of month for payment (1-31)
+             * @description Monthly payment due day (1-28)
              * @example 5
              */
             paymentDueDay?: number;
             /**
-             * @default bank_transfer
+             * @description Payment method
+             * @example bank_transfer
              * @enum {string}
              */
-            paymentMethod: "bank_transfer" | "cash" | "e_wallet" | "auto_debit" | "credit_card" | "debit_card";
+            paymentMethod?: "bank_transfer" | "cash" | "e_wallet" | "auto_debit" | "credit_card" | "debit_card";
             /**
-             * @description Utilities included in rent
-             * @example {
-             *       "electricity": true,
-             *       "water": true,
-             *       "internet": false
-             *     }
+             * @description Special conditions shown in contract PDF
+             * @example Khong nuoi thu cung trong can ho.
              */
-            utilitiesIncluded?: Record<string, never>;
-            /**
-             * @description Per-unit utility charges if not included
-             * @example {
-             *       "electricity": 3500,
-             *       "water": 15000
-             *     }
-             */
-            utilitiesCharges?: Record<string, never>;
-            /** @description Contract terms and conditions */
-            contractTerms?: string;
-            /** @description Special conditions */
             specialConditions?: string;
             /**
-             * @description Number of months to extend. If startDate/endDate are not provided, system auto-calculates next term from previous endDate.
-             * @example 12
+             * @description Additional contract terms shown in contract PDF
+             * @example Khong thay doi ket cau can ho trong thoi han thue.
              */
-            extensionMonths?: number;
-            /** @description Additional members to append into renewed contract by CCCD number. */
-            additionalMembers?: components["schemas"]["AddContractMemberDto"][];
+            contractTerms?: string;
         };
         UpdateContractDto: {
             /**
@@ -4606,6 +4916,25 @@ export interface components {
              * @example Khong co nhu cau thue nua
              */
             reason: string;
+        };
+        AddContractMemberDto: {
+            /**
+             * @description CCCD number of the user to add into contract
+             * @example 079203001234
+             */
+            nationalId: string;
+            /**
+             * @default co_tenant
+             * @enum {string}
+             */
+            memberType: "primary" | "co_tenant" | "guarantor";
+            /** @example false */
+            isPrimaryContact?: boolean;
+            /**
+             * @description Share percentage
+             * @example 50
+             */
+            sharePercentage?: number;
         };
         InvoiceContractApartmentDto: {
             /** @example apt-123 */
@@ -5436,6 +5765,179 @@ export interface components {
              */
             holdMs: number;
         };
+        IoTBoardApartmentSummaryDto: {
+            id: string;
+            /** @example A101 */
+            apartmentNumber: string;
+            /** @example 123 Nguyen Hue, Q1 */
+            address: string;
+        };
+        IoTBoardRoomSummaryDto: {
+            id: string;
+            /** @example R01 */
+            roomNumber: string;
+            /** @example bedroom */
+            roomType: string;
+        };
+        IoTBoardDeviceItemDto: {
+            id: string;
+            /** @example Front Door Lock */
+            deviceName: string;
+            /** @example smart_lock */
+            deviceType: string;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "inactive" | "maintenance" | "error";
+            isControllableByTenant: boolean;
+            /** @example door */
+            mqttControlType?: string | null;
+            /** @example 1 */
+            mqttChannelId?: number | null;
+            /** @example 1 */
+            mqttDoorPasswordChannelId?: number | null;
+            room?: components["schemas"]["IoTBoardRoomSummaryDto"] | null;
+        };
+        IoTBoardListItemDto: {
+            /** @example ESP_A101 */
+            id: string;
+            /** @example A101 Main Board */
+            name: string;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "inactive" | "maintenance" | "error";
+            /** @example 3 */
+            deviceCount: number;
+            apartment: components["schemas"]["IoTBoardApartmentSummaryDto"];
+            devices: components["schemas"]["IoTBoardDeviceItemDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        IoTBoardDetailDto: {
+            /** @example ESP_A101 */
+            id: string;
+            /** @example A101 Main Board */
+            name: string;
+            /**
+             * @example active
+             * @enum {string}
+             */
+            status: "active" | "inactive" | "maintenance" | "error";
+            /** @example 3 */
+            deviceCount: number;
+            apartment: components["schemas"]["IoTBoardApartmentSummaryDto"];
+            devices: components["schemas"]["IoTBoardDeviceItemDto"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: date-time */
+            lastOnlineAt?: string | null;
+        };
+        CreateIoTBoardDeviceDto: {
+            /** @example Smart Lock - Front Door */
+            deviceName: string;
+            /** @enum {string} */
+            deviceType: "smart_lock" | "thermostat" | "light" | "camera" | "sensor" | "alarm" | "doorbell";
+            /** @example Tuya */
+            brand?: string;
+            /** @example ZM-100 */
+            model?: string;
+            /** @example SN-123456 */
+            serialNumber?: string;
+            /** @example AA:BB:CC:DD:EE:FF */
+            macAddress?: string;
+            /**
+             * Format: uuid
+             * @description Room ID
+             */
+            roomId?: string;
+            /** @example Installed at main entrance */
+            locationDescription?: string;
+            /** @example 1.2.3 */
+            firmwareVersion?: string;
+            /** @default true */
+            isControllableByTenant: boolean;
+            /** @example 2026-01-15 */
+            installationDate?: string;
+            /** @example 2028-01-15 */
+            warrantyExpiryDate?: string;
+            /** @description Device configuration JSON */
+            configuration?: Record<string, never>;
+            /**
+             * @description MQTT control topic for this child device
+             * @example door
+             * @enum {string}
+             */
+            mqttControlType?: "light" | "alarm" | "door" | "curtain";
+            /**
+             * @description MQTT relay/channel index for this child device
+             * @example 1
+             */
+            mqttChannelId?: number;
+            /**
+             * @description Optional door-password channel. Defaults to mqttChannelId when omitted.
+             * @example 1
+             */
+            mqttDoorPasswordChannelId?: number;
+            notes?: string;
+        };
+        CreateIoTBoardDto: {
+            /**
+             * @description Physical board identifier used by MQTT topics
+             * @example ESP_A101
+             */
+            boardId: string;
+            /**
+             * @description Human-readable board name
+             * @example A101 Main Board
+             */
+            boardName: string;
+            /**
+             * Format: uuid
+             * @description Apartment owning this board and its child devices
+             */
+            apartmentId: string;
+            /** @description Child devices connected to this board */
+            devices: components["schemas"]["CreateIoTBoardDeviceDto"][];
+        };
+        UpdateIoTBoardDto: {
+            /**
+             * @description Physical board identifier used by MQTT topics
+             * @example ESP_A101
+             */
+            boardId?: string;
+            /**
+             * @description Updated board name propagated to child device metadata
+             * @example A101 Main Board v2
+             */
+            boardName?: string;
+            /**
+             * Format: uuid
+             * @description Move all board devices to another apartment
+             */
+            apartmentId?: string;
+            /** @description Child devices connected to this board */
+            devices?: components["schemas"]["CreateIoTBoardDeviceDto"][];
+        };
+        IoTBoardDeleteResultDto: {
+            /** @example ESP_A101 */
+            id: string;
+            /** @example A101 Main Board */
+            name: string;
+            /** @example 3 */
+            affectedDevices: number;
+            /**
+             * @example inactive
+             * @enum {string}
+             */
+            status: "active" | "inactive" | "maintenance" | "error";
+        };
         DeviceApartmentSummaryDto: {
             id: string;
             /** @example A101 */
@@ -5449,25 +5951,6 @@ export interface components {
             roomNumber: string;
             /** @example bedroom */
             roomType: string;
-        };
-        IoTDeviceListItemDto: {
-            id: string;
-            /** @example Smart Lock A101 */
-            deviceName: string;
-            /** @example smart_lock */
-            deviceType: string;
-            brand?: string | null;
-            model?: string | null;
-            serialNumber?: string | null;
-            /** @example active */
-            status: string;
-            isControllableByTenant: boolean;
-            /** Format: date-time */
-            lastOnlineAt?: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            apartment: components["schemas"]["DeviceApartmentSummaryDto"];
-            room?: components["schemas"]["DeviceRoomSummaryDto"] | null;
         };
         IoTDeviceDetailDto: {
             id: string;
@@ -5497,6 +5980,8 @@ export interface components {
             configuration?: Record<string, never> | null;
             /** @example ESP_A101 */
             mqttEspId?: string | null;
+            /** @example A101 Main Board */
+            mqttBoardName?: string | null;
             /** @example door */
             mqttControlType?: string | null;
             /** @example 1 */
@@ -5509,6 +5994,73 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            apartment: components["schemas"]["DeviceApartmentSummaryDto"];
+            room?: components["schemas"]["DeviceRoomSummaryDto"] | null;
+        };
+        UpdateIoTBoardDeviceDto: {
+            /** @example Smart Lock - Front Door */
+            deviceName?: string;
+            /** @enum {string} */
+            deviceType?: "smart_lock" | "thermostat" | "light" | "camera" | "sensor" | "alarm" | "doorbell";
+            /** @example Tuya */
+            brand?: string;
+            /** @example ZM-100 */
+            model?: string;
+            /** @example SN-123456 */
+            serialNumber?: string;
+            /** @example AA:BB:CC:DD:EE:FF */
+            macAddress?: string;
+            /**
+             * Format: uuid
+             * @description Room ID
+             */
+            roomId?: string;
+            /** @example Installed at main entrance */
+            locationDescription?: string;
+            /** @example 1.2.3 */
+            firmwareVersion?: string;
+            /** @default true */
+            isControllableByTenant: boolean;
+            /** @example 2026-01-15 */
+            installationDate?: string;
+            /** @example 2028-01-15 */
+            warrantyExpiryDate?: string;
+            /** @description Device configuration JSON */
+            configuration?: Record<string, never>;
+            /**
+             * @description MQTT control topic for this child device
+             * @example door
+             * @enum {string}
+             */
+            mqttControlType?: "light" | "alarm" | "door" | "curtain";
+            /**
+             * @description MQTT relay/channel index for this child device
+             * @example 1
+             */
+            mqttChannelId?: number;
+            /**
+             * @description Optional door-password channel. Defaults to mqttChannelId when omitted.
+             * @example 1
+             */
+            mqttDoorPasswordChannelId?: number;
+            notes?: string;
+        };
+        IoTDeviceListItemDto: {
+            id: string;
+            /** @example Smart Lock A101 */
+            deviceName: string;
+            /** @example smart_lock */
+            deviceType: string;
+            brand?: string | null;
+            model?: string | null;
+            serialNumber?: string | null;
+            /** @example active */
+            status: string;
+            isControllableByTenant: boolean;
+            /** Format: date-time */
+            lastOnlineAt?: string | null;
+            /** Format: date-time */
+            createdAt: string;
             apartment: components["schemas"]["DeviceApartmentSummaryDto"];
             room?: components["schemas"]["DeviceRoomSummaryDto"] | null;
         };
@@ -5552,6 +6104,11 @@ export interface components {
              * @example ESP_A101
              */
             mqttEspId?: string;
+            /**
+             * @description Human-readable board name for the MQTT target device
+             * @example A101 Main Board
+             */
+            mqttBoardName?: string;
             /**
              * @description MQTT control topic for this device. When omitted, generic control falls back from deviceType where possible.
              * @example door
@@ -5610,6 +6167,11 @@ export interface components {
              * @example ESP_A101
              */
             mqttEspId?: string;
+            /**
+             * @description Human-readable board name for the MQTT target device
+             * @example A101 Main Board
+             */
+            mqttBoardName?: string;
             /**
              * @description MQTT control topic for this device. When omitted, generic control falls back from deviceType where possible.
              * @example door
@@ -6896,6 +7458,122 @@ export interface components {
         PaginatedMessagesResponseDto: {
             data: components["schemas"]["MessageResponseDto"][];
             meta: components["schemas"]["PaginationMetaDto"];
+        };
+        AmenityListItemDto: {
+            /** @example 11111111-2222-3333-4444-555555555555 */
+            id: string;
+            /** @example wifi */
+            code: string;
+            /** @example Wi-Fi */
+            name: string;
+            /** @example Internet wireless tốc độ cao */
+            description?: string | null;
+            /** @example wifi-icon */
+            icon?: string | null;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * @description Number of apartments currently linked to this amenity
+             * @example 12
+             */
+            linkedApartments: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AmenityDetailDto: {
+            /** @example 11111111-2222-3333-4444-555555555555 */
+            id: string;
+            /** @example wifi */
+            code: string;
+            /** @example Wi-Fi */
+            name: string;
+            /** @example Internet wireless tốc độ cao */
+            description?: string | null;
+            /** @example wifi-icon */
+            icon?: string | null;
+            /** @example true */
+            isActive: boolean;
+            /**
+             * @description Number of apartments currently linked to this amenity
+             * @example 12
+             */
+            linkedApartments: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AmenityMutationResultDto: {
+            /** @example 11111111-2222-3333-4444-555555555555 */
+            id: string;
+            /** @example wifi */
+            code: string;
+            /** @example Wi-Fi */
+            name: string;
+            /** @example true */
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateAmenityDto: {
+            /**
+             * @description Unique amenity code (lowercase, numbers, underscore). Used as stable key for frontend.
+             * @example wifi
+             */
+            code: string;
+            /**
+             * @description Amenity display name
+             * @example Wi-Fi
+             */
+            name: string;
+            /**
+             * @description Amenity description
+             * @example Internet wireless tốc độ cao
+             */
+            description?: string;
+            /**
+             * @description Icon key used by frontend
+             * @example wifi-icon
+             */
+            icon?: string;
+            /**
+             * @description Active status
+             * @default true
+             * @example true
+             */
+            isActive: boolean;
+        };
+        UpdateAmenityDto: {
+            /**
+             * @description Unique amenity code (lowercase, numbers, underscore). Used as stable key for frontend.
+             * @example wifi
+             */
+            code?: string;
+            /**
+             * @description Amenity display name
+             * @example Wi-Fi
+             */
+            name?: string;
+            /**
+             * @description Amenity description
+             * @example Internet wireless tốc độ cao
+             */
+            description?: string;
+            /**
+             * @description Icon key used by frontend
+             * @example wifi-icon
+             */
+            icon?: string;
+            /**
+             * @description Active status
+             * @default true
+             * @example true
+             */
+            isActive: boolean;
         };
     };
     responses: never;
@@ -9130,6 +9808,63 @@ export interface operations {
             };
         };
     };
+    ContractsController_updatePdfContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContractPdfContentDto"];
+            };
+        };
+        responses: {
+            /** @description Contract PDF content updated and PDF regenerated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["ContractDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid update data */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contract not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contract does not allow PDF content editing */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ContractsController_activate: {
         parameters: {
             query?: never;
@@ -9162,6 +9897,52 @@ export interface operations {
             };
             /** @description Contract not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContractsController_activatePaid: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contract activated after deposit payment validation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["ContractDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Contract not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contract cannot be activated because it is expired, invalid status, or deposit not paid */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10826,6 +11607,286 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    IoTController_findAllBoards: {
+        parameters: {
+            query?: {
+                apartmentId?: string;
+                status?: "active" | "inactive" | "maintenance" | "error";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of MQTT boards with grouped devices */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTBoardListItemDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    IoTController_createBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateIoTBoardDto"];
+            };
+        };
+        responses: {
+            /** @description IoT board created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTBoardDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    IoTController_findOneBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Board details with child devices */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTBoardDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description IoT board not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IoTController_removeBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description IoT board deactivated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTBoardDeleteResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    IoTController_updateBoard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateIoTBoardDto"];
+            };
+        };
+        responses: {
+            /** @description IoT board updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTBoardDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    IoTController_createBoardDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boardId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateIoTBoardDeviceDto"];
+            };
+        };
+        responses: {
+            /** @description IoT board device created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTDeviceDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    IoTController_removeBoardDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boardId: string;
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description IoT board device deactivated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTDeviceDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    IoTController_updateBoardDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                boardId: string;
+                deviceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateIoTBoardDeviceDto"];
+            };
+        };
+        responses: {
+            /** @description IoT board device updated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["IoTDeviceDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13313,6 +14374,208 @@ export interface operations {
             };
             /** @description Conversation not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AmenitiesController_findAll: {
+        parameters: {
+            query?: {
+                isActive?: boolean;
+                keyword?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Amenity list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["AmenityListItemDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    AmenitiesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAmenityDto"];
+            };
+        };
+        responses: {
+            /** @description Amenity created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["AmenityMutationResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Amenity code already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AmenitiesController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Amenity detail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["AmenityDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Amenity not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AmenitiesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Amenity deactivated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["AmenityMutationResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Amenity not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AmenitiesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAmenityDto"];
+            };
+        };
+        responses: {
+            /** @description Amenity updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["AmenityMutationResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Amenity not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Amenity code already exists */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

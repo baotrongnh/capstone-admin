@@ -1,20 +1,20 @@
 "use client"
 
-import { ApartmentBasicSection } from "@/components/apartment/apartment-basic-section"
+import { ApartmentDetailsSection } from "@/components/apartment/sections/apartment-details-section"
 import {
      ApartmentIotSection,
      MOCK_IOT_BOARDS,
-} from "@/components/apartment/apartment-iot-section"
-import { ApartmentMediaSection } from "@/components/apartment/apartment-media-section"
+} from "@/components/apartment/sections/apartment-iot-section"
+import { ApartmentMediaSection } from "@/components/apartment/sections/apartment-media-section"
 import {
      ApartmentRentalSummarySection,
      ApartmentRoomsSection,
      ApartmentTenantSection,
-} from "@/components/apartment/apartment-occupancy-sections"
+} from "@/components/apartment/sections/apartment-occupancy-sections"
 import {
      ApartmentAmenitySection,
      ApartmentOwnerSection,
-} from "@/components/apartment/apartment-profile-sections"
+} from "@/components/apartment/sections/apartment-profile-sections"
 import { Button } from "@/components/ui/button"
 import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
 import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
@@ -34,12 +34,12 @@ import {
      toApartmentFieldErrors,
      validateApartmentForm,
 } from "@/lib/apartment/apartment-validation"
-import { buildApartmentFormData } from "@/lib/builders/apartment-form-data"
+import { buildApartmentFormData } from "@/lib/apartment/apartment-form-data"
 import type { ApartmentDetailData } from "@/types/apartment"
 import {
      ApartmentForm,
      buildApartmentForm,
-} from "@/types/apartment-modal"
+} from "@/types/apartment-form"
 import { APARTMENT_FURNITURE_LABELS, formatDateTime, formatStatus, formatVND } from "@/utils/format"
 import { message } from "antd"
 import {
@@ -61,7 +61,7 @@ import {
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
-type ApartmentDetailContentProps = {
+type ApartmentDetailEditorProps = {
      apartmentId: string | null
      mode: "create" | "view" | "edit"
      allowEdit?: boolean
@@ -176,14 +176,14 @@ const buildApartmentDetailItems = (
      ]
 }
 
-export function ApartmentDetailContent({
+export function ApartmentDetailEditor({
      apartmentId,
      mode,
      allowEdit = true,
      inDialog = false,
      onCreateSuccess,
      onCreateCancel,
-}: ApartmentDetailContentProps) {
+}: ApartmentDetailEditorProps) {
      const router = useRouter()
      const {
           data: apartmentDetailResponse,
@@ -540,7 +540,7 @@ export function ApartmentDetailContent({
 
                     {canRenderForm && form && (
                          <div className="space-y-5">
-                              <ApartmentBasicSection
+                              <ApartmentDetailsSection
                                    editMode={editMode}
                                    form={form}
                                    fieldErrors={fieldErrors}
@@ -655,6 +655,4 @@ export function ApartmentDetailContent({
           </div>
      )
 }
-
-export { ApartmentDetailContent as ApartmentEditorContent }
 

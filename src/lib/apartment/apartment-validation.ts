@@ -1,4 +1,4 @@
-import { ApartmentForm } from "@/types/apartment-modal"
+import { ApartmentForm } from "@/types/apartment-form"
 import type { ApartmentValidationField } from "@/types/apartment"
 
 export type { ApartmentValidationField } from "@/types/apartment"

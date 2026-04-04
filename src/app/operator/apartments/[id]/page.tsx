@@ -1,6 +1,6 @@
 "use client"
 
-import { ApartmentDetailContent } from "@/components/apartment/apartment-editor-content"
+import { ApartmentDetailEditor } from "@/components/apartment"
 import { Button } from "@/components/ui/button"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 
@@ -20,7 +20,7 @@ export default function OperatorApartmentDetailPage() {
                     </Button>
                </div>
 
-               <ApartmentDetailContent
+               <ApartmentDetailEditor
                     apartmentId={apartmentId || null}
                     mode={mode}
                />

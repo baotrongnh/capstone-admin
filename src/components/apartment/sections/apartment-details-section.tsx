@@ -7,19 +7,19 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select"
-import { ApartmentAddressFields } from "@/components/apartment/apartment-shared/address-fields"
+import { ApartmentAddressFields } from "@/components/apartment/ui/address-fields"
 import { ApartmentCoordinateMap } from "@/components/apartment/apartment-coordinate-map"
 import {
      DetailItem,
      SectionCard,
      SectionTitle,
-} from "@/components/apartment/apartment-shared/section-primitives"
+} from "@/components/apartment/ui/section-primitives"
 import type { DepositPreset } from "@/hooks/apartment/use-apartment-editor-state"
 import type {
      ApartmentFieldErrors,
      ApartmentValidationField,
 } from "@/lib/apartment/apartment-validation"
-import type { ApartmentForm } from "@/types/apartment-modal"
+import type { ApartmentForm } from "@/types/apartment-form"
 import type { GeocodeStatus } from "@/types/apartment"
 import { formatVNDInput } from "@/utils/format"
 import { Info, type LucideIcon } from "lucide-react"
@@ -30,7 +30,7 @@ type DetailEntry = {
      icon?: LucideIcon
 }
 
-type BasicSectionProps = {
+type ApartmentDetailsSectionProps = {
      editMode: boolean
      form: ApartmentForm
      fieldErrors?: ApartmentFieldErrors
@@ -69,7 +69,7 @@ const getGeocodeStatusText = (status: GeocodeStatus, errorMessage?: string | nul
      return null
 }
 
-export function ApartmentBasicSection({
+export function ApartmentDetailsSection({
      editMode,
      form,
      fieldErrors,
@@ -86,7 +86,7 @@ export function ApartmentBasicSection({
      setCurrencyField,
      onSelectDepositPreset,
      onPickCoordinate,
-}: BasicSectionProps) {
+}: ApartmentDetailsSectionProps) {
      const baseRentPrice = form.baseRentPrice || 0
      const canPickDepositPreset = baseRentPrice > 0
 
@@ -330,5 +330,3 @@ export function ApartmentBasicSection({
           </SectionCard>
      )
 }
-
-export { ApartmentBasicSection as ApartmentBasicInfoSection }

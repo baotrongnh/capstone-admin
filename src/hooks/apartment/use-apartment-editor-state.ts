@@ -1,4 +1,4 @@
-import { ApartmentForm, parseNumber } from "@/types/apartment-modal"
+import { ApartmentForm, parseNumber } from "@/types/apartment-form"
 import { parseVNDInput } from "@/utils/format"
 import { useMemo, useState } from "react"
 

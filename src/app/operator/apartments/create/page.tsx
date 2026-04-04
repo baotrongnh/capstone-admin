@@ -1,6 +1,6 @@
 "use client"
 
-import { ApartmentDetailContent } from "@/components/apartment/apartment-editor-content"
+import { ApartmentDetailEditor } from "@/components/apartment"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -16,7 +16,7 @@ export default function CreateApartmentPage() {
                     </Button>
                </div>
 
-               <ApartmentDetailContent
+               <ApartmentDetailEditor
                     apartmentId={null}
                     mode="create"
                     onCreateSuccess={() => router.push("/operator/apartments")}

@@ -1,5 +1,5 @@
 import type { ImagePreview } from "@/hooks/apartment/use-apartment-media-state"
-import { SectionCard, SectionTitle } from "@/components/apartment/apartment-shared/section-primitives"
+import { SectionCard, SectionTitle } from "@/components/apartment/ui/section-primitives"
 import {
      Dialog,
      DialogContent,

@@ -1,10 +1,17 @@
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
+import {
+     DetailItem,
+     SectionCard,
+     SectionTitle,
+} from "@/components/apartment/ui/section-primitives"
 import type { AmenityOption } from "@/lib/apartment/amenity-mapping"
-import type { ApartmentOwnerOption, ApartmentOwnerSummary } from "@/types/apartment"
+import type {
+     ApartmentOwnerOption,
+     ApartmentOwnerSummary,
+} from "@/types/apartment"
 import { Select as AntdSelect } from "antd"
 import { Building2, Hash, Info, UserCircle2 } from "lucide-react"
-import { DetailItem, SectionCard, SectionTitle, } from "./ui/section-primitives"
 
 type ApartmentOwnerSectionProps = {
      editMode: boolean
