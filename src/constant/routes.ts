@@ -10,6 +10,8 @@ export const ROUTE_STAFF = {
 
 export const ROUTE_ADMIN = {
   DASHBOARD: "/admin/dashboard",
+  REVENUES: "/admin/revenues",
+  USER: "/admin/user",
   SCHEDULE: "/staff/schedule",
   VERIFY_USER_INFORMATION: "/staff/verify-user-information",
 } as const;
