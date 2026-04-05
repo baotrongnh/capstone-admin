@@ -15,14 +15,12 @@ import { usePathname } from "next/navigation"
 
 export function AdminNavMain({
   items,
-  quickContractLabel = "Tạo hợp đồng nhanh",
 }: {
   items: {
     title: string
     url: string
     icon?: Icon
   }[]
-  quickContractLabel?: string
 }) {
   const pathname = usePathname()
 
