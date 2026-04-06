@@ -1,6 +1,6 @@
 "use client"
 
-import { ApartmentDetailContent } from "@/components/apartment/apartment-editor-content"
+import { ApartmentDetailEditor } from "@/components/apartment"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
 type ApartmentDetailModalProps = {
@@ -25,7 +25,7 @@ export function ApartmentDetailModal({
      return (
           <Dialog open={open} onOpenChange={handleOpenChange}>
                <DialogContent className="sm:max-w-6xl p-0">
-                    <ApartmentDetailContent
+                    <ApartmentDetailEditor
                          apartmentId={apartmentId}
                          mode={mode}
                          allowEdit={allowEdit}

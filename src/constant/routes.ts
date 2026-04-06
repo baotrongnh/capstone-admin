@@ -1,6 +1,7 @@
 export const ROUTE_STAFF = {
   INQUIRY: "/staff/inquiry",
   SCHEDULE: "/staff/schedule",
+  MAINTENANCE: "/staff/maintenance",
   VERIFY_USER_INFORMATION: "/staff/verify-user-information",
   CHAT: "/staff/chat",
   REQUEST: "/staff/request",
@@ -9,12 +10,15 @@ export const ROUTE_STAFF = {
 
 export const ROUTE_ADMIN = {
   DASHBOARD: "/admin/dashboard",
+  REVENUES: "/admin/revenues",
+  USER: "/admin/user",
   SCHEDULE: "/staff/schedule",
   VERIFY_USER_INFORMATION: "/staff/verify-user-information",
 } as const;
 
 export const ROUTE_OPERATOR = {
   APARTMENT: "/operator/apartments",
+  AMENITY: "/operator/amenities",
   STAFF_MANAGER: "/operator/staff-manager",
   REQUEST_PARTNER: "/operator/request",
   IOT_MANAGER: "/operator/iot-manager",

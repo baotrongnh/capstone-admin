@@ -2,19 +2,23 @@
 
 import { Button } from "@/components/ui/button";
 import { useFullAddress } from "@/hooks/query/useAddress";
+import { useAmenities } from "@/hooks/query/useAmenities";
 import {
   useApartment,
   useCreateCooperationMedia,
 } from "@/hooks/query/useApartments";
 import { useUser, useUsers } from "@/hooks/query/useUsers";
 import {
+  mapAmenitiesToOptions,
+  mergeAmenityOptions,
+  withFallbackAmenityOptions,
+} from "@/lib/apartment/amenity-mapping";
+import {
   ApartmentForm,
   buildApartmentForm,
-  formatDateTime,
-  formatStatus,
   parseNumber,
-} from "@/types/apartment-modal";
-import { formatVND, parseVNDInput } from "@/utils/format";
+} from "@/types/apartment-form";
+import { formatDateTime, formatStatus, formatVND, parseVNDInput } from "@/utils/format";
 import { message } from "antd";
 import {
   Bath,
@@ -33,12 +37,12 @@ import {
   Users,
 } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { ApartmentBasicInfoSection } from "../apartment/apartment-basic-section";
 import {
+  ApartmentDetailsSection,
   ApartmentAmenitySection,
   ApartmentOwnerSection,
-} from "../apartment/apartment-profile-sections";
-import { ApartmentMediaSection } from "../apartment/apartment-media-section";
+  ApartmentMediaSection,
+} from "@/components/apartment";
 import { useRouter } from "next/navigation";
 
 type RequestDetailContentProps = {
@@ -81,6 +85,8 @@ export function RequestDetailContent({
 
   const editMode = mode === "edit" || manualEditMode;
   const form = draftForm || initialForm;
+
+  const { data: amenitiesResponse } = useAmenities();
 
   const { data: usersResponse, isLoading: usersLoading } = useUsers({
     page: 1,
@@ -148,13 +154,14 @@ export function RequestDetailContent({
 
   const amenityPresetOptions = useMemo(
     () =>
-      Array.from(
-        new Set([
-          ...(detailApartment?.amenities || []),
-          ...(form?.amenities || []),
-        ]),
+      withFallbackAmenityOptions(
+        form?.amenityIds,
+        mergeAmenityOptions(
+          mapAmenitiesToOptions(amenitiesResponse?.data),
+          mapAmenitiesToOptions(detailApartment?.amenities),
+        ),
       ),
-    [detailApartment?.amenities, form?.amenities],
+    [amenitiesResponse?.data, detailApartment?.amenities, form?.amenityIds],
   );
 
   const detailItems = useMemo(() => {
@@ -403,9 +410,9 @@ export function RequestDetailContent({
     formData.append("baseRentPrice", String(form.baseRentPrice || ""));
     formData.append("depositAmount", String(form.depositAmount || ""));
 
-    if (form.amenities && form.amenities.length > 0) {
-      form.amenities.forEach((amenity: string) => {
-        formData.append("amenities[]", amenity);
+    if (form.amenityIds && form.amenityIds.length > 0) {
+      form.amenityIds.forEach((amenityId: string) => {
+        formData.append("amenityIds", amenityId);
       });
     }
 
@@ -466,7 +473,7 @@ export function RequestDetailContent({
 
         {detailApartment && form && (
           <div className="space-y-5">
-            <ApartmentBasicInfoSection
+            <ApartmentDetailsSection
               editMode={editMode}
               form={form}
               detailItems={detailItems}
@@ -495,10 +502,10 @@ export function RequestDetailContent({
             <ApartmentAmenitySection
               editMode={editMode}
               description={form.description}
-              amenities={form.amenities || []}
-              presetOptions={amenityPresetOptions}
+              amenityIds={form.amenityIds || []}
+              options={amenityPresetOptions}
               onDescriptionChange={(value) => setField("description", value)}
-              onAmenitiesChange={(value) => setField("amenities", value)}
+              onAmenitiesChange={(value) => setField("amenityIds", value)}
             />
 
             <ApartmentMediaSection

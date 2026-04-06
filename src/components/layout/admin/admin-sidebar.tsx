@@ -5,11 +5,10 @@ import {
   IconHelp,
   IconInnerShadowTop,
   IconLayoutDashboard,
-  IconSettings,
   IconUser,
-  IconUsersGroup
 } from "@tabler/icons-react"
 import * as React from "react"
+import Link from "next/link"
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -31,10 +30,8 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
 
   const navMain = [
     { title: t('dashboard'), url: ROUTE_ADMIN.DASHBOARD, icon: IconLayoutDashboard },
-    { title: 'Doanh thu', url: ROUTE_ADMIN.DASHBOARD, icon: IconBusinessplan },
-    { title: 'Quản lý người dùng', url: ROUTE_ADMIN.DASHBOARD, icon: IconUser },
-    { title: 'Quản lý nhân viên', url: ROUTE_ADMIN.DASHBOARD, icon: IconUsersGroup },
-    { title: 'Cài đặt hệ thống', url: ROUTE_ADMIN.DASHBOARD, icon: IconSettings },
+    { title: 'Doanh thu', url: ROUTE_ADMIN.REVENUES, icon: IconBusinessplan },
+    { title: 'Quản lý người dùng', url: ROUTE_ADMIN.USER, icon: IconUser },
   ]
 
   const navSecondary = [
@@ -50,16 +47,16 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
               asChild
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
-              <a href="#">
+              <Link href={ROUTE_ADMIN.DASHBOARD}>
                 <IconInnerShadowTop className="size-5!" />
                 <span className="text-base font-semibold">INTELLISERVOPS (Admin)</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <AdminNavMain items={navMain} quickContractLabel={t('quickContract')} />
+        <AdminNavMain items={navMain} />
         <AdminNavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

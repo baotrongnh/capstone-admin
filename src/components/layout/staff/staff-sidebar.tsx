@@ -56,6 +56,7 @@ export function StaffSidebar({
       url: ROUTE_STAFF.REQUEST,
       icon: IconHomeQuestion,
     },
+    { title: "Bảo trì", url: ROUTE_STAFF.MAINTENANCE, icon: IconHelp },
     { title: "Hợp đồng", url: ROUTE_STAFF.CONTRACT, icon: IconContract },
   ];
 
