@@ -6,7 +6,6 @@ import {
   IconHeartHandshake,
   IconHelp,
   IconInnerShadowTop,
-  IconSettings,
   IconUsers
 } from "@tabler/icons-react"
 import * as React from "react"
@@ -26,11 +25,6 @@ import { OperatorNavMain } from "./operator-nav-main"
 import { OperatorNavSecondary } from "./operator-nav-secondary"
 
 const data = {
-  user: {
-    name: "Operator",
-    email: "operator@gmail.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Quản lý căn hộ",
@@ -86,7 +80,7 @@ export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sideba
         <OperatorNavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )

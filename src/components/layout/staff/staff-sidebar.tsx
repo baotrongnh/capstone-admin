@@ -27,12 +27,6 @@ import { useTranslations } from "next-intl";
 import { StaffNavMain } from "./staff-nav-main";
 import { StaffNavSecondary } from "./staff-nav-secondary";
 
-const user = {
-  name: "Staff",
-  email: "staff@gmail.com",
-  avatar: "/avatars/shadcn.jpg",
-};
-
 export function StaffSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
@@ -93,7 +87,7 @@ export function StaffSidebar({
         <StaffNavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

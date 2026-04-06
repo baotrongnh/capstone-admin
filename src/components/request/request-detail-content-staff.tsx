@@ -33,11 +33,11 @@ import {
   Users,
 } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import { ApartmentBasicInfoSection } from "../apartment/apartment-basic-info-section";
+import { ApartmentBasicInfoSection } from "../apartment/apartment-basic-section";
 import {
   ApartmentAmenitySection,
   ApartmentOwnerSection,
-} from "../apartment/apartment-detail-sections";
+} from "../apartment/apartment-profile-sections";
 import { ApartmentMediaSection } from "../apartment/apartment-media-section";
 import { useRouter } from "next/navigation";
 
@@ -272,13 +272,15 @@ export function RequestDetailContent({
   const hasFormChanges = useMemo(() => {
     if (!initialForm || !form) return false;
 
+    const initialData = initialForm as Record<string, unknown>;
+    const currentData = form as Record<string, unknown>;
     const keys = Array.from(
-      new Set([...Object.keys(initialForm), ...Object.keys(form)]),
-    ) as Array<keyof ApartmentForm>;
+      new Set([...Object.keys(initialData), ...Object.keys(currentData)]),
+    );
 
     return keys.some((key) => {
-      const before = initialForm[key] ?? null;
-      const after = form[key] ?? null;
+      const before = initialData[key] ?? null;
+      const after = currentData[key] ?? null;
       return JSON.stringify(before) !== JSON.stringify(after);
     });
   }, [form, initialForm]);
@@ -289,26 +291,17 @@ export function RequestDetailContent({
     !usableAreaInvalid &&
     (hasFormChanges || hasMediaChanges || hasClientChanges);
 
-  const setField = <K extends keyof ApartmentForm>(
-    key: K,
-    value: ApartmentForm[K],
-  ) => {
+  const setField = (key: string, value: unknown) => {
     if (!form) return;
     setDraftForm({ ...form, [key]: value });
   };
 
-  const setNumberField = <K extends keyof ApartmentForm>(
-    key: K,
-    raw: string,
-  ) => {
-    setField(key, parseNumber(raw) as ApartmentForm[K]);
+  const setNumberField = (key: string, raw: string) => {
+    setField(key, parseNumber(raw));
   };
 
-  const setCurrencyField = <K extends keyof ApartmentForm>(
-    key: K,
-    raw: string,
-  ) => {
-    setField(key, parseVNDInput(raw) as ApartmentForm[K]);
+  const setCurrencyField = (key: string, raw: string) => {
+    setField(key, parseVNDInput(raw));
   };
 
   const handleStartEdit = () => {
@@ -481,21 +474,21 @@ export function RequestDetailContent({
               availableYears={availableYears}
               usableAreaInvalid={usableAreaInvalid}
               initialProvinceCode={detailApartment.provinceCode || undefined}
-              onSetField={setField}
-              onSetNumberField={setNumberField}
-              onSetCurrencyField={setCurrencyField}
+              setField={setField}
+              setNumberField={setNumberField}
+              setCurrencyField={setCurrencyField}
             />
 
             <ApartmentOwnerSection
               editMode={editMode}
-              ownerOptions={ownerOptions}
+              ownerSummary={{
+                id: detailApartment.ownerId || form.ownerId || null,
+                fullName: ownerName,
+                companyName: ownerCompany,
+              }}
               ownerId={form.ownerId || undefined}
-              ownerName={ownerName}
-              ownerCompany={ownerCompany}
+              ownerOptions={ownerOptions}
               usersLoading={usersLoading}
-              detailOwnerId={detailApartment.ownerId}
-              detailOwnerName={detailApartment.owner?.fullName}
-              detailOwnerCompany={detailApartment.owner?.companyName}
               onOwnerChange={(value) => setField("ownerId", value)}
             />
 

@@ -3348,7 +3348,14 @@ export interface components {
              * @example [
              *       {
              *         "id": "3f5369be-815f-42cb-8a8b-971fbe4a3557",
-             *         "status": "pending"
+             *         "contractNumber": "COOP-2026-00001",
+             *         "status": "pending",
+             *         "startDate": "2026-03-01T00:00:00.000Z",
+             *         "endDate": "2027-03-01T00:00:00.000Z",
+             *         "signedDate": "2026-03-01T10:20:30.000Z",
+             *         "contractDocumentUrl": "https://storage.example.com/cooperation/COOP-2026-00001.pdf",
+             *         "cooperationContractPdfUrl": "/apartments/cooperation-contracts/3f5369be-815f-42cb-8a8b-971fbe4a3557/pdf",
+             *         "cooperationContractPublicPdfUrl": "/apartments/cooperation-contracts/pdf/view?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
              *       }
              *     ]
              */
@@ -3783,7 +3790,7 @@ export interface components {
              * @example 2026-03-25T08:00:00.000Z
              */
             signedDate?: string | null;
-            /** @example https://cdn.example.com/apartment-cooperation-contracts/apt-1/partner-signed.pdf */
+            /** @example https://cdn.example.com/apartment-cooperation/cooperation-contracts/apt-1/partner-signed.pdf */
             contractDocumentUrl?: string | null;
             /**
              * @description Internal API URL to download cooperation contract PDF
@@ -4311,7 +4318,7 @@ export interface components {
              * @example 2026-03-24T14:00:00.000Z
              */
             signedDate?: string | null;
-            /** @example https://cdn.example.com/apartment-cooperation-contracts/apt-1/partner-signed.pdf */
+            /** @example https://cdn.example.com/apartment-cooperation/cooperation-contracts/apt-1/partner-signed.pdf */
             contractDocumentUrl?: string | null;
             /**
              * @description Internal API URL to download signed cooperation contract PDF
