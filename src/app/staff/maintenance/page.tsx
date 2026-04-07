@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import { Textarea } from "@/components/ui/textarea"
 import { useCompleteMaintenance, useMaintenance, useMaintenances, useUpdateMaintenance } from "@/hooks/query/useMaintenance"
 import {
-     DEFAULT_MAINTENANCE_UPDATE_FORM,
      getMaintenancePriorityOption,
      getMaintenanceStatusOption,
      MAINTENANCE_PRIORITY_OPTIONS,
@@ -30,19 +29,57 @@ import { message, Modal } from "antd"
 import { MoreHorizontalIcon, RefreshCcwIcon, WrenchIcon } from "lucide-react"
 import { useState } from "react"
 
+const createUpdateForm = (item?: Partial<Pick<MaintenanceItem, "status" | "urgency">>): MaintenanceUpdateForm => ({
+     status: normalizeMaintenanceStatus(item?.status),
+     priority: normalizeMaintenancePriority(item?.urgency),
+     scheduledDate: "",
+     resolutionNotes: "",
+     cost: "",
+})
+
+const buildUpdatePayload = (form: MaintenanceUpdateForm): { payload: MaintenanceUpdateRequestBody; invalidCost: boolean } => {
+     const payload: MaintenanceUpdateRequestBody = {
+          status: form.status,
+          priority: form.priority,
+     }
+
+     const scheduledDate = toIsoDateTime(form.scheduledDate)
+     if (scheduledDate) {
+          payload.scheduledDate = scheduledDate
+     }
+
+     const resolutionNotes = form.resolutionNotes.trim()
+     if (resolutionNotes) {
+          payload.resolutionNotes = resolutionNotes
+     }
+
+     const rawCost = form.cost.trim()
+     if (!rawCost) {
+          return { payload, invalidCost: false }
+     }
+
+     const parsedCost = Number(rawCost)
+     if (!Number.isFinite(parsedCost) || parsedCost < 0) {
+          return { payload, invalidCost: true }
+     }
+
+     payload.cost = parsedCost
+     return { payload, invalidCost: false }
+}
+
 export default function StaffMaintenancePage() {
      const [statusFilter, setStatusFilter] = useState<"all" | MaintenanceStatus>("all")
      const [selectedMaintenance, setSelectedMaintenance] = useState<MaintenanceItem | null>(null)
      const [openDetail, setOpenDetail] = useState(false)
      const [openUpdate, setOpenUpdate] = useState(false)
-     const [updateForm, setUpdateForm] = useState<MaintenanceUpdateForm>(DEFAULT_MAINTENANCE_UPDATE_FORM)
+     const [updateForm, setUpdateForm] = useState<MaintenanceUpdateForm>(createUpdateForm())
 
      const activeStatusFilter = statusFilter === "all" ? undefined : statusFilter
 
      const { data: listResponse, isLoading, isFetching, refetch } =
-          useMaintenances(activeStatusFilter ? { status: activeStatusFilter } : undefined);
+          useMaintenances(activeStatusFilter ? { status: activeStatusFilter } : undefined)
 
-     const maintenanceList = listResponse?.data || [];
+     const maintenanceList = listResponse?.data ?? []
 
      const { data: detailResponse, isLoading: detailLoading } = useMaintenance(selectedMaintenance?.id || null)
 
@@ -58,14 +95,15 @@ export default function StaffMaintenancePage() {
 
      const openUpdateDialog = (item: MaintenanceItem) => {
           setSelectedMaintenance(item)
-          setUpdateForm({
-               status: normalizeMaintenanceStatus(item.status),
-               priority: normalizeMaintenancePriority(item.urgency),
-               scheduledDate: "",
-               resolutionNotes: "",
-               cost: "",
-          })
+          setUpdateForm(createUpdateForm(item))
           setOpenUpdate(true)
+     }
+
+     const updateFormField = <K extends keyof MaintenanceUpdateForm>(key: K, value: MaintenanceUpdateForm[K]) => {
+          setUpdateForm((prev) => ({
+               ...prev,
+               [key]: value,
+          }))
      }
 
      const handleUpdateFromDetail = () => {
@@ -81,29 +119,10 @@ export default function StaffMaintenancePage() {
           const id = selectedMaintenance?.id
           if (!id) return
 
-          const payload: MaintenanceUpdateRequestBody = {
-               status: updateForm.status,
-               priority: updateForm.priority,
-          }
-
-          const scheduledDate = toIsoDateTime(updateForm.scheduledDate)
-          if (scheduledDate) {
-               payload.scheduledDate = scheduledDate;
-          }
-
-          const resolutionNotes = updateForm.resolutionNotes.trim()
-          if (resolutionNotes) {
-               payload.resolutionNotes = resolutionNotes
-          }
-
-          const rawCost = updateForm.cost.trim()
-          if (rawCost) {
-               const parsedCost = Number(rawCost)
-               if (!Number.isFinite(parsedCost) || parsedCost < 0) {
-                    message.error("Chi phí không hợp lệ.")
-                    return
-               }
-               payload.cost = parsedCost
+          const { payload, invalidCost } = buildUpdatePayload(updateForm)
+          if (invalidCost) {
+               message.error("Chi phí không hợp lệ.")
+               return
           }
 
           try {
@@ -112,7 +131,7 @@ export default function StaffMaintenancePage() {
           } catch {
                // Error toast already handled in hook.
           }
-     };
+     }
 
      const handleComplete = (item: MaintenanceItem) => {
           if (item.status === "completed") {
@@ -139,9 +158,9 @@ export default function StaffMaintenancePage() {
           <div className="space-y-5">
                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                     <div>
-                         <h1 className="text-2xl font-bold text-gray-900">Xử lý bảo trì</h1>
+                         <h1 className="text-2xl font-bold text-gray-900">Xử lý yêu cầu khách hàng</h1>
                          <p className="text-sm text-muted-foreground">
-                              Theo dõi, cập nhật tiến độ và hoàn tất yêu cầu bảo trì theo workflow API.
+                              Theo dõi, cập nhật tiến độ và hoàn tất yêu cầu khách hàng.
                          </p>
                     </div>
 
@@ -264,9 +283,9 @@ export default function StaffMaintenancePage() {
                <Dialog
                     open={openDetail}
                     onOpenChange={(open) => {
-                         setOpenDetail(open);
+                         setOpenDetail(open)
                          if (!open) {
-                              setSelectedMaintenance(null);
+                              setSelectedMaintenance(null)
                          }
                     }}
                >
@@ -313,24 +332,24 @@ export default function StaffMaintenancePage() {
                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div className="rounded-lg border p-3">
                                              <p className="text-xs text-muted-foreground">Căn hộ</p>
-                                             <p className="font-medium">{detail.apartment.apartmentNumber}</p>
-                                             <p className="text-xs text-muted-foreground">{detail.apartment.address}</p>
+                                             <p className="font-medium">{detail?.apartment?.apartmentNumber}</p>
+                                             <p className="text-xs text-muted-foreground">{detail.apartment?.address}</p>
                                         </div>
                                         <div className="rounded-lg border p-3">
                                              <p className="text-xs text-muted-foreground">Người báo</p>
-                                             <p className="font-medium">{detail.user.fullName}</p>
-                                             <p className="text-xs text-muted-foreground">{detail.user.phone}</p>
+                                             <p className="font-medium">{detail?.user?.fullName}</p>
+                                             <p className="text-xs text-muted-foreground">{detail.user?.phone}</p>
                                         </div>
                                    </div>
 
                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div className="rounded-lg border p-3">
                                              <p className="text-xs text-muted-foreground">Ngày ưu tiên</p>
-                                             <p>{formatDateTime(detail.preferredDate) || "-"}</p>
+                                             <p>{formatDateTime(detail?.preferredDate) || "-"}</p>
                                         </div>
                                         <div className="rounded-lg border p-3">
                                              <p className="text-xs text-muted-foreground">Hoàn tất lúc</p>
-                                             <p>{formatDateTime(detail.completedAt) || "-"}</p>
+                                             <p>{formatDateTime(detail?.completedAt) || "-"}</p>
                                         </div>
                                    </div>
                               </div>
@@ -341,10 +360,10 @@ export default function StaffMaintenancePage() {
                <Dialog
                     open={openUpdate}
                     onOpenChange={(open) => {
-                         setOpenUpdate(open);
+                         setOpenUpdate(open)
                          if (!open) {
                               setSelectedMaintenance(null);
-                              setUpdateForm(DEFAULT_MAINTENANCE_UPDATE_FORM);
+                              setUpdateForm(createUpdateForm())
                          }
                     }}
                >
@@ -361,12 +380,7 @@ export default function StaffMaintenancePage() {
                                    <p className="text-xs text-muted-foreground">Trạng thái</p>
                                    <Select
                                         value={updateForm.status}
-                                        onValueChange={(value) =>
-                                             setUpdateForm((prev) => ({
-                                                  ...prev,
-                                                  status: value as MaintenanceStatus,
-                                             }))
-                                        }
+                                        onValueChange={(value) => updateFormField("status", value as MaintenanceStatus)}
                                    >
                                         <SelectTrigger>
                                              <SelectValue />
@@ -385,12 +399,7 @@ export default function StaffMaintenancePage() {
                                    <p className="text-xs text-muted-foreground">Mức độ</p>
                                    <Select
                                         value={updateForm.priority}
-                                        onValueChange={(value) =>
-                                             setUpdateForm((prev) => ({
-                                                  ...prev,
-                                                  priority: value as MaintenancePriority,
-                                             }))
-                                        }
+                                        onValueChange={(value) => updateFormField("priority", value as MaintenancePriority)}
                                    >
                                         <SelectTrigger>
                                              <SelectValue />
@@ -410,12 +419,7 @@ export default function StaffMaintenancePage() {
                                    <Input
                                         type="datetime-local"
                                         value={updateForm.scheduledDate}
-                                        onChange={(event) =>
-                                             setUpdateForm((prev) => ({
-                                                  ...prev,
-                                                  scheduledDate: event.target.value,
-                                             }))
-                                        }
+                                        onChange={(event) => updateFormField("scheduledDate", event.target.value)}
                                    />
                               </div>
 
@@ -425,12 +429,7 @@ export default function StaffMaintenancePage() {
                                         type="number"
                                         min={0}
                                         value={updateForm.cost}
-                                        onChange={(event) =>
-                                             setUpdateForm((prev) => ({
-                                                  ...prev,
-                                                  cost: event.target.value,
-                                             }))
-                                        }
+                                        onChange={(event) => updateFormField("cost", event.target.value)}
                                         placeholder="Nhập chi phí nếu có"
                                    />
                               </div>
@@ -439,12 +438,7 @@ export default function StaffMaintenancePage() {
                                    <p className="text-xs text-muted-foreground">Ghi chú xử lý</p>
                                    <Textarea
                                         value={updateForm.resolutionNotes}
-                                        onChange={(event) =>
-                                             setUpdateForm((prev) => ({
-                                                  ...prev,
-                                                  resolutionNotes: event.target.value,
-                                             }))
-                                        }
+                                        onChange={(event) => updateFormField("resolutionNotes", event.target.value)}
                                         placeholder="Ví dụ: Đã thay block điều hòa, kiểm tra hoạt động ổn định"
                                         rows={4}
                                    />
