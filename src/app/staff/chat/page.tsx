@@ -45,6 +45,7 @@ export default function ChatPage() {
   const searchParams = useSearchParams()
   const queryClient = useQueryClient()
   const messageListRef = useRef<HTMLDivElement | null>(null)
+  const messageEndRef = useRef<HTMLDivElement | null>(null)
   const activeConversationId = searchParams.get("conversationId")
 
   const [messageInput, setMessageInput] = useState("")
@@ -54,6 +55,7 @@ export default function ChatPage() {
 
   const { data: conversation } = useChatConversation(activeConversationId)
   const { data: messages = [], isLoading: isLoadingMessages } = useChatConversationMessages(activeConversationId)
+  const lastMessageKey = messages.at(-1)?.id ?? null
 
   const hasSelectedImages = selectedImages.length > 0
   const canSendMessage = Boolean(activeConversationId) && !isUploadingImages && (Boolean(messageInput.trim()) || hasSelectedImages)
@@ -73,6 +75,16 @@ export default function ChatPage() {
     })),
     [selectedImages],
   )
+
+  const scrollToBottom = useCallback(() => {
+    const listElement = messageListRef.current
+    if (!listElement) {
+      return
+    }
+
+    listElement.scrollTop = listElement.scrollHeight
+    messageEndRef.current?.scrollIntoView({ block: "end" })
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -149,22 +161,18 @@ export default function ChatPage() {
   }, [activeConversationId, invalidateConversationList, invalidateConversationMessages])
 
   useEffect(() => {
-    if (!activeConversationId || !messageListRef.current) {
+    if (!activeConversationId || isLoadingMessages) {
       return
     }
 
     const frameId = window.requestAnimationFrame(() => {
-      const el = messageListRef.current
-      if (!el) {
-        return
-      }
-      el.scrollTop = el.scrollHeight
+      scrollToBottom()
     })
 
     return () => {
       window.cancelAnimationFrame(frameId)
     }
-  }, [activeConversationId, messages.length])
+  }, [activeConversationId, isLoadingMessages, lastMessageKey, scrollToBottom])
 
   const handleSelectImages = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
@@ -313,6 +321,7 @@ export default function ChatPage() {
                                   width={192}
                                   height={96}
                                   unoptimized
+                                  onLoad={scrollToBottom}
                                   className="h-24 w-full object-cover"
                                 />
                               </a>
@@ -329,6 +338,7 @@ export default function ChatPage() {
                     </div>
                   )
                 })}
+                <div ref={messageEndRef} />
               </div>
             )}
           </div>
