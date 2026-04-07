@@ -1,16 +1,10 @@
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import {
-     DetailItem,
-     SectionCard,
-     SectionTitle,
-} from "@/components/apartment/apartment-shared/section-primitives"
-import type {
-     ApartmentOwnerOption,
-     ApartmentOwnerSummary,
-} from "@/types/apartment"
+import type { AmenityOption } from "@/lib/apartment/amenity-mapping"
+import type { ApartmentOwnerOption, ApartmentOwnerSummary } from "@/types/apartment"
 import { Select as AntdSelect } from "antd"
 import { Building2, Hash, Info, UserCircle2 } from "lucide-react"
+import { DetailItem, SectionCard, SectionTitle, } from "./ui/section-primitives"
 
 type ApartmentOwnerSectionProps = {
      editMode: boolean
@@ -79,8 +73,8 @@ export function ApartmentOwnerSection({
 type ApartmentAmenitySectionProps = {
      editMode: boolean
      description?: string
-     amenities: string[]
-     presetOptions: string[]
+     amenityIds: string[]
+     options: AmenityOption[]
      onDescriptionChange: (value?: string) => void
      onAmenitiesChange: (value: string[]) => void
 }
@@ -88,11 +82,13 @@ type ApartmentAmenitySectionProps = {
 export function ApartmentAmenitySection({
      editMode,
      description,
-     amenities,
-     presetOptions,
+     amenityIds,
+     options,
      onDescriptionChange,
      onAmenitiesChange,
 }: ApartmentAmenitySectionProps) {
+     const optionLabelMap = new Map(options.map((item) => [item.value, item.label]))
+
      return (
           <SectionCard>
                <SectionTitle
@@ -111,12 +107,12 @@ export function ApartmentAmenitySection({
                          <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Tiện ích</p>
                               <AntdSelect
-                                   mode="tags"
+                                   mode="multiple"
                                    showSearch
-                                   value={amenities}
-                                   onChange={(value) => onAmenitiesChange(value)}
-                                   placeholder="Tìm hoặc nhập tiện ích"
-                                   options={presetOptions.map((item) => ({ label: item, value: item }))}
+                                   value={amenityIds}
+                                   onChange={(value) => onAmenitiesChange(value as string[])}
+                                   placeholder="Tìm và chọn tiện ích"
+                                   options={options}
                                    className="w-full"
                               />
                          </div>
@@ -130,10 +126,10 @@ export function ApartmentAmenitySection({
                          <div>
                               <p className="text-xs text-muted-foreground mb-1">Tiện ích</p>
                               <div className="flex flex-wrap gap-2">
-                                   {amenities.length > 0 ? (
-                                        amenities.map((item) => (
-                                             <Badge key={item} variant="outline">
-                                                  {item}
+                                   {amenityIds.length > 0 ? (
+                                        amenityIds.map((id) => (
+                                             <Badge key={id} variant="outline">
+                                                  {optionLabelMap.get(id) || id}
                                              </Badge>
                                         ))
                                    ) : (

@@ -2,7 +2,7 @@ import {
      DetailItem,
      SectionCard,
      SectionTitle,
-} from "@/components/apartment/apartment-shared/section-primitives"
+} from "@/components/apartment/ui/section-primitives"
 import { Badge } from "@/components/ui/badge"
 import { Select as AntdSelect } from "antd"
 import { Cpu } from "lucide-react"

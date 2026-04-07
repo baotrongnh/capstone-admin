@@ -6,6 +6,7 @@ import {
   IconHeartHandshake,
   IconHelp,
   IconInnerShadowTop,
+  IconListDetails,
   IconUsers
 } from "@tabler/icons-react"
 import * as React from "react"
@@ -30,6 +31,11 @@ const data = {
       title: "Quản lý căn hộ",
       url: ROUTE_OPERATOR.APARTMENT,
       icon: IconBuilding,
+    },
+    {
+      title: "Quản lý tiện ích",
+      url: ROUTE_OPERATOR.AMENITY,
+      icon: IconListDetails,
     },
     {
       title: "Quản lý nhân viên",

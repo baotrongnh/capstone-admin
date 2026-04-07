@@ -17,11 +17,10 @@ import {
      TableHeader,
      TableRow,
 } from "@/components/ui/table"
-import { useApartments } from "@/hooks/query/useApartments"
+import { useApartments, useDeleteApartment } from "@/hooks/query/useApartments"
 import type { ApartmentQueryParams } from "@/types/apartment"
-import { formatStatus } from "@/types/apartment-modal"
-import { formatVND } from "@/utils/format"
-import { message, Pagination } from "antd"
+import { formatStatus, formatVND } from "@/utils/format"
+import { Modal, Pagination } from "antd"
 import { MoreHorizontalIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -40,6 +39,7 @@ export default function OperatorApartmentsPage() {
      )
 
      const { data: apartmentListResponse, isLoading: isListLoading } = useApartments(params)
+     const deleteApartment = useDeleteApartment()
      const apartments = apartmentListResponse?.data || []
      const paginationMeta = apartmentListResponse?.meta
      const totalItems = paginationMeta?.total || 0
@@ -55,8 +55,38 @@ export default function OperatorApartmentsPage() {
           router.push(`/operator/apartments/${id}?mode=edit`)
      }
 
-     const handleDelete = (id: string) => {
-          message.info(`Sẽ mở xác nhận xóa căn hộ: ${id}`)
+     const getStatusBadge = (status?: string | null) => {
+          const statusClassMap: Record<string, string> = {
+               available: "bg-green-100 text-green-700 border-green-200",
+               occupied: "bg-yellow-100 text-yellow-700 border-yellow-200",
+               maintenance: "bg-amber-100 text-amber-700 border-amber-200",
+               reserved: "bg-purple-100 text-purple-700 border-purple-200",
+               inactive: "bg-red-100 text-red-700 border-red-200",
+          }
+
+          const className = status ? statusClassMap[status] : undefined
+          return (
+               <Badge className={`border ${className || "bg-muted text-muted-foreground"}`}>
+                    {formatStatus(status)}
+               </Badge>
+          )
+     }
+
+     const handleDelete = (id: string, apartmentNumber: string) => {
+          Modal.confirm({
+               title: "Xác nhận xóa căn hộ",
+               content: `Bạn có chắc chắn muốn xóa căn hộ ${apartmentNumber}?`,
+               okText: "Xóa",
+               okType: "danger",
+               cancelText: "Hủy",
+               async onOk() {
+                    try {
+                         await deleteApartment.mutateAsync(id)
+                    } catch {
+                         // Error toast is handled in useDeleteApartment
+                    }
+               },
+          })
      }
 
      return (
@@ -73,9 +103,8 @@ export default function OperatorApartmentsPage() {
                               <TableHead>Mã căn hộ</TableHead>
                               <TableHead>Ảnh</TableHead>
                               <TableHead>Tên tòa nhà</TableHead>
-                              <TableHead>Phòng ngủ</TableHead>
                               <TableHead>Diện tích</TableHead>
-                              <TableHead>Giá thuê</TableHead>
+                              <TableHead>Giá thuê (/tháng)</TableHead>
                               <TableHead>Trạng thái</TableHead>
                               <TableHead className="text-right">Thao tác</TableHead>
                          </TableRow>
@@ -114,11 +143,10 @@ export default function OperatorApartmentsPage() {
                                         )}
                                    </TableCell>
                                    <TableCell>{apt.buildingName || "-"}</TableCell>
-                                   <TableCell>{apt.numberOfBedrooms}</TableCell>
                                    <TableCell>{apt.totalArea} m²</TableCell>
                                    <TableCell>{formatVND(apt.baseRentPrice, true)}</TableCell>
                                    <TableCell>
-                                        <Badge variant="secondary">{formatStatus(apt.status)}</Badge>
+                                        {getStatusBadge(apt.status)}
                                    </TableCell>
                                    <TableCell className="text-right">
                                         <DropdownMenu>
@@ -138,7 +166,8 @@ export default function OperatorApartmentsPage() {
                                                   <DropdownMenuSeparator />
                                                   <DropdownMenuItem
                                                        variant="destructive"
-                                                       onClick={() => handleDelete(apt.id)}
+                                                       disabled={deleteApartment.isPending}
+                                                       onClick={() => handleDelete(apt.id, apt.apartmentNumber)}
                                                   >
                                                        Xóa
                                                   </DropdownMenuItem>

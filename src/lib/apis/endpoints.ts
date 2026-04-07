@@ -6,8 +6,11 @@ export const createEndpoints = (resource: string) => {
 
 export const endpoints = {
   auth: createEndpoints("auth"),
-  apartments: createEndpoints('apartments'),
-  user: createEndpoints('users'),
+  apartments: createEndpoints("apartments"),
+  amenities: createEndpoints("amenities"),
+  maintenance: createEndpoints("maintenance"),
+  user: createEndpoints("users"),
   iot: createEndpoints("iot"),
   chat: createEndpoints("chat"),
-}
+  revenues: createEndpoints("revenues"),
+};
