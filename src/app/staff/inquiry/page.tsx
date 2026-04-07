@@ -92,7 +92,7 @@ export default function InquiryPageStaff() {
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className="w-[100px]">ID</TableHead>
+              <TableHead className="w-25">ID</TableHead>
               <TableHead>Khách hàng</TableHead>
               <TableHead>Căn hộ</TableHead>
               <TableHead>Trạng thái</TableHead>
@@ -156,7 +156,7 @@ function ActionMenu() {
             <MoreHorizontalIcon className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[200px]">
+        <DropdownMenuContent align="end" className="w-50">
           <DropdownMenuLabel>Hành động</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => setModalType("detail")}>
             <User className="mr-2 h-4 w-4 text-blue-500" /> Xem chi tiết yêu cầu
@@ -177,7 +177,7 @@ function ActionMenu() {
         open={modalType === "detail"}
         onOpenChange={() => setModalType(null)}
       >
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="size-5" /> Chi tiết khách hàng
@@ -214,7 +214,7 @@ function ActionMenu() {
                   Ghi chú từ khách
                 </p>
                 <p className="text-sm italic">
-                  "Tôi muốn xem nhà vào sáng thứ 7 tuần này."
+                  &quot;Tôi muốn xem nhà vào sáng thứ 7 tuần này.&quot;
                 </p>
               </div>
             </div>
@@ -249,7 +249,7 @@ function ActionMenu() {
         open={modalType === "status"}
         onOpenChange={() => setModalType(null)}
       >
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Cập nhật tiến độ</DialogTitle>
             <DialogDescription>
