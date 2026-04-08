@@ -37,11 +37,11 @@ const data = {
       url: ROUTE_OPERATOR.AMENITY,
       icon: IconListDetails,
     },
-    {
-      title: "Quản lý nhân viên",
-      url: ROUTE_OPERATOR.STAFF_MANAGER,
-      icon: IconUsers,
-    },
+    // {
+    //   title: "Quản lý nhân viên",
+    //   url: ROUTE_OPERATOR.STAFF_MANAGER,
+    //   icon: IconUsers,
+    // },
     {
       title: "Duyệt hợp tác",
       url: ROUTE_OPERATOR.REQUEST_PARTNER,
