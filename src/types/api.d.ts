@@ -986,26 +986,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/contracts/cooperation/commission-phases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Admin setup global cooperation commission phases
-         * @description Replace all active global commission phases for partner cooperation contracts. New cooperation contracts use phase matched by contract start date.
-         */
-        put: operations["ContractsController_setGlobalCooperationCommissionPhases"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/contracts/cooperation/{id}/cancel": {
         parameters: {
             query?: never;
@@ -1038,33 +1018,12 @@ export interface paths {
         /**
          * Renew rental contract
          * @description Create a new draft (unsigned) renewal contract from an existing contract with 2 options: keep_current (keep old duration and members) or customize (provide extensionMonths and new members by CCCD).
-         * @description Create a new draft (unsigned) renewal contract from an existing contract with 2 options: keep_current (keep old duration and members) or customize (provide extensionMonths and new members by CCCD).
          */
         post: operations["ContractsController_renewContract"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
-        trace?: never;
-    };
-    "/api/v1/contracts/{id}/pdf-content": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update editable PDF content of contract
-         * @description Update fields that are rendered in contract PDF and regenerate PDF immediately.
-         */
-        patch: operations["ContractsController_updatePdfContent"];
         trace?: never;
     };
     "/api/v1/contracts/{id}/pdf-content": {
@@ -1102,26 +1061,6 @@ export interface paths {
         head?: never;
         /** Activate contract */
         patch: operations["ContractsController_activate"];
-        trace?: never;
-    };
-    "/api/v1/contracts/{id}/activate-paid": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Activate contract after deposit paid
-         * @description Activate pending/signed contract when deposit invoice is paid and contract is not expired.
-         */
-        patch: operations["ContractsController_activatePaid"];
         trace?: never;
     };
     "/api/v1/contracts/{id}/activate-paid": {
@@ -2957,195 +2896,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/amenities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List amenities
-         * @description Get amenity list for apartment forms and filters.
-         */
-        get: operations["AmenitiesController_findAll"];
-        put?: never;
-        /**
-         * Create amenity
-         * @description Admin/Operator creates a new amenity item.
-         */
-        post: operations["AmenitiesController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/amenities/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get amenity detail */
-        get: operations["AmenitiesController_findOne"];
-        put?: never;
-        post?: never;
-        /**
-         * Deactivate amenity
-         * @description Soft delete amenity by setting isActive=false.
-         */
-        delete: operations["AmenitiesController_remove"];
-        options?: never;
-        head?: never;
-        /**
-         * Update amenity
-         * @description Admin/Operator updates amenity metadata.
-         */
-        patch: operations["AmenitiesController_update"];
-        trace?: never;
-    };
-    "/api/v1/revenues/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * System revenue overview
-         * @description Revenue from paid invoices excluding deposit fees. For partner apartments, system revenue is calculated by cooperation commission percentage.
-         */
-        get: operations["RevenueController_getOverview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/partners": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Partner revenue summaries
-         * @description Grouped revenue summaries by partner with gross revenue, system commission, and net payout.
-         */
-        get: operations["RevenueController_getPartnerSummaries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Revenue transaction reconciliation list
-         * @description Detailed reconciled revenue rows with invoice, apartment, rental contract and cooperation contract information.
-         */
-        get: operations["RevenueController_getTransactions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/partner/me/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Partner view own apartment revenue overview
-         * @description Partner-only endpoint. Revenue is calculated as paid rent invoices minus system commission.
-         */
-        get: operations["RevenueController_getMyPartnerOverview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/partner/me/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Partner view own apartment revenue transactions
-         * @description Partner-only endpoint. Returns reconciled transaction rows for apartments owned by current partner user.
-         */
-        get: operations["RevenueController_getMyPartnerTransactions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/staff/partner-payouts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Staff view monthly partner payout summaries
-         * @description Show monthly amount that should be transferred to each partner (rent revenue minus system commission).
-         */
-        get: operations["RevenueController_getStaffPartnerPayoutSummaries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/staff/partner-payouts/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Staff confirm monthly payout transfer to partner
-         * @description Confirm transfer by uploading transfer proof image and saving confirmation for the partner/month.
-         */
-        post: operations["RevenueController_confirmStaffPartnerPayout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4021,16 +3771,6 @@ export interface components {
             /** @example wifi-icon */
             icon?: string | null;
         };
-        ApartmentAmenityDto: {
-            /** @example 11111111-2222-3333-4444-555555555555 */
-            id: string;
-            /** @example wifi */
-            code: string;
-            /** @example Wi-Fi */
-            name: string;
-            /** @example wifi-icon */
-            icon?: string | null;
-        };
         ApartmentCooperationContractDto: {
             /** @example 3f5369be-815f-42cb-8a8b-971fbe4a3557 */
             id: string;
@@ -4121,17 +3861,6 @@ export interface components {
             description?: string | null;
             images?: string[] | null;
             videoTourUrl?: string | null;
-            /**
-             * @example [
-             *       {
-             *         "id": "11111111-2222-3333-4444-555555555555",
-             *         "code": "wifi",
-             *         "name": "Wi-Fi",
-             *         "icon": "wifi-icon"
-             *       }
-             *     ]
-             */
-            amenities?: components["schemas"]["ApartmentAmenityDto"][] | null;
             /**
              * @example [
              *       {
@@ -4319,21 +4048,8 @@ export interface components {
              *         "name": "Parking",
              *         "icon": null
              *       }
-             *       {
-             *         "id": "11111111-2222-3333-4444-555555555555",
-             *         "code": "wifi",
-             *         "name": "Wi-Fi",
-             *         "icon": "wifi-icon"
-             *       },
-             *       {
-             *         "id": "66666666-7777-8888-9999-000000000000",
-             *         "code": "parking",
-             *         "name": "Parking",
-             *         "icon": null
-             *       }
              *     ]
              */
-            amenities?: components["schemas"]["ApartmentAmenityDto"][] | null;
             amenities?: components["schemas"]["ApartmentAmenityDto"][] | null;
             /** @example 12000000 */
             baseRentPrice: string;
@@ -4350,22 +4066,6 @@ export interface components {
             images?: string[] | null;
             videoTourUrl?: string | null;
             yearBuilt?: number | null;
-            /**
-             * @description Cho biet user hien tai co du dieu kien danh gia apartment hay khong
-             * @example false
-             */
-            canRateApartment: boolean;
-            /**
-             * @description Cho biet user hien tai da danh gia apartment nay chua
-             * @example false
-             */
-            hasRatedApartment: boolean;
-            /**
-             * @description Ly do user hien tai khong the danh gia apartment
-             * @example no_active_contract
-             * @enum {string|null}
-             */
-            ratingEligibilityReason?: "not_authenticated" | "not_user_role" | "no_active_contract" | "already_rated" | null;
             /**
              * @description Cho biet user hien tai co du dieu kien danh gia apartment hay khong
              * @example false
@@ -4510,15 +4210,11 @@ export interface components {
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
              * @description List of amenity IDs
-             * @description List of amenity IDs
              * @example [
-             *       "11111111-2222-3333-4444-555555555555",
-             *       "66666666-7777-8888-9999-000000000000"
              *       "11111111-2222-3333-4444-555555555555",
              *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenityIds?: string[];
             amenityIds?: string[];
             /**
              * @description Monthly rent in VND
@@ -4620,15 +4316,11 @@ export interface components {
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
              * @description List of amenity IDs
-             * @description List of amenity IDs
              * @example [
-             *       "11111111-2222-3333-4444-555555555555",
-             *       "66666666-7777-8888-9999-000000000000"
              *       "11111111-2222-3333-4444-555555555555",
              *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenityIds?: string[];
             amenityIds?: string[];
             /**
              * @description Monthly rent in VND
@@ -4781,15 +4473,11 @@ export interface components {
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
              * @description List of amenity IDs
-             * @description List of amenity IDs
              * @example [
-             *       "11111111-2222-3333-4444-555555555555",
-             *       "66666666-7777-8888-9999-000000000000"
              *       "11111111-2222-3333-4444-555555555555",
              *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenityIds?: string[];
             amenityIds?: string[];
             /**
              * @description Monthly rent in VND
@@ -4860,15 +4548,11 @@ export interface components {
             furnishingStatus: "unfurnished" | "semi_furnished" | "fully_furnished";
             /**
              * @description List of amenity IDs
-             * @description List of amenity IDs
              * @example [
-             *       "11111111-2222-3333-4444-555555555555",
-             *       "66666666-7777-8888-9999-000000000000"
              *       "11111111-2222-3333-4444-555555555555",
              *       "66666666-7777-8888-9999-000000000000"
              *     ]
              */
-            amenityIds?: string[];
             amenityIds?: string[];
             /**
              * @description Monthly rent in VND
@@ -5078,8 +4762,6 @@ export interface components {
             apartmentNumber: string;
             /** @example Toa nha IntelliServOps Tower */
             buildingName?: string | null;
-            /** @example Toa nha IntelliServOps Tower */
-            buildingName?: string | null;
             /** @example 26728 */
             wardCode?: number | null;
             /** @example 79 */
@@ -5090,16 +4772,6 @@ export interface components {
             provinceName?: string | null;
             /** @example 12 Nguyễn Huệ, Phường Bến Nghé */
             streetAddress?: string | null;
-            /** @example 2 */
-            numberOfBedrooms?: number | null;
-            /** @example 4 */
-            maxOccupants?: number | null;
-            /** @example 1 */
-            numberOfBathrooms?: number | null;
-            /** @example 55.5 */
-            totalArea?: number | null;
-            /** @example 50.2 */
-            usableArea?: number | null;
             /** @example 2 */
             numberOfBedrooms?: number | null;
             /** @example 4 */
@@ -5132,8 +4804,6 @@ export interface components {
             status: string;
             /** @example renewal */
             category: string;
-            /** @example renewal */
-            category: string;
             /** Format: date-time */
             startDate: string;
             /** Format: date-time */
@@ -5142,20 +4812,10 @@ export interface components {
             monthlyRent: string;
             /** @example 30000000.00 */
             depositAmount: string;
-            /** @example 30000000.00 */
-            depositAmount: string;
             /** Format: date-time */
             createdAt: string;
             /** @example true */
             hasPdf: boolean;
-            terminationReason?: string | null;
-            /** @example false */
-            isDepositPaid: boolean;
-            /** Format: date-time */
-            depositPaidAt?: string | null;
-            /** @example false */
-            isRenewed: boolean;
-            latestRenewalContractId?: string | null;
             terminationReason?: string | null;
             /** @example false */
             isDepositPaid: boolean;
@@ -5211,8 +4871,6 @@ export interface components {
             id: string;
             userId: string;
             rentalContractId: string;
-            userId: string;
-            rentalContractId: string;
             /** @example primary */
             memberType: string;
             isPrimaryContact: boolean;
@@ -5232,21 +4890,10 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            /** @example true */
-            notificationEnabled: boolean;
-            /** @example full */
-            accessLevel: string;
-            /** @example 50.00 */
-            sharePercentage?: string | null;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
             user: components["schemas"]["ContractMemberUserDto"];
         };
         ContractDetailDto: {
             id: string;
-            apartmentId: string;
             apartmentId: string;
             /** @example CTR-202601-00001 */
             contractNumber: string;
@@ -5278,23 +4925,8 @@ export interface components {
             landlordAddress?: string | null;
             /** @example 1900 0000 */
             landlordPhone?: string | null;
-            /** @example Cong ty TNHH IntelliServOps */
-            landlordName?: string | null;
-            /** @example 0312345678 */
-            landlordIdNumber?: string | null;
-            /** @example 01/01/2020 */
-            landlordIdIssueDate?: string | null;
-            /** @example So KH&DT TP. Ho Chi Minh */
-            landlordIdIssuePlace?: string | null;
-            /** @example TP. Ho Chi Minh, Viet Nam */
-            landlordAddress?: string | null;
-            /** @example 1900 0000 */
-            landlordPhone?: string | null;
             /** @example active */
             status: string;
-            /** @example normal */
-            category: string;
-            renewedFromContractId?: string | null;
             /** @example normal */
             category: string;
             renewedFromContractId?: string | null;
@@ -5333,41 +4965,16 @@ export interface components {
              * @example 1
              */
             currentOccupants: number;
-            /** @example false */
-            isDepositPaid: boolean;
-            /** Format: date-time */
-            depositPaidAt?: string | null;
-            /** @example false */
-            isRenewed: boolean;
-            latestRenewalContractId?: string | null;
-            /**
-             * @description Maximum number of additional members that can still be added to this contract based on apartment max occupants
-             * @example 1
-             */
-            maxAddableMembers: number;
-            /**
-             * @description Maximum occupants allowed for this contract
-             * @example 2
-             */
-            maxOccupants: number;
-            /**
-             * @description Current active occupants in this contract
-             * @example 1
-             */
-            currentOccupants: number;
             /** Format: date-time */
             terminationDate?: string | null;
             terminationReason?: string | null;
             earlyTerminationFee?: string | null;
-            createdByStaffId?: string | null;
             createdByStaffId?: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
             apartment: components["schemas"]["ContractApartmentDto"];
-            createdByStaff?: components["schemas"]["ContractCreatorDto"] | null;
-            invoices: components["schemas"]["ContractInvoiceDto"][];
             createdByStaff?: components["schemas"]["ContractCreatorDto"] | null;
             invoices: components["schemas"]["ContractInvoiceDto"][];
             members: components["schemas"]["ContractMemberDto"][];
@@ -5437,49 +5044,6 @@ export interface components {
              * @example 2026-03-24T14:00:00.000Z
              */
             signedDate?: string;
-        };
-        CooperationCommissionPhaseDto: {
-            /** @example 8dd54d08-b7c2-49f5-8678-e8ba3d987f41 */
-            id: string;
-            /** @example Q2-2026 */
-            phaseName: string;
-            /** Format: date-time */
-            effectiveFrom: string;
-            /** Format: date-time */
-            effectiveTo?: string | null;
-            /** @example 10 */
-            commissionRate: number;
-        };
-        SetGlobalCooperationCommissionPhasesResultDto: {
-            phases: components["schemas"]["CooperationCommissionPhaseDto"][];
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        CooperationCommissionPhaseInputDto: {
-            /**
-             * @description Phase name for admin tracking
-             * @example Q2-2026
-             */
-            phaseName: string;
-            /**
-             * @description Phase effective start date/time
-             * @example 2026-04-01T00:00:00.000Z
-             */
-            effectiveFrom: string;
-            /**
-             * @description Phase effective end date/time. Null means open-ended until next update.
-             * @example 2026-06-30T23:59:59.999Z
-             */
-            effectiveTo?: string | null;
-            /**
-             * @description Commission rate percentage applied to cooperation contracts
-             * @example 10
-             */
-            commissionRate: number;
-        };
-        SetGlobalCooperationCommissionPhasesDto: {
-            /** @description Full active phase list. Existing active list will be replaced. */
-            phases: components["schemas"]["CooperationCommissionPhaseInputDto"][];
         };
         CooperationCommissionPhaseDto: {
             /** @example 8dd54d08-b7c2-49f5-8678-e8ba3d987f41 */
@@ -5640,12 +5204,6 @@ export interface components {
              * @enum {string}
              */
             renewalOption: "keep_current" | "customize";
-            /**
-             * @description Applied renewal option for this request
-             * @example keep_current
-             * @enum {string}
-             */
-            renewalOption: "keep_current" | "customize";
             /** @description New renewed contract in draft status (unsigned) */
             renewedContract: components["schemas"]["ContractDetailDto"];
         };
@@ -5656,28 +5214,7 @@ export interface components {
              * @enum {string}
              */
             renewalOption: "keep_current" | "customize";
-        RenewContractDto: {
             /**
-             * @description Renew option. keep_current: keep old duration and members. customize: provide new extensionMonths and optional memberNationalIds.
-             * @example keep_current
-             * @enum {string}
-             */
-            renewalOption: "keep_current" | "customize";
-            /**
-             * @description Number of months to extend. Required when renewalOption is customize.
-             * @example 12
-             */
-            extensionMonths?: number;
-            /**
-             * @description List of member CCCD numbers. Only applied when renewalOption is customize. Final members will be current user + this list, old members are not kept.
-             * @example [
-             *       "079203009999",
-             *       "079203008888"
-             *     ]
-             */
-            memberNationalIds?: string[];
-        };
-        UpdateContractPdfContentDto: {
              * @description Number of months to extend. Required when renewalOption is customize.
              * @example 12
              */
@@ -5712,28 +5249,7 @@ export interface components {
              * @example So KH&DT TP. Ho Chi Minh
              */
             landlordIdIssuePlace?: string;
-             * @description Landlord name displayed in PDF (Party A)
-             * @example Cong ty TNHH IntelliServOps
-             */
-            landlordName?: string;
             /**
-             * @description Landlord/company ID number displayed in PDF
-             * @example 0312345678
-             */
-            landlordIdNumber?: string;
-            /**
-             * @description Issue date of landlord ID/license
-             * @example 01/01/2020
-             */
-            landlordIdIssueDate?: string;
-            /**
-             * @description Issue place of landlord ID/license
-             * @example So KH&DT TP. Ho Chi Minh
-             */
-            landlordIdIssuePlace?: string;
-            /**
-             * @description Landlord registered address displayed in PDF
-             * @example TP. Ho Chi Minh, Viet Nam
              * @description Landlord registered address displayed in PDF
              * @example TP. Ho Chi Minh, Viet Nam
              */
@@ -5743,15 +5259,7 @@ export interface components {
              * @example 1900 0000
              */
             landlordPhone?: string;
-            landlordAddress?: string;
             /**
-             * @description Landlord phone number displayed in PDF
-             * @example 1900 0000
-             */
-            landlordPhone?: string;
-            /**
-             * @description Contract start date used in PDF
-             * @example 2026-04-01
              * @description Contract start date used in PDF
              * @example 2026-04-01
              */
@@ -5759,24 +5267,19 @@ export interface components {
             /**
              * @description Contract end date used in PDF
              * @example 2027-03-31
-             * @description Contract end date used in PDF
-             * @example 2027-03-31
              */
             endDate?: string;
             /**
-             * @description Monthly rental fee
              * @description Monthly rental fee
              * @example 15000000
              */
             monthlyRent?: number;
             /**
              * @description Deposit amount
-             * @description Deposit amount
              * @example 30000000
              */
             depositAmount?: number;
             /**
-             * @description Monthly payment due day (1-28)
              * @description Monthly payment due day (1-28)
              * @example 5
              */
@@ -5784,16 +5287,10 @@ export interface components {
             /**
              * @description Payment method
              * @example bank_transfer
-             * @description Payment method
-             * @example bank_transfer
              * @enum {string}
              */
             paymentMethod?: "bank_transfer" | "cash" | "e_wallet" | "auto_debit" | "credit_card" | "debit_card";
-            paymentMethod?: "bank_transfer" | "cash" | "e_wallet" | "auto_debit" | "credit_card" | "debit_card";
             /**
-             * @description Special conditions shown in contract PDF
-             * @example Khong nuoi thu cung trong can ho.
-             */
              * @description Special conditions shown in contract PDF
              * @example Khong nuoi thu cung trong can ho.
              */
@@ -5801,10 +5298,7 @@ export interface components {
             /**
              * @description Additional contract terms shown in contract PDF
              * @example Khong thay doi ket cau can ho trong thoi han thue.
-             * @description Additional contract terms shown in contract PDF
-             * @example Khong thay doi ket cau can ho trong thoi han thue.
              */
-            contractTerms?: string;
             contractTerms?: string;
         };
         UpdateContractDto: {
@@ -5878,25 +5372,6 @@ export interface components {
              * @example Khong co nhu cau thue nua
              */
             reason: string;
-        };
-        AddContractMemberDto: {
-            /**
-             * @description CCCD number of the user to add into contract
-             * @example 079203001234
-             */
-            nationalId: string;
-            /**
-             * @default co_tenant
-             * @enum {string}
-             */
-            memberType: "primary" | "co_tenant" | "guarantor";
-            /** @example false */
-            isPrimaryContact?: boolean;
-            /**
-             * @description Share percentage
-             * @example 50
-             */
-            sharePercentage?: number;
         };
         AddContractMemberDto: {
             /**
@@ -6873,7 +6348,6 @@ export interface components {
             address: string;
         };
         IoTBoardRoomSummaryDto: {
-        IoTBoardRoomSummaryDto: {
             id: string;
             /** @example R01 */
             roomNumber: string;
@@ -6881,18 +6355,11 @@ export interface components {
             roomType: string;
         };
         IoTBoardDeviceItemDto: {
-        IoTBoardDeviceItemDto: {
             id: string;
-            /** @example Front Door Lock */
             /** @example Front Door Lock */
             deviceName: string;
             /** @example smart_lock */
             deviceType: string;
-            /**
-             * @example active
-             * @enum {string}
-             */
-            status: "active" | "inactive" | "maintenance" | "error";
             /**
              * @example active
              * @enum {string}
@@ -8320,288 +7787,6 @@ export interface components {
         PaginatedMessagesResponseDto: {
             data: components["schemas"]["MessageResponseDto"][];
             meta: components["schemas"]["PaginationMetaDto"];
-        };
-        AmenityListItemDto: {
-            /** @example 11111111-2222-3333-4444-555555555555 */
-            id: string;
-            /** @example wifi */
-            code: string;
-            /** @example Wi-Fi */
-            name: string;
-            /** @example Internet wireless tốc độ cao */
-            description?: string | null;
-            /** @example wifi-icon */
-            icon?: string | null;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * @description Number of apartments currently linked to this amenity
-             * @example 12
-             */
-            linkedApartments: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        AmenityDetailDto: {
-            /** @example 11111111-2222-3333-4444-555555555555 */
-            id: string;
-            /** @example wifi */
-            code: string;
-            /** @example Wi-Fi */
-            name: string;
-            /** @example Internet wireless tốc độ cao */
-            description?: string | null;
-            /** @example wifi-icon */
-            icon?: string | null;
-            /** @example true */
-            isActive: boolean;
-            /**
-             * @description Number of apartments currently linked to this amenity
-             * @example 12
-             */
-            linkedApartments: number;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        AmenityMutationResultDto: {
-            /** @example 11111111-2222-3333-4444-555555555555 */
-            id: string;
-            /** @example wifi */
-            code: string;
-            /** @example Wi-Fi */
-            name: string;
-            /** @example true */
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        CreateAmenityDto: {
-            /**
-             * @description Unique amenity code (lowercase, numbers, underscore). Used as stable key for frontend.
-             * @example wifi
-             */
-            code: string;
-            /**
-             * @description Amenity display name
-             * @example Wi-Fi
-             */
-            name: string;
-            /**
-             * @description Amenity description
-             * @example Internet wireless tốc độ cao
-             */
-            description?: string;
-            /**
-             * @description Icon key used by frontend
-             * @example wifi-icon
-             */
-            icon?: string;
-            /**
-             * @description Active status
-             * @default true
-             * @example true
-             */
-            isActive: boolean;
-        };
-        UpdateAmenityDto: {
-            /**
-             * @description Unique amenity code (lowercase, numbers, underscore). Used as stable key for frontend.
-             * @example wifi
-             */
-            code?: string;
-            /**
-             * @description Amenity display name
-             * @example Wi-Fi
-             */
-            name?: string;
-            /**
-             * @description Amenity description
-             * @example Internet wireless tốc độ cao
-             */
-            description?: string;
-            /**
-             * @description Icon key used by frontend
-             * @example wifi-icon
-             */
-            icon?: string;
-            /**
-             * @description Active status
-             * @default true
-             * @example true
-             */
-            isActive: boolean;
-        };
-        RevenueOverviewDto: {
-            /** @example 25 */
-            invoiceCount: number;
-            /** @example 350000000 */
-            totalInvoiceAmount: number;
-            /** @example 275000000 */
-            totalSystemRevenue: number;
-            /** @example 100000000 */
-            totalPartnerGrossRevenue: number;
-            /** @example 85000000 */
-            totalPartnerNetPayout: number;
-        };
-        RevenuePartnerDto: {
-            id: string;
-            fullName: string;
-            companyName?: string | null;
-        };
-        PartnerRevenueSummaryItemDto: {
-            partner: components["schemas"]["RevenuePartnerDto"];
-            /** @example 10 */
-            invoiceCount: number;
-            /** @example 2 */
-            apartmentCount: number;
-            /** @example 3 */
-            contractCount: number;
-            /** @example 120000000 */
-            totalGrossRevenue: number;
-            /** @example 12000000 */
-            totalSystemCommissionRevenue: number;
-            /** @example 108000000 */
-            totalNetPayoutRevenue: number;
-        };
-        RevenueApartmentDto: {
-            id: string;
-            apartmentNumber: string;
-            buildingName?: string | null;
-        };
-        RevenueContractDto: {
-            id: string;
-            contractNumber: string;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-            status: string;
-        };
-        RevenueCooperationContractDto: {
-            id: string;
-            contractNumber: string;
-            /** @example 10 */
-            commissionRate: number;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-        };
-        RevenueTransactionDto: {
-            invoiceId: string;
-            invoiceNumber: string;
-            invoiceType: string;
-            /** Format: date-time */
-            invoicePaidAt: string;
-            /** @example 12000000 */
-            invoiceAmount: number;
-            /** @example true */
-            isPartnerApartment: boolean;
-            /** @example 10 */
-            commissionRateApplied: number | null;
-            /** @example 1200000 */
-            systemRevenueAmount: number;
-            /** @example 12000000 */
-            partnerGrossRevenueAmount: number;
-            /** @example 10800000 */
-            partnerNetPayoutAmount: number;
-            apartment: components["schemas"]["RevenueApartmentDto"];
-            contract: components["schemas"]["RevenueContractDto"];
-            partner?: components["schemas"]["RevenuePartnerDto"] | null;
-            cooperationContract?: components["schemas"]["RevenueCooperationContractDto"] | null;
-        };
-        RevenueTransactionListDto: {
-            items: components["schemas"]["RevenueTransactionDto"][];
-            /** @example 100 */
-            total: number;
-            /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 5 */
-            totalPages: number;
-        };
-        PartnerMyRevenueOverviewDto: {
-            /** @example 12 */
-            invoiceCount: number;
-            /** @example 180000000 */
-            totalGrossRevenue: number;
-            /** @example 18000000 */
-            totalSystemCommissionAmount: number;
-            /** @example 162000000 */
-            totalNetPayoutRevenue: number;
-        };
-        PartnerPayoutPartnerInfoDto: {
-            id: string;
-            fullName: string;
-            companyName?: string | null;
-        };
-        PartnerPayoutSummaryItemDto: {
-            partner: components["schemas"]["PartnerPayoutPartnerInfoDto"];
-            /** @example 2026-04 */
-            periodMonth: string;
-            /** Format: date-time */
-            periodStart: string;
-            /** Format: date-time */
-            periodEnd: string;
-            /** @example 12 */
-            invoiceCount: number;
-            /** @example 3 */
-            apartmentCount: number;
-            /** @example 150000000 */
-            totalGrossAmount: number;
-            /** @example 15000000 */
-            totalSystemCommissionAmount: number;
-            /** @example 135000000 */
-            totalNetPayoutAmount: number;
-            /** @example false */
-            isTransferred: boolean;
-            transferProofImageUrl?: string | null;
-            transferNote?: string | null;
-            /** Format: date-time */
-            confirmedAt?: string | null;
-            confirmedByStaffId?: string | null;
-            confirmedByStaffName?: string | null;
-        };
-        PartnerPayoutSummaryListDto: {
-            items: components["schemas"]["PartnerPayoutSummaryItemDto"][];
-            /** @example 10 */
-            total: number;
-            /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 1 */
-            totalPages: number;
-        };
-        ConfirmPartnerPayoutResultDto: {
-            payout: components["schemas"]["PartnerPayoutSummaryItemDto"];
-        };
-        ConfirmPartnerPayoutDto: {
-            /**
-             * Format: uuid
-             * @description Partner user id to confirm monthly transfer
-             * @example 9fbc9e7e-5a4d-4f38-9ba8-cc96af4f0eaf
-             */
-            partnerId: string;
-            /**
-             * @description Month in YYYY-MM format
-             * @example 2026-04
-             */
-            month: string;
-            /** @example Da chuyen khoan du ngay 05/04/2026 */
-            note?: string;
-            /**
-             * Format: binary
-             * @description Transfer proof image (JPEG/PNG/WebP)
-             */
-            transferProof: string;
         };
         AmenityListItemDto: {
             /** @example 11111111-2222-3333-4444-555555555555 */
@@ -11253,47 +10438,6 @@ export interface operations {
             };
         };
     };
-    ContractsController_setGlobalCooperationCommissionPhases: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetGlobalCooperationCommissionPhasesDto"];
-            };
-        };
-        responses: {
-            /** @description Global cooperation commission phases updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["SetGlobalCooperationCommissionPhasesResultDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Invalid phase dates or overlapping phase ranges */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ContractsController_cancelCooperationContract: {
         parameters: {
             query?: never;
@@ -11465,63 +10609,6 @@ export interface operations {
             };
         };
     };
-    ContractsController_updatePdfContent: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateContractPdfContentDto"];
-            };
-        };
-        responses: {
-            /** @description Contract PDF content updated and PDF regenerated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["ContractDetailDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Invalid update data */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Contract not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Contract does not allow PDF content editing */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     ContractsController_activate: {
         parameters: {
             query?: never;
@@ -11554,52 +10641,6 @@ export interface operations {
             };
             /** @description Contract not found */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    ContractsController_activatePaid: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Contract activated after deposit payment validation */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["ContractDetailDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Contract not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Contract cannot be activated because it is expired, invalid status, or deposit not paid */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13376,7 +12417,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        /** @example 201 */
+                        /** @example 200 */
                         statusCode?: number;
                         /** @example Success */
                         message?: string;
@@ -13423,7 +12464,7 @@ export interface operations {
                         statusCode?: number;
                         /** @example Success */
                         message?: string;
-                        data?: components["schemas"]["IoTTestSequenceResponseDto"];
+                        data?: components["schemas"]["IoTMqttCommandResultDto"];
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
@@ -15958,482 +14999,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    AmenitiesController_findAll: {
-        parameters: {
-            query?: {
-                isActive?: boolean;
-                keyword?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Amenity list */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["AmenityListItemDto"][];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    AmenitiesController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAmenityDto"];
-            };
-        };
-        responses: {
-            /** @description Amenity created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 201 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["AmenityMutationResultDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Amenity code already exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AmenitiesController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Amenity detail */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["AmenityDetailDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Amenity not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AmenitiesController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Amenity deactivated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["AmenityMutationResultDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Amenity not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    AmenitiesController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateAmenityDto"];
-            };
-        };
-        responses: {
-            /** @description Amenity updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["AmenityMutationResultDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Amenity not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Amenity code already exists */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    RevenueController_getOverview: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Revenue overview for system and partner payout context */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueOverviewDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getPartnerSummaries: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner revenue summaries */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRevenueSummaryItemDto"][];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getTransactions: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated revenue transaction list */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueTransactionListDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getMyPartnerOverview: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner own revenue overview */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerMyRevenueOverviewDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getMyPartnerTransactions: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated partner own revenue transactions */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueTransactionListDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getStaffPartnerPayoutSummaries: {
-        parameters: {
-            query?: {
-                /** @description Month in YYYY-MM format. Default is current month */
-                month?: string;
-                /** @description Filter by partner user id */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated partner payout summaries for selected month */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerPayoutSummaryListDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_confirmStaffPartnerPayout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["ConfirmPartnerPayoutDto"];
-            };
-        };
-        responses: {
-            /** @description Partner payout confirmation saved successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["ConfirmPartnerPayoutResultDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConfirmPartnerPayoutResultDto"];
-                };
             };
         };
     };
