@@ -24,6 +24,7 @@ const NUMBER_FIELDS = [
      "usableArea",
      "numberOfBedrooms",
      "numberOfBathrooms",
+     "maxOccupants",
      "baseRentPrice",
      "depositAmount",
      "yearBuilt",

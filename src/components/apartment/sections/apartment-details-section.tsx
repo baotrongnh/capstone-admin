@@ -226,6 +226,18 @@ export function ApartmentDetailsSection({
                               </div>
 
                               <div className="space-y-1">
+                                   <p className="text-xs text-muted-foreground">Số người cho phép</p>
+                                   <Input
+                                        value={form.maxOccupants ?? ""}
+                                        onChange={(e) => setNumberField("maxOccupants", e.target.value)}
+                                        aria-invalid={getFieldError("maxOccupants") ? true : undefined}
+                                   />
+                                   {getFieldError("maxOccupants") ? (
+                                        <p className="text-xs text-destructive">{getFieldError("maxOccupants")}</p>
+                                   ) : null}
+                              </div>
+
+                              <div className="space-y-1">
                                    <p className="text-xs text-muted-foreground">Giá thuê (VNĐ)</p>
                                    <Input
                                         value={formatVNDInput(form.baseRentPrice)}

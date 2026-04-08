@@ -2,3 +2,4 @@
 - Code phải đơn giản dễ debug
 - Code phải phù hợp và chuẩn với project hiện tại (cách call api, hook)
 - Type nên chủ ý dùng từ type trong open api, không để file và function utils lung tung
+- Dùng shadcn trong project admin

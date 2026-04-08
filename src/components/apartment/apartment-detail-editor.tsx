@@ -1,10 +1,7 @@
 "use client"
 
 import { ApartmentDetailsSection } from "@/components/apartment/sections/apartment-details-section"
-import {
-     ApartmentIotSection,
-     MOCK_IOT_BOARDS,
-} from "@/components/apartment/sections/apartment-iot-section"
+import { ApartmentIotSection } from "@/components/apartment/sections/apartment-iot-section"
 import { ApartmentMediaSection } from "@/components/apartment/sections/apartment-media-section"
 import {
      ApartmentRentalSummarySection,
@@ -22,6 +19,7 @@ import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-st
 import { useFullAddress } from "@/hooks/query/useAddress"
 import { useAmenities } from "@/hooks/query/useAmenities"
 import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
+import { useIotBoards, useUpdateIotBoard } from "@/hooks/query/useIotDevices"
 import { useUser, useUsers } from "@/hooks/query/useUsers"
 import {
      mapAmenitiesToOptions,
@@ -36,6 +34,7 @@ import {
 } from "@/lib/apartment/apartment-validation"
 import { buildApartmentFormData } from "@/lib/apartment/apartment-form-data"
 import type { ApartmentDetailData } from "@/types/apartment"
+import type { IotBoardItem } from "@/types/iot"
 import {
      ApartmentForm,
      buildApartmentForm,
@@ -59,7 +58,7 @@ import {
      Users,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 type ApartmentDetailEditorProps = {
      apartmentId: string | null
@@ -75,6 +74,7 @@ const DEFAULT_CREATE_FORM: ApartmentForm = {
      status: "available",
      amenityIds: [],
      images: [],
+     maxOccupants: undefined,
 }
 
 const hasApartmentFormChanged = (
@@ -99,25 +99,16 @@ const AVAILABLE_YEARS = (() => {
      return Array.from({ length: currentYear - 1950 + 1 }, (_, idx) => currentYear - idx)
 })()
 
-const findInitialIotBoardId = (detailApartment?: ApartmentDetailData | null) => {
-     if (!detailApartment?.iotDevices?.length) {
+const findInitialIotBoardId = (
+     boards: IotBoardItem[],
+     apartmentId?: string | null,
+) => {
+     if (!apartmentId) {
           return undefined
      }
 
-     for (const item of detailApartment.iotDevices) {
-          const id = String((item as { id?: string | null } | null | undefined)?.id || "")
-          if (id && MOCK_IOT_BOARDS.some((board) => board.id === id)) {
-               return id
-          }
-     }
-
-     return undefined
+     return boards.find((board) => board.apartment?.id === apartmentId)?.id
 }
-
-const IOT_BOARD_OPTIONS = MOCK_IOT_BOARDS.map((board) => ({
-     id: board.id,
-     label: `${board.boardName} (${board.boardType}) - ${board.id}`,
-}))
 
 const buildApartmentDetailItems = (
      detailApartment: ApartmentDetailData,
@@ -151,6 +142,7 @@ const buildApartmentDetailItems = (
           },
           { label: "Số phòng ngủ", value: detailApartment.numberOfBedrooms, icon: BedDouble },
           { label: "Số phòng tắm", value: detailApartment.numberOfBathrooms, icon: Bath },
+          { label: "Số người cho phép", value: detailApartment.maxOccupants, icon: Users },
           { label: "Địa chỉ đầy đủ", value: fullAddress, icon: MapPin },
           { label: "Mã phường/xã", value: detailApartment.wardCode, icon: Hash },
           { label: "Mã tỉnh/thành", value: detailApartment.provinceCode, icon: Hash },
@@ -194,6 +186,13 @@ export function ApartmentDetailEditor({
 
      const updateApartment = useUpdateApartment()
      const createApartment = useCreateApartment()
+     const updateIotBoard = useUpdateIotBoard()
+
+     const {
+          data: iotBoardsResponse,
+          isLoading: isIotBoardsLoading,
+          isFetching: isIotBoardsFetching,
+     } = useIotBoards()
 
      const detailApartment = apartmentDetailResponse?.data
      const detailLoading = isLoading || isFetching
@@ -206,10 +205,9 @@ export function ApartmentDetailEditor({
           return buildApartmentForm(detailApartment)
      }, [detailApartment, isCreateMode])
 
-     const initialIotBoardId = useMemo(
-          () => findInitialIotBoardId(detailApartment),
-          [detailApartment],
-     )
+     const iotBoards = useMemo(() => iotBoardsResponse?.data ?? [], [iotBoardsResponse?.data])
+
+     const initialIotBoardId = useMemo(() => findInitialIotBoardId(iotBoards, detailApartment?.id), [iotBoards, detailApartment?.id])
 
      const initialRoomTags = useMemo(
           () => detailApartment?.rooms.map((room) => room.roomNumber).filter(Boolean) || [],
@@ -256,10 +254,32 @@ export function ApartmentDetailEditor({
      } = useApartmentMediaState()
 
      const [fieldErrors, setFieldErrors] = useState<ApartmentFieldErrors>({})
+     const [isIotBoardTouched, setIsIotBoardTouched] = useState(false)
 
      const editMode = isCreateMode || mode === "edit" || manualEditMode
 
-     const { data: amenitiesResponse } = useAmenities()
+     useEffect(() => {
+          if (!editMode || isCreateMode || isIotBoardTouched) {
+               return
+          }
+
+          if (selectedIotBoardId === undefined && initialIotBoardId) {
+               setSelectedIotBoardId(initialIotBoardId)
+          }
+     }, [
+          editMode,
+          initialIotBoardId,
+          isCreateMode,
+          isIotBoardTouched,
+          selectedIotBoardId,
+          setSelectedIotBoardId,
+     ])
+
+     const {
+          data: amenitiesResponse,
+          isLoading: isAmenitiesLoading,
+          isFetching: isAmenitiesFetching,
+     } = useAmenities()
 
      const { data: usersResponse, isLoading: usersLoading } = useUsers({ page: 1, limit: 200 })
 
@@ -307,10 +327,39 @@ export function ApartmentDetailEditor({
           form?.totalArea !== undefined &&
           form.usableArea > form.totalArea
 
-     const iotBoardOptions = IOT_BOARD_OPTIONS
-     const selectedIotBoard = MOCK_IOT_BOARDS.find((board) => board.id === selectedIotBoardId)
+     const iotBoardsLoading = isIotBoardsLoading || isIotBoardsFetching
+     const amenitiesLoading = isAmenitiesLoading || isAmenitiesFetching
 
-     const selectedIotBoardDevices = selectedIotBoard?.devices || []
+     const iotBoardOptions = useMemo(
+          () =>
+               iotBoards
+                    .filter(
+                         (board) =>
+                              !board.apartment?.id ||
+                              board.apartment.id === detailApartment?.id,
+                    )
+                    .map((board) => ({
+                         id: board.id,
+                         label: `${board.name} - ${board.id}`,
+                    })),
+          [detailApartment?.id, iotBoards],
+     )
+
+     const activeSelectedIotBoardId = editMode
+          ? selectedIotBoardId
+          : selectedIotBoardId || initialIotBoardId
+
+     const selectedIotBoard = useMemo(
+          () => iotBoards.find((board) => board.id === activeSelectedIotBoardId),
+          [activeSelectedIotBoardId, iotBoards],
+     )
+
+     const selectedIotBoardDevices =
+          selectedIotBoard?.devices.map((device) => ({
+               id: device.id,
+               deviceName: device.deviceName,
+               deviceType: device.deviceType,
+          })) || []
 
      const roomOptions = detailApartment?.rooms.map((room) => room.roomNumber).filter(Boolean) || []
      const amenityPresetOptions = withFallbackAmenityOptions(
@@ -324,6 +373,7 @@ export function ApartmentDetailEditor({
      const availableYears = AVAILABLE_YEARS
 
      const isSaving = updateApartment.isPending || createApartment.isPending
+          || updateIotBoard.isPending
      const uploadPercent = updateApartment.isPending
           ? updateApartment.uploadPercent
           : createApartment.isPending
@@ -339,6 +389,38 @@ export function ApartmentDetailEditor({
           !isCreateMode &&
           (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags) ||
                selectedIotBoardId !== initialIotBoardId)
+
+     const syncIotBoardAssignment = async ({
+          apartmentTargetId,
+          previousBoardId,
+          nextBoardId,
+     }: {
+          apartmentTargetId: string
+          previousBoardId?: string
+          nextBoardId?: string
+     }) => {
+          if (previousBoardId === nextBoardId) {
+               return
+          }
+
+          if (previousBoardId && previousBoardId !== nextBoardId) {
+               await updateIotBoard.mutateAsync({
+                    boardId: previousBoardId,
+                    payload: {
+                         apartmentId: null,
+                    },
+               })
+          }
+
+          if (nextBoardId && nextBoardId !== previousBoardId) {
+               await updateIotBoard.mutateAsync({
+                    boardId: nextBoardId,
+                    payload: {
+                         apartmentId: apartmentTargetId,
+                    },
+               })
+          }
+     }
 
      const canSaveChanges =
           !!form &&
@@ -392,7 +474,21 @@ export function ApartmentDetailEditor({
 
      const handleCreateApartment = async (payloadData: FormData) => {
           try {
-               await createApartment.mutateAsync(payloadData)
+               const createdApartmentResponse = await createApartment.mutateAsync(payloadData)
+               const createdApartmentId = createdApartmentResponse?.data?.id
+
+               if (createdApartmentId && selectedIotBoardId) {
+                    try {
+                         await syncIotBoardAssignment({
+                              apartmentTargetId: createdApartmentId,
+                              previousBoardId: undefined,
+                              nextBoardId: selectedIotBoardId,
+                         })
+                    } catch {
+                         message.warning("Đã tạo căn hộ nhưng chưa gắn được mạch IoT. Vui lòng thử lại.")
+                    }
+               }
+
                resetMediaState()
                resetTransientState()
                resetCreateDraft()
@@ -416,8 +512,17 @@ export function ApartmentDetailEditor({
 
           try {
                await updateApartment.mutateAsync({ id: apartmentId, data: payloadData })
-               if (hasClientChanges) {
-                    message.info("Mạch IoT/phòng đã cập nhật trên UI và sẵn sàng nối BE.")
+
+               if (selectedIotBoardId !== initialIotBoardId) {
+                    await syncIotBoardAssignment({
+                         apartmentTargetId: apartmentId,
+                         previousBoardId: initialIotBoardId,
+                         nextBoardId: selectedIotBoardId,
+                    })
+               }
+
+               if (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags)) {
+                    message.info("Danh sách phòng đã cập nhật trên UI và sẵn sàng nối BE.")
                }
                handleCancelEdit()
           } catch {
@@ -440,6 +545,7 @@ export function ApartmentDetailEditor({
           setTenantCount(detailApartment?.userApartments.length ?? 0)
           setRoomTags(initialRoomTags)
           setSelectedIotBoardId(initialIotBoardId)
+          setIsIotBoardTouched(false)
           setFieldErrors({})
           resetGeocodeTracking()
           setManualEditMode(true)
@@ -448,6 +554,7 @@ export function ApartmentDetailEditor({
      const handleCancelEdit = () => {
           resetMediaState()
           resetTransientState()
+          setIsIotBoardTouched(false)
           setFieldErrors({})
           resetGeocodeTracking()
 
@@ -573,6 +680,7 @@ export function ApartmentDetailEditor({
                                    description={form.description}
                                    amenityIds={form.amenityIds || []}
                                    options={amenityPresetOptions}
+                                   amenitiesLoading={amenitiesLoading}
                                    onDescriptionChange={(value) => setField("description", value)}
                                    onAmenitiesChange={(value) => setField("amenityIds", value)}
                               />
@@ -601,11 +709,15 @@ export function ApartmentDetailEditor({
                               <ApartmentIotSection
                                    editMode={editMode}
                                    selectedBoardId={selectedIotBoardId}
-                                   selectedBoardLabel={selectedIotBoard ? `${selectedIotBoard.boardName} (${selectedIotBoard.boardType})` : undefined}
+                                   selectedBoardLabel={selectedIotBoard ? `${selectedIotBoard.name} - ${selectedIotBoard.id}` : undefined}
                                    boardOptions={iotBoardOptions}
+                                   boardsLoading={iotBoardsLoading}
                                    boardDevices={selectedIotBoardDevices}
                                    iotDeviceCount={detailApartment?.iotDevices.length ?? 0}
-                                   onBoardChange={setSelectedIotBoardId}
+                                   onBoardChange={(value) => {
+                                        setIsIotBoardTouched(true)
+                                        setSelectedIotBoardId(value)
+                                   }}
                               />
 
                               <ApartmentRoomsSection
