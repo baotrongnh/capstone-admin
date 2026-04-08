@@ -226,7 +226,7 @@ export function ApartmentDetailsSection({
                               </div>
 
                               <div className="space-y-1">
-                                   <p className="text-xs text-muted-foreground">Số người cho phép</p>
+                                   <p className="text-xs text-muted-foreground">Số người ở tối đa</p>
                                    <Input
                                         value={form.maxOccupants ?? ""}
                                         onChange={(e) => setNumberField("maxOccupants", e.target.value)}
