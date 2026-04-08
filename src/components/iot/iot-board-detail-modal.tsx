@@ -36,7 +36,7 @@ export function IotBoardDetailModal({
                     <DialogHeader>
                          <DialogTitle>Chi tiết mạch IoT</DialogTitle>
                          <DialogDescription>
-                              Xem đầy đủ thiết bị và thao tác nhanh ngay tại modal này.
+                              Xem đầy đủ thiết bị.
                          </DialogDescription>
                     </DialogHeader>
 

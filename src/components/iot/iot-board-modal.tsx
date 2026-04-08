@@ -62,7 +62,7 @@ export function IotBoardModal({
                          <DialogDescription>
                               {isEdit
                                    ? "Chỉnh sửa thông tin mạch."
-                                   : "Tạo mạch và nhập thiết bị luôn từ form này."}
+                                   : "Tạo mạch và nhập thiết bị."}
                          </DialogDescription>
                     </DialogHeader>
 
@@ -113,7 +113,7 @@ export function IotBoardModal({
                          <div className="rounded-lg border bg-muted/15 p-2 text-xs text-muted-foreground">
                               {isEdit
                                    ? "Bạn có thể thêm/xóa/chỉnh sửa danh sách thiết bị trực tiếp trong modal này."
-                                   : "Nhập thiết bị ban đầu khi tạo mạch."}
+                                   : "Thiết bị là tùy chọn khi tạo mạch. Có thể để trống và thêm sau."}
                          </div>
 
                          {form.devices.map((device, index) => (
