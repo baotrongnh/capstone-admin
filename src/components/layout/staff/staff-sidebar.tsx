@@ -39,6 +39,7 @@ export function StaffSidebar({
       url: ROUTE_STAFF.SCHEDULE,
       icon: IconCalendarStats,
     },
+    { title: "Chi trả doanh thu", url: ROUTE_STAFF.PAYOUTS, icon: IconContract },
   ];
 
   const navMain2 = [
