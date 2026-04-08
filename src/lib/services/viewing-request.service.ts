@@ -40,7 +40,7 @@ export const viewingRequestService = {
     ): Promise<AppointmentActionResponse> => {
         const { data } = await apiClient.patch(
             `${endpoints.viewRequest}/appointments/${payload.appointmentId}/cancel`,
-            { reason: payload.reason },
+            { note: payload.note },
         )
         return data
     },

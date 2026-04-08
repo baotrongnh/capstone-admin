@@ -3,7 +3,7 @@
 import { Modal, Select, Input, message } from "antd"
 import { useMemo, useState } from "react"
 import type { CancelReasonModalProps } from "@/types/appointment"
-import { buildCancelReason } from "@/utils/schedule-utils"
+import { buildCancelNote } from "@/utils/schedule-utils"
 import { useTranslations } from "next-intl"
 
 export default function CancelReasonModal({
@@ -15,7 +15,7 @@ export default function CancelReasonModal({
 }: CancelReasonModalProps) {
     const t = useTranslations("StaffSchedule")
     const [title, setTitle] = useState<string>("")
-    const [reason, setReason] = useState<string>("")
+    const [note, setNote] = useState<string>("")
 
     const titleOptions = useMemo(
         () => [
@@ -35,7 +35,7 @@ export default function CancelReasonModal({
 
     const handleAfterClose = () => {
         setTitle("")
-        setReason("")
+        setNote("")
     }
 
     const handleSubmit = () => {
@@ -44,8 +44,8 @@ export default function CancelReasonModal({
             return
         }
 
-        const combinedReason = buildCancelReason(title.trim(), reason)
-        onSubmit(combinedReason)
+        const combinedNote = buildCancelNote(title.trim(), note)
+        onSubmit(combinedNote)
     }
 
     return (
@@ -53,6 +53,8 @@ export default function CancelReasonModal({
             open={open}
             onCancel={onClose}
             onOk={handleSubmit}
+            okButtonProps={{ danger: true }}
+            cancelText={t("actions.cancel")}
             okText={
                 mode === "deny"
                     ? t("reasonModal.submitDeny")
@@ -61,6 +63,12 @@ export default function CancelReasonModal({
             confirmLoading={isSubmitting}
             title={modalTitle}
             afterClose={handleAfterClose}
+            footer={(_, { OkBtn, CancelBtn }) => (
+                <div className="flex justify-end gap-2">
+                    <CancelBtn />
+                    <OkBtn />
+                </div>
+            )}
         >
             <div className="space-y-4">
                 <div>
@@ -85,8 +93,8 @@ export default function CancelReasonModal({
                     <Input.TextArea
                         rows={4}
                         placeholder={t("reasonModal.detailPlaceholder")}
-                        value={reason}
-                        onChange={(event) => setReason(event.target.value)}
+                        value={note}
+                        onChange={(event) => setNote(event.target.value)}
                     />
                 </div>
             </div>

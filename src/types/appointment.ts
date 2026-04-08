@@ -30,7 +30,7 @@ export type AppointmentActionResponse =
 
 export type CancelAppointmentPayload = {
     appointmentId: string
-    reason?: string
+    note?: string
 }
 
 export type DoneAppointmentPayload = {
@@ -58,6 +58,16 @@ export type AppointmentModalProps = {
     isSubmitting?: boolean
 }
 
+export type AppointmentCardProps = {
+    appointment: AppointmentWithApartment
+    onConfirm: AppointmentModalProps["onConfirm"]
+    onDeny: AppointmentModalProps["onDeny"]
+    onCancel: AppointmentModalProps["onCancel"]
+    onDone: AppointmentModalProps["onDone"]
+    isSubmitting?: AppointmentModalProps["isSubmitting"]
+    statusLabelMap: Record<string, string>
+}
+
 export type AppointmentActionsProps = {
     appointment: Appointment
     onConfirm: (appointment: Appointment) => void
@@ -73,7 +83,7 @@ export type CancelReasonModalProps = {
     open: boolean
     mode: ReasonModalMode
     onClose: () => void
-    onSubmit: (reason: string) => void
+    onSubmit: (note: string) => void
     isSubmitting?: boolean
 }
 

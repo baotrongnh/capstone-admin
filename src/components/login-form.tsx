@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
+import { LOGIN_IMAGE } from "@/constant/assets"
 
 export function LoginForm({
   className,
@@ -92,12 +93,13 @@ export function LoginForm({
               </Field>
             </FieldGroup>
           </form>
-          <div className="bg-muted relative hidden md:block">
+          <div className="relative hidden min-h-80 md:block">
             <Image
-              src="/placeholder.svg"
-              alt="Image"
+              src={LOGIN_IMAGE}
+              alt="Login image"
               fill
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              priority
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         </CardContent>

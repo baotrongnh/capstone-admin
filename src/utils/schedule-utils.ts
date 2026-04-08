@@ -72,8 +72,8 @@ export const buildAppointmentsByDate = (appointments: Appointment[]) => {
     return grouped
 }
 
-export const buildCancelReason = (title: string, reason?: string) => {
-    const trimmed = reason?.trim()
+export const buildCancelNote = (title: string, note?: string) => {
+    const trimmed = note?.trim()
     if (!trimmed) return title
     return `${title}: ${trimmed}`
 }

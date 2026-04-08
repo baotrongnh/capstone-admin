@@ -66,8 +66,8 @@
       "titlePlaceholder": "Select a reason",
       "detailPlaceholder": "Optional details",
       "titleRequired": "Please select a reason title.",
-      "submitCancel": "Cancel",
-      "submitDeny": "Deny"
+      "submitCancel": "Confirm appointment cancellation",
+      "submitDeny": "Deny appointment"
     },
     "reasonOptions": {
       "staffUnavailable": "Staff unavailable",
