@@ -182,6 +182,7 @@ export function ApartmentDetailEditor({
           isLoading,
           isFetching,
           isError,
+          refetch: refetchApartmentDetail,
      } = useApartment(apartmentId || "")
 
      const updateApartment = useUpdateApartment()
@@ -198,6 +199,7 @@ export function ApartmentDetailEditor({
      const detailLoading = isLoading || isFetching
 
      const isCreateMode = mode === "create"
+     const isRouteEditMode = mode === "edit"
 
      const initialForm = useMemo(() => {
           if (isCreateMode) return DEFAULT_CREATE_FORM
@@ -256,7 +258,7 @@ export function ApartmentDetailEditor({
      const [fieldErrors, setFieldErrors] = useState<ApartmentFieldErrors>({})
      const [isIotBoardTouched, setIsIotBoardTouched] = useState(false)
 
-     const editMode = isCreateMode || mode === "edit" || manualEditMode
+     const editMode = isCreateMode || isRouteEditMode || manualEditMode
 
      useEffect(() => {
           if (!editMode || isCreateMode || isIotBoardTouched) {
@@ -524,6 +526,8 @@ export function ApartmentDetailEditor({
                if (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags)) {
                     message.info("Danh sách phòng đã cập nhật trên UI và sẵn sàng nối BE.")
                }
+
+               await refetchApartmentDetail()
                handleCancelEdit()
           } catch {
                // Error toast is already handled in useUpdateApartment
@@ -570,6 +574,10 @@ export function ApartmentDetailEditor({
 
           setDraftForm(null)
           setManualEditMode(false)
+
+          if (isRouteEditMode && apartmentId) {
+               router.replace(`/operator/apartments/${apartmentId}`)
+          }
      }
 
      const handleRemoveExistingImage = (index: number) => {
