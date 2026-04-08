@@ -30,6 +30,7 @@ export function useIotManagerPage() {
      const [boardForm, setBoardForm] = useState<BoardFormState>(createDefaultBoardForm)
      const [isBoardDetailDialogOpen, setIsBoardDetailDialogOpen] = useState(false)
      const [detailBoardId, setDetailBoardId] = useState<string | null>(null)
+     const [deleteBoardTarget, setDeleteBoardTarget] = useState<{ id: string; name: string } | null>(null)
 
      const boardQuery = statusFilter === "__all__" ? undefined : { status: statusFilter }
 
@@ -285,12 +286,28 @@ export function useIotManagerPage() {
           }
      }
 
-     const handleDeleteBoard = async (boardId: string, boardName: string) => {
-          const accepted = window.confirm(`Bạn có chắc chắn muốn xóa mạch ${boardName}?`)
-          if (!accepted) return
+     const handleDeleteBoard = (boardId: string, boardName: string) => {
+          setDeleteBoardTarget({ id: boardId, name: boardName })
+     }
+
+     const closeDeleteBoardDialog = () => {
+          if (deleteBoard.isPending) return
+          setDeleteBoardTarget(null)
+     }
+
+     const onDeleteBoardDialogOpenChange = (open: boolean) => {
+          if (!open) {
+               closeDeleteBoardDialog()
+               return
+          }
+     }
+
+     const confirmDeleteBoard = async () => {
+          if (!deleteBoardTarget) return
 
           try {
-               await deleteBoard.mutateAsync(boardId)
+               await deleteBoard.mutateAsync(deleteBoardTarget.id)
+               setDeleteBoardTarget(null)
           } catch {
                // Error toast handled in hooks.
           }
@@ -308,6 +325,8 @@ export function useIotManagerPage() {
           isBoardListFetching,
           refetchBoards,
           isDeletingBoard: deleteBoard.isPending,
+          isDeleteBoardDialogOpen: !!deleteBoardTarget,
+          deleteBoardTargetName: deleteBoardTarget?.name || "",
 
           isBoardDialogOpen,
           editingBoardId,
@@ -328,6 +347,9 @@ export function useIotManagerPage() {
           removeCreateDeviceRow,
           setCreateDeviceField,
           handleDeleteBoard,
+          closeDeleteBoardDialog,
+          onDeleteBoardDialogOpenChange,
+          confirmDeleteBoard,
           openEditBoardForAddDevice,
      }
 }
