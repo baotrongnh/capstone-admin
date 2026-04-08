@@ -66,8 +66,8 @@ export function IotBoardModal({
                          </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-2.5 py-1 md:grid-cols-2 lg:grid-cols-3">
-                         <div className="space-y-1.5">
+                    <div className="grid gap-2.5 py-1 md:grid-cols-3">
+                         <div className="space-y-1.5 min-w-0">
                               <p className="text-xs text-muted-foreground">Mã mạch</p>
                               <Input
                                    value={form.id || ""}
@@ -76,36 +76,14 @@ export function IotBoardModal({
                               />
                          </div>
 
-                         <div className="space-y-1.5">
-                              <p className="text-xs text-muted-foreground">Căn hộ liên kết</p>
-                              <Select
-                                   value={form.apartmentId || "__none__"}
-                                   onValueChange={(value) =>
-                                        onFieldChange("apartmentId", value === "__none__" ? "" : value)
-                                   }
-                              >
-                                   <SelectTrigger>
-                                        <SelectValue placeholder="Không liên kết căn hộ" />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                        <SelectItem value="__none__">Không liên kết</SelectItem>
-                                        {apartmentOptions.map((item) => (
-                                             <SelectItem key={item.id} value={item.id}>
-                                                  {item.apartmentNumber || "-"} - {item.buildingName || "Không rõ tòa nhà"}
-                                             </SelectItem>
-                                        ))}
-                                   </SelectContent>
-                              </Select>
-                         </div>
-
-                         <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
+                         <div className="space-y-1.5 min-w-0">
                               <p className="text-xs text-muted-foreground">Trạng thái mạch</p>
                               <Select
                                    value={form.status}
                                    onValueChange={(value) => onFieldChange("status", value)}
                                    disabled={!isEdit}
                               >
-                                   <SelectTrigger>
+                                   <SelectTrigger className="w-full min-w-0">
                                         <SelectValue placeholder="Chọn trạng thái" />
                                    </SelectTrigger>
                                    <SelectContent>
@@ -113,6 +91,33 @@ export function IotBoardModal({
                                         <SelectItem value="inactive">{STATUS_LABEL_MAP.inactive}</SelectItem>
                                         <SelectItem value="maintenance">{STATUS_LABEL_MAP.maintenance}</SelectItem>
                                         <SelectItem value="error">{STATUS_LABEL_MAP.error}</SelectItem>
+                                   </SelectContent>
+                              </Select>
+                         </div>
+
+                         <div className="space-y-1.5 min-w-0">
+                              <p className="text-xs text-muted-foreground">Căn hộ liên kết</p>
+                              <Select
+                                   value={form.apartmentId || "__none__"}
+                                   onValueChange={(value) =>
+                                        onFieldChange("apartmentId", value === "__none__" ? "" : value)
+                                   }
+                              >
+                                   <SelectTrigger className="w-full min-w-0">
+                                        <SelectValue placeholder="Không liên kết căn hộ" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                        <SelectItem value="__none__">Không liên kết</SelectItem>
+                                        {apartmentOptions.map((item) => {
+                                             const apartmentLabel = `${item.apartmentNumber || "-"} - ${item.buildingName || "Không rõ tòa nhà"}`
+                                             return (
+                                                  <SelectItem key={item.id} value={item.id}>
+                                                       <span className="block max-w-64 truncate" title={apartmentLabel}>
+                                                            {apartmentLabel}
+                                                       </span>
+                                                  </SelectItem>
+                                             )
+                                        })}
                                    </SelectContent>
                               </Select>
                          </div>
