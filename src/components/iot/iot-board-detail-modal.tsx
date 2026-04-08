@@ -8,27 +8,24 @@ import {
      DialogHeader,
      DialogTitle,
 } from "@/components/ui/dialog"
-import type { IotBoardDeviceCreateRequest, IotBoardDeviceItem, IotBoardItem } from "@/types/iot"
+import type { IotBoardDeviceCreateRequest, IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
+import { PencilIcon, PlusIcon } from "lucide-react"
 
 type IotBoardDetailModalProps = {
      open: boolean
      board: IotBoardItem | null
-     isDeletingDevice: boolean
      onOpenChange: (open: boolean) => void
+     onEditBoard: (board: IotBoardItem) => void
      onAddDevice: (boardId: string) => void
-     onEditDevice: (boardId: string, device: IotBoardDeviceItem) => void
-     onDeleteDevice: (boardId: string, deviceId: string, deviceName?: string | null) => void
 }
 
 export function IotBoardDetailModal({
      open,
      board,
-     isDeletingDevice,
      onOpenChange,
+     onEditBoard,
      onAddDevice,
-     onEditDevice,
-     onDeleteDevice,
 }: IotBoardDetailModalProps) {
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,9 +61,28 @@ export function IotBoardDetailModal({
 
                               <div className="flex items-center justify-between">
                                    <h3 className="text-sm font-medium">Danh sách thiết bị ({board.devices.length})</h3>
-                                   <Button size="sm" onClick={() => onAddDevice(board.id)}>
-                                        + Thêm thiết bị
-                                   </Button>
+                                   <div className="flex items-center gap-1.5">
+                                        <Button
+                                             type="button"
+                                             size="icon"
+                                             variant="ghost"
+                                             className="size-8"
+                                             title="Sửa mạch"
+                                             onClick={() => onEditBoard(board)}
+                                        >
+                                             <PencilIcon className="size-4" />
+                                        </Button>
+                                        <Button
+                                             type="button"
+                                             size="icon"
+                                             variant="ghost"
+                                             className="size-8"
+                                             title="Thêm thiết bị"
+                                             onClick={() => onAddDevice(board.id)}
+                                        >
+                                             <PlusIcon className="size-4" />
+                                        </Button>
+                                   </div>
                               </div>
 
                               {board.devices.length === 0 ? (
@@ -89,31 +105,6 @@ export function IotBoardDetailModal({
                                                        </p>
                                                   </div>
 
-                                                  <div className="flex items-center gap-1.5">
-                                                       <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() => onEditDevice(board.id, device)}
-                                                       >
-                                                            Sửa
-                                                       </Button>
-                                                       <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="destructive"
-                                                            disabled={isDeletingDevice}
-                                                            onClick={() =>
-                                                                 onDeleteDevice(
-                                                                      board.id,
-                                                                      device.id,
-                                                                      device.deviceName,
-                                                                 )
-                                                            }
-                                                       >
-                                                            Xóa
-                                                       </Button>
-                                                  </div>
                                              </div>
                                         ))}
                                    </div>

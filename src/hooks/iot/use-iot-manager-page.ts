@@ -2,24 +2,19 @@
 
 import {
      createDefaultBoardForm,
-     createDefaultDeviceForm,
      TOPIC_OPTIONS,
      type BoardFormState,
-     type DeviceFormState,
+     type CreateDeviceRow,
 } from "@/components/iot/iot-shared"
 import { useApartments } from "@/hooks/query/useApartments"
 import {
      useCreateIotBoard,
-     useCreateIotBoardDevice,
      useDeleteIotBoard,
-     useDeleteIotBoardDevice,
      useIotBoards,
      useUpdateIotBoard,
-     useUpdateIotBoardDevice,
 } from "@/hooks/query/useIotDevices"
 import type {
      IotBoardDeviceCreateRequest,
-     IotBoardDeviceItem,
      IotBoardItem,
      IotBoardListQuery,
 } from "@/types/iot"
@@ -36,11 +31,6 @@ export function useIotManagerPage() {
      const [isBoardDetailDialogOpen, setIsBoardDetailDialogOpen] = useState(false)
      const [detailBoardId, setDetailBoardId] = useState<string | null>(null)
 
-     const [isDeviceDialogOpen, setIsDeviceDialogOpen] = useState(false)
-     const [activeBoardId, setActiveBoardId] = useState("")
-     const [editingDeviceId, setEditingDeviceId] = useState<string | null>(null)
-     const [deviceForm, setDeviceForm] = useState<DeviceFormState>(createDefaultDeviceForm)
-
      const boardQuery = statusFilter === "__all__" ? undefined : { status: statusFilter }
 
      const {
@@ -55,9 +45,6 @@ export function useIotManagerPage() {
      const createBoard = useCreateIotBoard()
      const updateBoard = useUpdateIotBoard()
      const deleteBoard = useDeleteIotBoard()
-     const createBoardDevice = useCreateIotBoardDevice()
-     const updateBoardDevice = useUpdateIotBoardDevice()
-     const deleteBoardDevice = useDeleteIotBoardDevice()
 
      const boards = useMemo(() => boardsResponse?.data ?? [], [boardsResponse?.data])
      const apartmentOptions = apartmentResponse?.data || []
@@ -90,7 +77,35 @@ export function useIotManagerPage() {
      )
 
      const isBoardSaving = createBoard.isPending || updateBoard.isPending
-     const isDeviceSaving = createBoardDevice.isPending || updateBoardDevice.isPending
+
+     const mapBoardToForm = (board: IotBoardItem, appendBlankDevice = false): BoardFormState => {
+          const devicesFromBoard: CreateDeviceRow[] = board.devices.map((device) => {
+               const topic = TOPIC_OPTIONS.includes((device.mqttTopic || "") as IotBoardDeviceCreateRequest["topic"])
+                    ? (device.mqttTopic as IotBoardDeviceCreateRequest["topic"])
+                    : "light"
+
+               return {
+                    deviceId: device.mqttDeviceId ? String(device.mqttDeviceId) : "",
+                    deviceName: device.deviceName || "",
+                    topic,
+               }
+          })
+
+          const devices: CreateDeviceRow[] = devicesFromBoard.length
+               ? devicesFromBoard
+               : [{ deviceId: "", deviceName: "", topic: "light" }]
+
+          if (appendBlankDevice) {
+               devices.push({ deviceId: "", deviceName: "", topic: "light" })
+          }
+
+          return {
+               id: board.id,
+               apartmentId: board.apartment?.id || "",
+               status: board.status,
+               devices,
+          }
+     }
 
      const resetBoardDialog = () => {
           setIsBoardDialogOpen(false)
@@ -124,27 +139,18 @@ export function useIotManagerPage() {
 
      const openEditBoardDialog = (board: IotBoardItem) => {
           closeBoardDetailDialog()
-
-          const devicesFromBoard = board.devices.map((device) => {
-               const topic = TOPIC_OPTIONS.includes((device.mqttTopic || "") as IotBoardDeviceCreateRequest["topic"])
-                    ? (device.mqttTopic as IotBoardDeviceCreateRequest["topic"])
-                    : "light"
-
-               return {
-                    deviceId: device.mqttDeviceId ? String(device.mqttDeviceId) : "",
-                    deviceName: device.deviceName || "",
-                    topic,
-               }
-          })
-
           setEditingBoardId(board.id)
-          setBoardForm({
-               id: board.id,
-               apartmentId: board.apartment?.id || "",
-               devices: devicesFromBoard.length
-                    ? devicesFromBoard
-                    : [{ deviceId: "", deviceName: "", topic: "light" }],
-          })
+          setBoardForm(mapBoardToForm(board))
+          setIsBoardDialogOpen(true)
+     }
+
+     const openEditBoardForAddDevice = (boardId: string) => {
+          const board = boards.find((item) => item.id === boardId)
+          if (!board) return
+
+          closeBoardDetailDialog()
+          setEditingBoardId(board.id)
+          setBoardForm(mapBoardToForm(board, true))
           setIsBoardDialogOpen(true)
      }
 
@@ -157,7 +163,7 @@ export function useIotManagerPage() {
           setIsBoardDialogOpen(true)
      }
 
-     const onBoardFieldChange = (field: "id" | "apartmentId", value: string) => {
+     const onBoardFieldChange = (field: "id" | "apartmentId" | "status", value: string) => {
           setBoardForm((prev) => ({
                ...prev,
                [field]: value,
@@ -254,6 +260,7 @@ export function useIotManagerPage() {
                          payload: {
                               id: boardId,
                               apartmentId: boardForm.apartmentId || undefined,
+                              status: boardForm.status,
                               devices: normalized,
                          },
                     })
@@ -289,120 +296,6 @@ export function useIotManagerPage() {
           }
      }
 
-     const openCreateDeviceDialog = (boardId: string) => {
-          setIsBoardDetailDialogOpen(false)
-          setActiveBoardId(boardId)
-          setEditingDeviceId(null)
-          setDeviceForm(createDefaultDeviceForm())
-          setIsDeviceDialogOpen(true)
-     }
-
-     const startCreateDeviceFromEdit = () => {
-          if (!activeBoardId) return
-          setEditingDeviceId(null)
-          setDeviceForm(createDefaultDeviceForm())
-     }
-
-     const openEditDeviceDialog = (boardId: string, device: IotBoardDeviceItem) => {
-          setIsBoardDetailDialogOpen(false)
-
-          const topic = TOPIC_OPTIONS.includes((device.mqttTopic || "") as IotBoardDeviceCreateRequest["topic"])
-               ? (device.mqttTopic as IotBoardDeviceCreateRequest["topic"])
-               : "light"
-
-          setActiveBoardId(boardId)
-          setEditingDeviceId(device.id)
-          setDeviceForm({
-               deviceId: device.mqttDeviceId ? String(device.mqttDeviceId) : "",
-               deviceName: device.deviceName || "",
-               topic,
-               state: device.mqttState || "OFF",
-          })
-          setIsDeviceDialogOpen(true)
-     }
-
-     const closeDeviceDialog = () => {
-          if (isDeviceSaving) return
-          setIsDeviceDialogOpen(false)
-          setActiveBoardId("")
-          setEditingDeviceId(null)
-          setDeviceForm(createDefaultDeviceForm())
-     }
-
-     const onDeviceDialogOpenChange = (open: boolean) => {
-          if (!open) {
-               closeDeviceDialog()
-               return
-          }
-          setIsDeviceDialogOpen(true)
-     }
-
-     const onDeviceFieldChange = (field: keyof DeviceFormState, value: string) => {
-          setDeviceForm((prev) => ({
-               ...prev,
-               [field]: value,
-          }))
-     }
-
-     const handleSaveDevice = async () => {
-          if (!activeBoardId) {
-               message.error("Không xác định được mạch để thao tác thiết bị.")
-               return
-          }
-
-          const parsedDeviceId = Number(deviceForm.deviceId)
-          if (!Number.isFinite(parsedDeviceId) || parsedDeviceId <= 0) {
-               message.error("Vui lòng nhập Device ID hợp lệ (lớn hơn 0).")
-               return
-          }
-
-          const normalizedDeviceName = deviceForm.deviceName.trim()
-          if (!normalizedDeviceName) {
-               message.error("Vui lòng nhập tên thiết bị.")
-               return
-          }
-
-          try {
-               if (editingDeviceId) {
-                    await updateBoardDevice.mutateAsync({
-                         boardId: activeBoardId,
-                         deviceId: editingDeviceId,
-                         payload: {
-                              deviceId: parsedDeviceId,
-                              deviceName: normalizedDeviceName,
-                              topic: deviceForm.topic,
-                              state: deviceForm.state.trim() || undefined,
-                         },
-                    })
-               } else {
-                    await createBoardDevice.mutateAsync({
-                         boardId: activeBoardId,
-                         payload: {
-                              deviceId: parsedDeviceId,
-                              deviceName: normalizedDeviceName,
-                              topic: deviceForm.topic,
-                              state: "OFF",
-                         },
-                    })
-               }
-
-               closeDeviceDialog()
-          } catch {
-               // Error toast handled in hooks.
-          }
-     }
-
-     const handleDeleteDevice = async (boardId: string, deviceId: string, deviceName?: string | null) => {
-          const accepted = window.confirm(`Bạn có chắc chắn muốn xóa thiết bị ${deviceName || deviceId}?`)
-          if (!accepted) return
-
-          try {
-               await deleteBoardDevice.mutateAsync({ boardId, deviceId })
-          } catch {
-               // Error toast handled in hooks.
-          }
-     }
-
      return {
           statusFilter,
           setStatusFilter,
@@ -415,7 +308,6 @@ export function useIotManagerPage() {
           isBoardListFetching,
           refetchBoards,
           isDeletingBoard: deleteBoard.isPending,
-          isDeletingDevice: deleteBoardDevice.isPending,
 
           isBoardDialogOpen,
           editingBoardId,
@@ -436,19 +328,6 @@ export function useIotManagerPage() {
           removeCreateDeviceRow,
           setCreateDeviceField,
           handleDeleteBoard,
-
-          isDeviceDialogOpen,
-          editingDeviceId,
-          activeBoardId,
-          deviceForm,
-          isDeviceSaving,
-          openCreateDeviceDialog,
-          startCreateDeviceFromEdit,
-          openEditDeviceDialog,
-          onDeviceDialogOpenChange,
-          closeDeviceDialog,
-          onDeviceFieldChange,
-          handleSaveDevice,
-          handleDeleteDevice,
+          openEditBoardForAddDevice,
      }
 }
