@@ -26,6 +26,7 @@ export type IotBoardUpdateRequest = Omit<
 > & {
      apartmentId?: string | null
      devices?: IotBoardDeviceCreateLiteRequest[]
+     status?: NonNullable<IotBoardListQuery["status"]>
 }
 
 export type IotBoardUpdateResponse =

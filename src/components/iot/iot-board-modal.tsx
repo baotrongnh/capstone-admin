@@ -15,9 +15,9 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select"
-import { PlusIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon } from "lucide-react"
 import type { BoardFormState, CreateDeviceRow } from "./iot-shared"
-import { TOPIC_LABEL_MAP, TOPIC_OPTIONS } from "./iot-shared"
+import { STATUS_LABEL_MAP, TOPIC_LABEL_MAP, TOPIC_OPTIONS } from "./iot-shared"
 
 type ApartmentOption = {
      id: string
@@ -34,7 +34,7 @@ type IotBoardModalProps = {
      onOpenChange: (open: boolean) => void
      onCancel: () => void
      onSubmit: () => void
-     onFieldChange: (field: "id" | "apartmentId", value: string) => void
+     onFieldChange: (field: "id" | "apartmentId" | "status", value: string) => void
      onAddDevice: () => void
      onRemoveDevice: (index: number) => void
      onDeviceChange: (index: number, field: keyof CreateDeviceRow, value: string) => void
@@ -66,8 +66,8 @@ export function IotBoardModal({
                          </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-2.5 py-1 md:grid-cols-2">
-                         <div className="space-y-1.5">
+                    <div className="grid gap-2.5 py-1 md:grid-cols-3">
+                         <div className="space-y-1.5 min-w-0">
                               <p className="text-xs text-muted-foreground">Mã mạch</p>
                               <Input
                                    value={form.id || ""}
@@ -76,7 +76,26 @@ export function IotBoardModal({
                               />
                          </div>
 
-                         <div className="space-y-1.5">
+                         <div className="space-y-1.5 min-w-0">
+                              <p className="text-xs text-muted-foreground">Trạng thái mạch</p>
+                              <Select
+                                   value={form.status}
+                                   onValueChange={(value) => onFieldChange("status", value)}
+                                   disabled={!isEdit}
+                              >
+                                   <SelectTrigger className="w-full min-w-0">
+                                        <SelectValue placeholder="Chọn trạng thái" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                        <SelectItem value="active">{STATUS_LABEL_MAP.active}</SelectItem>
+                                        <SelectItem value="inactive">{STATUS_LABEL_MAP.inactive}</SelectItem>
+                                        <SelectItem value="maintenance">{STATUS_LABEL_MAP.maintenance}</SelectItem>
+                                        <SelectItem value="error">{STATUS_LABEL_MAP.error}</SelectItem>
+                                   </SelectContent>
+                              </Select>
+                         </div>
+
+                         <div className="space-y-1.5 min-w-0">
                               <p className="text-xs text-muted-foreground">Căn hộ liên kết</p>
                               <Select
                                    value={form.apartmentId || "__none__"}
@@ -84,16 +103,21 @@ export function IotBoardModal({
                                         onFieldChange("apartmentId", value === "__none__" ? "" : value)
                                    }
                               >
-                                   <SelectTrigger>
+                                   <SelectTrigger className="w-full min-w-0">
                                         <SelectValue placeholder="Không liên kết căn hộ" />
                                    </SelectTrigger>
                                    <SelectContent>
                                         <SelectItem value="__none__">Không liên kết</SelectItem>
-                                        {apartmentOptions.map((item) => (
-                                             <SelectItem key={item.id} value={item.id}>
-                                                  {item.apartmentNumber || "-"} - {item.buildingName || "Không rõ tòa nhà"}
-                                             </SelectItem>
-                                        ))}
+                                        {apartmentOptions.map((item) => {
+                                             const apartmentLabel = `${item.apartmentNumber || "-"} - ${item.buildingName || "Không rõ tòa nhà"}`
+                                             return (
+                                                  <SelectItem key={item.id} value={item.id}>
+                                                       <span className="block max-w-64 truncate" title={apartmentLabel}>
+                                                            {apartmentLabel}
+                                                       </span>
+                                                  </SelectItem>
+                                             )
+                                        })}
                                    </SelectContent>
                               </Select>
                          </div>
@@ -104,9 +128,15 @@ export function IotBoardModal({
                               <h3 className="text-sm font-medium">
                                    {isEdit ? "Thiết bị trên mạch" : "Thiết bị khởi tạo"}
                               </h3>
-                              <Button type="button" variant="outline" size="sm" onClick={onAddDevice}>
-                                   <PlusIcon className="mr-1 size-4" />
-                                   Thêm thiết bị
+                              <Button
+                                   type="button"
+                                   variant="outline"
+                                   size="icon"
+                                   className="size-8"
+                                   title="Thêm thiết bị"
+                                   onClick={onAddDevice}
+                              >
+                                   <PlusIcon className="size-4" />
                               </Button>
                          </div>
 
@@ -168,10 +198,13 @@ export function IotBoardModal({
                                         </div>
                                         <Button
                                              type="button"
-                                             variant="destructive"
+                                             size="icon"
+                                             variant="ghost"
+                                             className="size-9 text-destructive hover:text-destructive"
+                                             title="Xóa thiết bị"
                                              onClick={() => onRemoveDevice(index)}
                                         >
-                                             Xóa
+                                             <Trash2Icon className="size-4" />
                                         </Button>
                                    </div>
                               </div>

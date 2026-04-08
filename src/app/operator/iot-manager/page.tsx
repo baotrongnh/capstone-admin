@@ -3,7 +3,6 @@
 import { IotBoardDetailModal } from "@/components/iot/iot-board-detail-modal"
 import { IotBoardModal } from "@/components/iot/iot-board-modal"
 import { IotBoardTable } from "@/components/iot/iot-board-table"
-import { IotDeviceModal } from "@/components/iot/iot-device-modal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -30,7 +29,6 @@ export default function IotManagerPage() {
           isBoardListFetching,
           refetchBoards,
           isDeletingBoard,
-          isDeletingDevice,
           isBoardDialogOpen,
           editingBoardId,
           boardForm,
@@ -49,19 +47,7 @@ export default function IotManagerPage() {
           removeCreateDeviceRow,
           setCreateDeviceField,
           handleDeleteBoard,
-          isDeviceDialogOpen,
-          editingDeviceId,
-          activeBoardId,
-          deviceForm,
-          isDeviceSaving,
-          openCreateDeviceDialog,
-          startCreateDeviceFromEdit,
-          openEditDeviceDialog,
-          onDeviceDialogOpenChange,
-          closeDeviceDialog,
-          onDeviceFieldChange,
-          handleSaveDevice,
-          handleDeleteDevice,
+          openEditBoardForAddDevice,
      } = useIotManagerPage()
 
      return (
@@ -124,18 +110,16 @@ export default function IotManagerPage() {
                     isDeletingBoard={isDeletingBoard}
                     onEditBoard={openEditBoardDialog}
                     onViewBoardDetails={openBoardDetailDialog}
-                    onCreateDevice={openCreateDeviceDialog}
+                    onCreateDevice={openEditBoardForAddDevice}
                     onDeleteBoard={handleDeleteBoard}
                />
 
                <IotBoardDetailModal
                     open={isBoardDetailDialogOpen}
                     board={detailBoard}
-                    isDeletingDevice={isDeletingDevice}
                     onOpenChange={onBoardDetailDialogOpenChange}
-                    onAddDevice={openCreateDeviceDialog}
-                    onEditDevice={openEditDeviceDialog}
-                    onDeleteDevice={handleDeleteDevice}
+                    onEditBoard={openEditBoardDialog}
+                    onAddDevice={openEditBoardForAddDevice}
                />
 
                <IotBoardModal
@@ -151,19 +135,6 @@ export default function IotManagerPage() {
                     onAddDevice={addCreateDeviceRow}
                     onRemoveDevice={removeCreateDeviceRow}
                     onDeviceChange={setCreateDeviceField}
-               />
-
-               <IotDeviceModal
-                    open={isDeviceDialogOpen}
-                    isEdit={!!editingDeviceId}
-                    isSaving={isDeviceSaving}
-                    boardId={activeBoardId}
-                    form={deviceForm}
-                    onOpenChange={onDeviceDialogOpenChange}
-                    onCancel={closeDeviceDialog}
-                    onStartCreate={startCreateDeviceFromEdit}
-                    onSubmit={handleSaveDevice}
-                    onFieldChange={onDeviceFieldChange}
                />
           </div>
      )
