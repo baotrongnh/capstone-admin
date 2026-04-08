@@ -4655,6 +4655,10 @@ export interface components {
             wardCode?: number | null;
             /** @example 79 */
             provinceCode?: number | null;
+            /** @example Phuong Ben Nghe */
+            wardName?: string | null;
+            /** @example Thanh pho Ho Chi Minh */
+            provinceName?: string | null;
             /** @example 12 Nguyễn Huệ, Phường Bến Nghé */
             streetAddress?: string | null;
             /** @example 2 */
@@ -4711,6 +4715,17 @@ export interface components {
             pdfUrl?: string | null;
             apartment: components["schemas"]["ContractApartmentDto"];
             members: components["schemas"]["ContractListMemberDto"][];
+        };
+        ContractListPaginatedDto: {
+            items: components["schemas"]["ContractListItemDto"][];
+            /** @example 120 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 6 */
+            totalPages: number;
         };
         ContractCreatorDto: {
             id: string;
@@ -5271,6 +5286,10 @@ export interface components {
             apartmentNumber: string;
             /** @example 26728 */
             wardCode?: number | null;
+            /** @example Phuong Ben Nghe */
+            wardName?: string | null;
+            /** @example Thanh pho Ho Chi Minh */
+            provinceName?: string | null;
         };
         InvoiceContractMemberUserDto: {
             /** @example user-123 */
@@ -5349,6 +5368,17 @@ export interface components {
             rentalContract: components["schemas"]["InvoiceContractSummaryDto"];
             /** @description Contract information for this invoice */
             contract: components["schemas"]["InvoiceContractSummaryDto"];
+        };
+        InvoiceListPaginatedDto: {
+            items: components["schemas"]["InvoiceListItemDto"][];
+            /** @example 120 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 6 */
+            totalPages: number;
         };
         InvoiceContentItemDto: {
             /** @example Deposit for contract CTR-2026-00001 */
@@ -5665,8 +5695,18 @@ export interface components {
         MaintenanceApartmentDto: {
             /** @example A101 */
             apartmentNumber: string;
-            /** @example 123 Nguyen Hue, Q1 */
-            address: string;
+            /** @example 26728 */
+            wardCode?: number | null;
+            /** @example Xa Chau Pha */
+            wardName?: string | null;
+            /** @example Tinh Ba Ria - Vung Tau */
+            provinceName?: string | null;
+            /** @example Xa Chau Pha, Thi xa Phu My, Tinh Ba Ria - Vung Tau */
+            fullAddress?: string | null;
+            /** @example 123 Nguyen Hue */
+            streetAddress?: string | null;
+            /** @example 123 Nguyen Hue */
+            address?: string | null;
         };
         MaintenanceListItemDto: {
             id: string;
@@ -5682,6 +5722,8 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             preferredDate?: string | null;
+            /** @example false */
+            isRated: boolean;
             apartment: components["schemas"]["MaintenanceApartmentDto"];
         };
         MaintenanceRoomDto: {
@@ -5706,6 +5748,8 @@ export interface components {
             completedAt?: string | null;
             /** Format: date-time */
             updatedAt: string;
+            /** @example true */
+            isRated: boolean;
             apartment: components["schemas"]["MaintenanceApartmentDto"];
             room?: components["schemas"]["MaintenanceRoomDto"] | null;
         };
@@ -5741,6 +5785,8 @@ export interface components {
             completionImages?: Record<string, never> | null;
             completionNotes?: string | null;
             tenantRating?: number | null;
+            /** @example false */
+            isRated: boolean;
             tenantFeedback?: string | null;
             /** @example 500000.00 */
             costEstimate?: string | null;
@@ -9786,6 +9832,8 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "draft" | "pending" | "signed" | "active" | "expired" | "terminated" | "renewed";
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -9793,7 +9841,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of contracts */
+            /** @description Paginated list of contracts */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9804,7 +9852,7 @@ export interface operations {
                         statusCode?: number;
                         /** @example Success */
                         message?: string;
-                        data?: components["schemas"]["ContractListItemDto"][];
+                        data?: components["schemas"]["ContractListPaginatedDto"];
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
@@ -10031,9 +10079,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
             /** @description Invalid or missing PDF file */
             400: {
@@ -10547,9 +10593,7 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": Record<string, never>;
-                };
+                content?: never;
             };
             /** @description Invalid or unverified CCCD */
             400: {
@@ -10578,6 +10622,8 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "draft" | "issued" | "sent" | "partially_paid" | "paid" | "overdue" | "cancelled";
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -10585,7 +10631,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of invoices */
+            /** @description Paginated list of invoices */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10596,7 +10642,7 @@ export interface operations {
                         statusCode?: number;
                         /** @example Success */
                         message?: string;
-                        data?: components["schemas"]["InvoiceListItemDto"][];
+                        data?: components["schemas"]["InvoiceListPaginatedDto"];
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
@@ -10727,6 +10773,8 @@ export interface operations {
             query?: {
                 status?: "pending" | "processing" | "completed" | "failed" | "refunded" | "cancelled";
                 invoiceId?: string;
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -10734,7 +10782,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of payments */
+            /** @description Paginated list of payments */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10749,6 +10797,14 @@ export interface operations {
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
+                            /** @example 25 */
+                            total?: number;
+                            /** @example 1 */
+                            page?: number;
+                            /** @example 10 */
+                            limit?: number;
+                            /** @example 3 */
+                            totalPages?: number;
                         };
                     };
                 };
@@ -10800,6 +10856,9 @@ export interface operations {
         parameters: {
             query?: {
                 status?: "pending" | "processing" | "completed" | "failed" | "refunded" | "cancelled";
+                invoiceId?: string;
+                page?: number;
+                limit?: number;
             };
             header?: never;
             path: {
@@ -10809,7 +10868,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Payments of a specific invoice (includes pending synthetic entry if unpaid) */
+            /** @description Paginated payments of a specific invoice (includes pending synthetic entry if unpaid) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -10824,6 +10883,14 @@ export interface operations {
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
+                            /** @example 25 */
+                            total?: number;
+                            /** @example 1 */
+                            page?: number;
+                            /** @example 10 */
+                            limit?: number;
+                            /** @example 3 */
+                            totalPages?: number;
                         };
                     };
                 };

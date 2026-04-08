@@ -31,16 +31,12 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable}`}
-      >
+    <html data-theme="light" lang={locale}>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ReactQueryProvider>
           <NextIntlClientProvider messages={messages}>
             <SocketProvider>
-              <AuthProvider>
-                {children}
-              </AuthProvider>
+              <AuthProvider>{children}</AuthProvider>
             </SocketProvider>
           </NextIntlClientProvider>
         </ReactQueryProvider>
