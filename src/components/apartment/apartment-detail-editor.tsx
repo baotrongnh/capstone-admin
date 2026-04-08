@@ -281,7 +281,7 @@ export function ApartmentDetailEditor({
           isFetching: isAmenitiesFetching,
      } = useAmenities()
 
-     const { data: usersResponse, isLoading: usersLoading } = useUsers({ page: 1, limit: 200 })
+     const { data: usersResponse, isLoading: usersLoading } = useUsers({ page: 1, limit: 100 })
 
      const ownerOptions = usersResponse?.data || []
      const selectedOwnerId = form?.ownerId || detailApartment?.ownerId || undefined
