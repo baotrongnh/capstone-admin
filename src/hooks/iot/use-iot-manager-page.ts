@@ -50,7 +50,7 @@ export function useIotManagerPage() {
           refetch: refetchBoards,
      } = useIotBoards(boardQuery)
 
-     const { data: apartmentResponse } = useApartments({ page: 1, limit: 200 })
+     const { data: apartmentResponse } = useApartments({ page: 1, limit: 100 })
 
      const createBoard = useCreateIotBoard()
      const updateBoard = useUpdateIotBoard()
@@ -262,11 +262,6 @@ export function useIotManagerPage() {
 
                     if (hasInvalidRow) {
                          message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
-                         return
-                    }
-
-                    if (!normalizedDevices.length) {
-                         message.error("Vui lòng nhập ít nhất 1 thiết bị hợp lệ (có Device ID và tên thiết bị) khi tạo mạch.")
                          return
                     }
 
