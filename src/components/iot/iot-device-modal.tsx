@@ -92,15 +92,19 @@ export function IotDeviceModal({
 
                          <div className="space-y-1">
                               <p className="text-xs text-muted-foreground">Trạng thái</p>
-                              {isEdit ? (
-                                   <Input
-                                        value={form.state || ""}
-                                        placeholder="VD: OFF"
-                                        onChange={(event) => onFieldChange("state", event.target.value)}
-                                   />
-                              ) : (
-                                   <Input value="OFF" disabled />
-                              )}
+                              <Select
+                                   value={form.state}
+                                   onValueChange={(value) => onFieldChange("state", value)}
+                                   disabled={!isEdit}
+                              >
+                                   <SelectTrigger>
+                                        <SelectValue placeholder="Chọn trạng thái" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                        <SelectItem value="OFF">OFF</SelectItem>
+                                        <SelectItem value="ON">ON</SelectItem>
+                                   </SelectContent>
+                              </Select>
                          </div>
                     </div>
 

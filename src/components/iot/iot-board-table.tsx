@@ -50,7 +50,7 @@ export function IotBoardTable({
                               <TableHead>Số thiết bị</TableHead>
                               <TableHead>Trạng thái</TableHead>
                               <TableHead>Cập nhật</TableHead>
-                              <TableHead className="min-w-[360px]">Thiết bị</TableHead>
+                              <TableHead className="min-w-55">Thiết bị</TableHead>
                               <TableHead className="text-right">Thao tác</TableHead>
                          </TableRow>
                     </TableHeader>
@@ -88,7 +88,7 @@ export function IotBoardTable({
                                                   ) : (
                                                        <>
                                                             {board.devices.slice(0, 3).map((device) => (
-                                                                 <Badge key={device.id} variant="outline" className="max-w-[180px] truncate">
+                                                                 <Badge key={device.id} variant="outline" className="max-w-45 truncate">
                                                                       {device.deviceName || `Thiết bị ${device.mqttDeviceId || "-"}`}
                                                                  </Badge>
                                                             ))}
@@ -112,10 +112,7 @@ export function IotBoardTable({
                                                             Xem chi tiết
                                                        </DropdownMenuItem>
                                                        <DropdownMenuItem onClick={() => onEditBoard(board)}>
-                                                            Sửa mạch
-                                                       </DropdownMenuItem>
-                                                       <DropdownMenuItem onClick={() => onCreateDevice(board.id)}>
-                                                            Thêm thiết bị
+                                                            Chỉnh sửa
                                                        </DropdownMenuItem>
                                                        <DropdownMenuSeparator />
                                                        <DropdownMenuItem
@@ -123,7 +120,7 @@ export function IotBoardTable({
                                                             disabled={isDeletingBoard}
                                                             onClick={() => onDeleteBoard(board.id, board.name || board.id)}
                                                        >
-                                                            Xóa mạch
+                                                            Xóa
                                                        </DropdownMenuItem>
                                                   </DropdownMenuContent>
                                              </DropdownMenu>

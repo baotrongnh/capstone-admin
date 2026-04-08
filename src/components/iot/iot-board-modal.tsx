@@ -15,9 +15,9 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select"
-import { PlusIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon } from "lucide-react"
 import type { BoardFormState, CreateDeviceRow } from "./iot-shared"
-import { TOPIC_LABEL_MAP, TOPIC_OPTIONS } from "./iot-shared"
+import { STATUS_LABEL_MAP, TOPIC_LABEL_MAP, TOPIC_OPTIONS } from "./iot-shared"
 
 type ApartmentOption = {
      id: string
@@ -34,7 +34,7 @@ type IotBoardModalProps = {
      onOpenChange: (open: boolean) => void
      onCancel: () => void
      onSubmit: () => void
-     onFieldChange: (field: "id" | "apartmentId", value: string) => void
+     onFieldChange: (field: "id" | "apartmentId" | "status", value: string) => void
      onAddDevice: () => void
      onRemoveDevice: (index: number) => void
      onDeviceChange: (index: number, field: keyof CreateDeviceRow, value: string) => void
@@ -66,7 +66,7 @@ export function IotBoardModal({
                          </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-2.5 py-1 md:grid-cols-2">
+                    <div className="grid gap-2.5 py-1 md:grid-cols-2 lg:grid-cols-3">
                          <div className="space-y-1.5">
                               <p className="text-xs text-muted-foreground">Mã mạch</p>
                               <Input
@@ -97,6 +97,25 @@ export function IotBoardModal({
                                    </SelectContent>
                               </Select>
                          </div>
+
+                         <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
+                              <p className="text-xs text-muted-foreground">Trạng thái mạch</p>
+                              <Select
+                                   value={form.status}
+                                   onValueChange={(value) => onFieldChange("status", value)}
+                                   disabled={!isEdit}
+                              >
+                                   <SelectTrigger>
+                                        <SelectValue placeholder="Chọn trạng thái" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                        <SelectItem value="active">{STATUS_LABEL_MAP.active}</SelectItem>
+                                        <SelectItem value="inactive">{STATUS_LABEL_MAP.inactive}</SelectItem>
+                                        <SelectItem value="maintenance">{STATUS_LABEL_MAP.maintenance}</SelectItem>
+                                        <SelectItem value="error">{STATUS_LABEL_MAP.error}</SelectItem>
+                                   </SelectContent>
+                              </Select>
+                         </div>
                     </div>
 
                     <div className="space-y-2.5">
@@ -104,9 +123,15 @@ export function IotBoardModal({
                               <h3 className="text-sm font-medium">
                                    {isEdit ? "Thiết bị trên mạch" : "Thiết bị khởi tạo"}
                               </h3>
-                              <Button type="button" variant="outline" size="sm" onClick={onAddDevice}>
-                                   <PlusIcon className="mr-1 size-4" />
-                                   Thêm thiết bị
+                              <Button
+                                   type="button"
+                                   variant="outline"
+                                   size="icon"
+                                   className="size-8"
+                                   title="Thêm thiết bị"
+                                   onClick={onAddDevice}
+                              >
+                                   <PlusIcon className="size-4" />
                               </Button>
                          </div>
 
@@ -168,10 +193,13 @@ export function IotBoardModal({
                                         </div>
                                         <Button
                                              type="button"
-                                             variant="destructive"
+                                             size="icon"
+                                             variant="ghost"
+                                             className="size-9 text-destructive hover:text-destructive"
+                                             title="Xóa thiết bị"
                                              onClick={() => onRemoveDevice(index)}
                                         >
-                                             Xóa
+                                             <Trash2Icon className="size-4" />
                                         </Button>
                                    </div>
                               </div>

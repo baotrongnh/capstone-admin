@@ -9,6 +9,7 @@ export type CreateDeviceRow = {
 export type BoardFormState = {
      id: string
      apartmentId: string
+     status: NonNullable<IotBoardListQuery["status"]>
      devices: CreateDeviceRow[]
 }
 
@@ -16,7 +17,7 @@ export type DeviceFormState = {
      deviceId: string
      deviceName: string
      topic: IotBoardDeviceCreateRequest["topic"]
-     state: string
+     state: "ON" | "OFF"
 }
 
 export const TOPIC_OPTIONS: Array<IotBoardDeviceCreateRequest["topic"]> = [
@@ -50,6 +51,7 @@ export const TOPIC_LABEL_MAP: Record<IotBoardDeviceCreateRequest["topic"], strin
 export const createDefaultBoardForm = (): BoardFormState => ({
      id: "",
      apartmentId: "",
+     status: "active",
      devices: [{ deviceId: "", deviceName: "", topic: "light" }],
 })
 
