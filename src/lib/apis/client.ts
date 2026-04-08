@@ -7,7 +7,7 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-     const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+     const accessToken = typeof window !== 'undefined' ? localStorage.getItem('adminAccessToken') : null
      if (accessToken) {
           config.headers.Authorization = `Bearer ${accessToken}`
      }
@@ -24,7 +24,7 @@ apiClient.interceptors.response.use(undefined, async (error) => {
      if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
           originalRequest._retry = true
 
-          const refreshToken = localStorage.getItem('refreshToken')
+          const refreshToken = localStorage.getItem('adminRefreshToken')
           if (!refreshToken) {
                const redirectUrl = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
                localStorage.clear()
@@ -37,8 +37,8 @@ apiClient.interceptors.response.use(undefined, async (error) => {
                     { refreshToken }
                )
                const newTokens = data.data.tokens
-               localStorage.setItem('accessToken', newTokens.accessToken)
-               localStorage.setItem('refreshToken', newTokens.refreshToken)
+               localStorage.setItem('adminAccessToken', newTokens.accessToken)
+               localStorage.setItem('adminRefreshToken', newTokens.refreshToken)
                originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`
                return apiClient(originalRequest)
           } catch {
