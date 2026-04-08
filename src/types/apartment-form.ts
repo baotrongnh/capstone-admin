@@ -31,6 +31,7 @@ export const buildApartmentForm = (
      usableArea: toOptionalNumber(detail.usableArea),
      numberOfBedrooms: detail.numberOfBedrooms ?? undefined,
      numberOfBathrooms: detail.numberOfBathrooms ?? undefined,
+     maxOccupants: toOptionalNumber(detail.maxOccupants),
      furnishingStatus: (detail.furnishingStatus as FurnishingStatus) || "unfurnished",
      status: (detail.status as ApartmentStatus) || "available",
      baseRentPrice: toOptionalNumber(detail.baseRentPrice),

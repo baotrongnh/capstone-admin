@@ -44,6 +44,12 @@ export const validateApartmentForm = (form: ApartmentForm): ApartmentValidationE
           errors.push({ field: "numberOfBathrooms", message: "Số phòng tắm không được nhỏ hơn 0" })
      }
 
+     if (form.maxOccupants === undefined || form.maxOccupants === null) {
+          errors.push({ field: "maxOccupants", message: "Vui lòng nhập số người cho phép" })
+     } else if (form.maxOccupants < 1) {
+          errors.push({ field: "maxOccupants", message: "Số người cho phép phải lớn hơn hoặc bằng 1" })
+     }
+
      if (!form.baseRentPrice || form.baseRentPrice <= 0) {
           errors.push({ field: "baseRentPrice", message: "Giá thuê phải lớn hơn 0" })
      }

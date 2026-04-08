@@ -1,10 +1,75 @@
-import { IotDeviceListQuery, IotDeviceListResponse } from "@/types/iot"
+import {
+     IotBoardCreateLiteRequest,
+     IotBoardCreateResponse,
+     IotBoardDeleteResponse,
+     IotBoardDetailResponse,
+     IotBoardDeviceCreateLiteRequest,
+     IotBoardDeviceCreateResponse,
+     IotBoardDeviceDeleteResponse,
+     IotBoardDeviceUpdateRequest,
+     IotBoardDeviceUpdateResponse,
+     IotBoardListQuery,
+     IotBoardListResponse,
+     IotBoardUpdateRequest,
+     IotBoardUpdateResponse,
+} from "@/types/iot"
 import { apiClient } from "../apis/client"
 import { endpoints } from "../apis/endpoints"
 
 export const iotService = {
-     getDevices: async (params?: IotDeviceListQuery): Promise<IotDeviceListResponse> => {
-          const { data } = await apiClient.get(`${endpoints.iot}/devices`, { params })
+     getBoards: async (params?: IotBoardListQuery): Promise<IotBoardListResponse> => {
+          const { data } = await apiClient.get(`${endpoints.iot}/boards`, { params })
+          return data
+     },
+
+     getBoardById: async (boardId: string): Promise<IotBoardDetailResponse> => {
+          const { data } = await apiClient.get(`${endpoints.iot}/boards/${boardId}`)
+          return data
+     },
+
+     createBoard: async (payload: IotBoardCreateLiteRequest): Promise<IotBoardCreateResponse> => {
+          const { data } = await apiClient.post(`${endpoints.iot}/boards`, payload)
+          return data
+     },
+
+     updateBoard: async (
+          boardId: string,
+          payload: IotBoardUpdateRequest,
+     ): Promise<IotBoardUpdateResponse> => {
+          const { data } = await apiClient.patch(`${endpoints.iot}/boards/${boardId}`, payload)
+          return data
+     },
+
+     deleteBoard: async (boardId: string): Promise<IotBoardDeleteResponse> => {
+          const { data } = await apiClient.delete(`${endpoints.iot}/boards/${boardId}`)
+          return data
+     },
+
+     createBoardDevice: async (
+          boardId: string,
+          payload: IotBoardDeviceCreateLiteRequest,
+     ): Promise<IotBoardDeviceCreateResponse> => {
+          const { data } = await apiClient.post(`${endpoints.iot}/boards/${boardId}/devices`, payload)
+          return data
+     },
+
+     updateBoardDevice: async (
+          boardId: string,
+          deviceId: string,
+          payload: IotBoardDeviceUpdateRequest,
+     ): Promise<IotBoardDeviceUpdateResponse> => {
+          const { data } = await apiClient.patch(
+               `${endpoints.iot}/boards/${boardId}/devices/${deviceId}`,
+               payload,
+          )
+          return data
+     },
+
+     deleteBoardDevice: async (
+          boardId: string,
+          deviceId: string,
+     ): Promise<IotBoardDeviceDeleteResponse> => {
+          const { data } = await apiClient.delete(`${endpoints.iot}/boards/${boardId}/devices/${deviceId}`)
           return data
      },
 }

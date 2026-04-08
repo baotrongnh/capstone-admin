@@ -35,6 +35,7 @@ export type ApartmentValidationField =
      | "totalArea"
      | "numberOfBedrooms"
      | "numberOfBathrooms"
+     | "maxOccupants"
      | "baseRentPrice"
      | "furnishingStatus"
 

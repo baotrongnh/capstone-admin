@@ -30,8 +30,19 @@ export function ApartmentAddressFields({
           initialCodes.wardCode,
      )
 
-     const { data: provinces } = useProvinces()
-     const { data: wards } = useWards(provinceCode)
+     const {
+          data: provinces,
+          isLoading: isProvincesLoading,
+          isFetching: isProvincesFetching,
+     } = useProvinces()
+     const {
+          data: wards,
+          isLoading: isWardsLoading,
+          isFetching: isWardsFetching,
+     } = useWards(provinceCode)
+
+     const provincesLoading = isProvincesLoading || isProvincesFetching
+     const wardsLoading = isWardsLoading || isWardsFetching
 
      const provinceOptions = useMemo(
           () =>
@@ -79,6 +90,7 @@ export function ApartmentAddressFields({
                     <AntdSelect
                          showSearch
                          allowClear
+                         loading={provincesLoading}
                          value={provinceCode ? String(provinceCode) : undefined}
                          placeholder="Chọn tỉnh/thành phố"
                          optionFilterProp="label"
@@ -94,13 +106,14 @@ export function ApartmentAddressFields({
                     <AntdSelect
                          showSearch
                          allowClear
+                         loading={wardsLoading}
                          value={wardCode ? String(wardCode) : undefined}
                          placeholder="Chọn phường/xã"
                          optionFilterProp="label"
                          filterOption={filterAddressOption}
                          options={wardOptions}
                          onChange={(value) => handleWardChange(String(value || ""))}
-                         disabled={!provinceCode}
+                         disabled={!provinceCode || provincesLoading}
                          className="w-full"
                     />
                </div>
