@@ -58,10 +58,12 @@ export default function OperatorApartmentsPage() {
      const getStatusBadge = (status?: string | null) => {
           const statusClassMap: Record<string, string> = {
                available: "bg-green-100 text-green-700 border-green-200",
-               occupied: "bg-yellow-100 text-yellow-700 border-yellow-200",
+               occupied: "bg-amber-100 text-amber-700 border-amber-200",
                maintenance: "bg-amber-100 text-amber-700 border-amber-200",
-               reserved: "bg-purple-100 text-purple-700 border-purple-200",
+               reserved: "bg-gray-100 text-gray-700 border-gray-200",
                inactive: "bg-red-100 text-red-700 border-red-200",
+               pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
+               verified: 'bg-blue-100 text-blue-700 border-blue-200',
           }
 
           const className = status ? statusClassMap[status] : undefined
