@@ -15,9 +15,6 @@ const DEFAULT_COORDINATE = {
      longitude: 106.7009,
 }
 
-const LEAFLET_CSS_ID = "leaflet-stylesheet"
-const LEAFLET_CSS_HREF = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-
 const normalizeCoordinate = (value: number | undefined, fallback: number) => {
      if (typeof value !== "number" || !Number.isFinite(value)) {
           return fallback
@@ -43,17 +40,6 @@ const normalizeLeafletLayering = (map: LeafletMap) => {
      controls.forEach((control) => {
           (control as HTMLElement).style.zIndex = "7"
      })
-}
-
-const ensureLeafletStylesheet = () => {
-     if (typeof document === "undefined") return
-     if (document.getElementById(LEAFLET_CSS_ID)) return
-
-     const link = document.createElement("link")
-     link.id = LEAFLET_CSS_ID
-     link.rel = "stylesheet"
-     link.href = LEAFLET_CSS_HREF
-     document.head.appendChild(link)
 }
 
 export function ApartmentCoordinateMap({
@@ -90,7 +76,6 @@ export function ApartmentCoordinateMap({
                     return
                }
 
-               ensureLeafletStylesheet()
                const L = await import("leaflet")
 
                if (isDisposed || !mapContainerRef.current || mapRef.current) {
@@ -148,6 +133,14 @@ export function ApartmentCoordinateMap({
 
                mapRef.current = map
                markerRef.current = marker
+
+               // Ensure map tiles are laid out correctly after first render.
+               requestAnimationFrame(() => {
+                    map.invalidateSize()
+               })
+               setTimeout(() => {
+                    map.invalidateSize()
+               }, 250)
           }
 
           void initializeMap()
@@ -200,6 +193,22 @@ export function ApartmentCoordinateMap({
                map.touchZoom.enable()
           }
      }, [disabled])
+
+     useEffect(() => {
+          const map = mapRef.current
+          const container = mapContainerRef.current
+          if (!map || !container || typeof ResizeObserver === "undefined") return
+
+          const observer = new ResizeObserver(() => {
+               map.invalidateSize()
+          })
+
+          observer.observe(container)
+
+          return () => {
+               observer.disconnect()
+          }
+     }, [activeCoordinate.latitude, activeCoordinate.longitude])
 
      return (
           <div className="relative z-0 isolate overflow-hidden rounded-lg border">
