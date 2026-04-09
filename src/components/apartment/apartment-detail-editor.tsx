@@ -41,6 +41,7 @@ import { useAmenities } from "@/hooks/query/useAmenities"
 import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
 import { useUser, useUsers } from "@/hooks/query/useUsers"
 import { mapAmenitiesToOptions, mergeAmenityOptions, withFallbackAmenityOptions } from "@/lib/apartment/amenity-mapping"
+import type { ApartmentStatus } from "@/types/apartment"
 import { buildApartmentForm } from "@/types/apartment-form"
 import { Modal } from "antd"
 import { useRouter } from "next/navigation"
@@ -98,6 +99,8 @@ export function ApartmentDetailEditor({
 
      const detailApartment = apartmentDetailResponse?.data
      const detailLoading = isLoading || isFetching
+     const initialApartmentStatus =
+          (detailApartment?.status as ApartmentStatus | undefined) || null
 
      const isCreateMode = mode === "create"
      const isRouteEditMode = mode === "edit"
@@ -264,6 +267,7 @@ export function ApartmentDetailEditor({
                isRouteEditMode,
                allowEdit,
                apartmentId,
+               initialStatus: initialApartmentStatus,
                roomTags,
                initialRoomTags,
                canSaveChanges,
@@ -345,6 +349,7 @@ export function ApartmentDetailEditor({
           fullAddress,
           availableYears,
           usableAreaInvalid,
+          initialStatus: initialApartmentStatus,
           initialProvinceCode: detailApartment?.provinceCode || undefined,
           selectedDepositPreset,
           geocodeStatus,
