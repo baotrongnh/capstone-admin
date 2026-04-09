@@ -28,6 +28,8 @@ export const DEFAULT_CREATE_FORM: ApartmentForm = {
      status: "available",
      amenityIds: [],
      images: [],
+     numberOfBedrooms: 0,
+     numberOfBathrooms: 0,
      maxOccupants: undefined,
 }
 
@@ -36,7 +38,6 @@ export const DEFAULT_SECTION_VISIBILITY = {
      showOwnerSection: true,
      showAmenitySection: true,
      showMediaSection: true,
-     showRentalSummarySection: true,
      showIotSection: true,
      showRoomsSection: true,
      showTenantSection: true,

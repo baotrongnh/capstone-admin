@@ -8,11 +8,8 @@ import {
      type ApartmentMediaSectionModel,
 } from "@/components/apartment/sections/apartment-media-section"
 import {
-     ApartmentRentalSummarySection,
      ApartmentRoomsSection,
      ApartmentTenantSection,
-     type ApartmentRentalSummarySectionActions,
-     type ApartmentRentalSummarySectionModel,
      type ApartmentRoomsSectionActions,
      type ApartmentRoomsSectionModel,
      type ApartmentTenantSectionModel,
@@ -62,7 +59,6 @@ type ApartmentDetailEditorProps = {
           showOwnerSection?: boolean
           showAmenitySection?: boolean
           showMediaSection?: boolean
-          showRentalSummarySection?: boolean
           showIotSection?: boolean
           showRoomsSection?: boolean
           showTenantSection?: boolean
@@ -134,8 +130,6 @@ export function ApartmentDetailEditor({
           setManualEditMode,
           form,
           selectedDepositPreset,
-          tenantCount,
-          setTenantCount,
           roomTags,
           setRoomTags,
           updateField,
@@ -270,7 +264,6 @@ export function ApartmentDetailEditor({
                isRouteEditMode,
                allowEdit,
                apartmentId,
-               detailApartment,
                roomTags,
                initialRoomTags,
                canSaveChanges,
@@ -280,7 +273,6 @@ export function ApartmentDetailEditor({
           editorState: {
                form,
                updateField,
-               setTenantCount,
                setRoomTags,
                resetTransientState,
                startEditDraft,
@@ -409,16 +401,6 @@ export function ApartmentDetailEditor({
           onRemoveSelectedVideo: handleRemoveSelectedVideo,
      }
 
-     const rentalSummarySectionModel: ApartmentRentalSummarySectionModel = {
-          editMode,
-          tenantCount,
-          utilityMeterCount: detailApartment?.utilityMeters.length ?? 0,
-     }
-
-     const rentalSummarySectionActions: ApartmentRentalSummarySectionActions = {
-          onTenantCountChange: setTenantCount,
-     }
-
      const roomsSectionModel: ApartmentRoomsSectionModel = {
           editMode,
           roomTags,
@@ -500,13 +482,6 @@ export function ApartmentDetailEditor({
                                    />
                               ) : null}
 
-                              {resolvedSectionVisibility.showRentalSummarySection ? (
-                                   <ApartmentRentalSummarySection
-                                        model={rentalSummarySectionModel}
-                                        actions={rentalSummarySectionActions}
-                                   />
-                              ) : null}
-
                               {resolvedSectionVisibility.showIotSection ? (
                                    <ApartmentIotSection
                                         model={{
@@ -540,7 +515,7 @@ export function ApartmentDetailEditor({
                                    />
                               ) : null}
 
-                              {resolvedSectionVisibility.showTenantSection ? (
+                              {resolvedSectionVisibility.showTenantSection && !isCreateMode ? (
                                    <ApartmentTenantSection model={tenantSectionModel} />
                               ) : null}
 

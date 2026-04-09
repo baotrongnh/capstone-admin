@@ -4,7 +4,6 @@ import type { DepositPreset } from "@/hooks/apartment/use-apartment-editor-state
 import { useApartmentFormValidation } from "@/hooks/apartment/use-apartment-form-validation"
 import { useApartmentIotAssignment } from "@/hooks/apartment/use-apartment-iot-assignment"
 import { buildApartmentFormData } from "@/lib/apartment/apartment-form-data"
-import type { ApartmentDetailData } from "@/types/apartment"
 import type { ApartmentForm } from "@/types/apartment-form"
 import { message } from "antd"
 
@@ -19,7 +18,6 @@ type UseApartmentDetailEditorControllerParams = {
           isRouteEditMode: boolean
           allowEdit: boolean
           apartmentId: string | null
-          detailApartment?: ApartmentDetailData
           roomTags: string[]
           initialRoomTags: string[]
           canSaveChanges: boolean
@@ -29,7 +27,6 @@ type UseApartmentDetailEditorControllerParams = {
      editorState: {
           form: ApartmentForm | null
           updateField: (key: keyof ApartmentForm, rawValue: unknown) => Partial<Record<keyof ApartmentForm, unknown>>
-          setTenantCount: (value: number) => void
           setRoomTags: (tags: string[]) => void
           resetTransientState: () => void
           startEditDraft: () => boolean
@@ -82,7 +79,6 @@ export function useApartmentDetailEditorController({
           isRouteEditMode,
           allowEdit,
           apartmentId,
-          detailApartment,
           roomTags,
           initialRoomTags,
           canSaveChanges,
@@ -93,7 +89,6 @@ export function useApartmentDetailEditorController({
      const {
           form,
           updateField,
-          setTenantCount,
           setRoomTags,
           resetTransientState,
           startEditDraft,
@@ -273,7 +268,6 @@ export function useApartmentDetailEditorController({
 
           if (!startEditDraft()) return
 
-          setTenantCount(detailApartment?.userApartments.length ?? 0)
           setRoomTags(initialRoomTags)
           iotAssignment.resetSelectionToInitial()
           formValidation.clearAllErrors()

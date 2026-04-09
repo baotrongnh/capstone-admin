@@ -110,12 +110,13 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
                                    <p className="text-xs font-medium text-foreground">Mạch đang liên kết</p>
                                    <Button
                                         type="button"
-                                        variant="destructive"
+                                        variant="ghost"
+                                        className="text-red-600 hover:text-red-600"
                                         size="sm"
                                         disabled={!canBulkUnlinkBoards || isBulkUnlinkingBoards}
                                         onClick={onBulkUnlinkBoards}
                                    >
-                                        {isBulkUnlinkingBoards ? "Đang gỡ toàn bộ..." : "Hủy toàn bộ mạch liên kết"}
+                                        {isBulkUnlinkingBoards ? "Đang gỡ toàn bộ..." : "Hủy tất cả liên kết"}
                                    </Button>
                               </div>
 
@@ -134,11 +135,12 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
                                                             <Button
                                                                  type="button"
                                                                  variant="outline"
+                                                                 className="text-red-600 hover:text-red-600"
                                                                  size="sm"
                                                                  disabled={isBulkUnlinkingBoards || unlinkingBoardId === board.id}
                                                                  onClick={() => onUnlinkLinkedBoard?.(board.id)}
                                                             >
-                                                                 {unlinkingBoardId === board.id ? "Đang hủy..." : "Hủy liên kết mạch"}
+                                                                 {unlinkingBoardId === board.id ? "Đang hủy..." : "Hủy liên kết"}
                                                             </Button>
                                                        </div>
 

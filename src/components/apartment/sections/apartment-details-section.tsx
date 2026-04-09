@@ -157,7 +157,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {editMode ? (
                          <>
-                              <FieldBlock label="Tên tòa nhà">
+                              <FieldBlock label="Tên tòa nhà" required error={getFieldError("buildingName")}>
                                    <Input value={form.buildingName || ""} onChange={(e) => setField("buildingName", e.target.value || undefined)} />
                               </FieldBlock>
 
@@ -173,9 +173,9 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                                    <Input value={form.floorNumber ?? ""} onChange={(e) => setNumberField("floorNumber", e.target.value)} />
                               </FieldBlock>
 
-                              <FieldBlock label="Trạng thái">
+                              <FieldBlock label="Trạng thái" required error={getFieldError("status")}>
                                    <Select value={form.status || "available"} onValueChange={(value) => setField("status", value)}>
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger className="w-full" aria-invalid={getFieldError("status") ? true : undefined}>
                                              <SelectValue placeholder="Chọn trạng thái" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -235,7 +235,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                                    ) : null}
                               </FieldBlock>
 
-                              <FieldBlock label="Số phòng ngủ" required error={getFieldError("numberOfBedrooms")}>
+                              <FieldBlock label="Số phòng ngủ" error={getFieldError("numberOfBedrooms")}>
                                    <Input
                                         value={form.numberOfBedrooms ?? ""}
                                         onChange={(e) => setNumberField("numberOfBedrooms", e.target.value)}
@@ -243,7 +243,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                                    />
                               </FieldBlock>
 
-                              <FieldBlock label="Số phòng tắm" required error={getFieldError("numberOfBathrooms")}>
+                              <FieldBlock label="Số phòng tắm" error={getFieldError("numberOfBathrooms")}>
                                    <Input
                                         value={form.numberOfBathrooms ?? ""}
                                         onChange={(e) => setNumberField("numberOfBathrooms", e.target.value)}
@@ -267,8 +267,12 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                                    />
                               </FieldBlock>
 
-                              <FieldBlock label="Tiền cọc (VNĐ)">
-                                   <Input value={formatVNDInput(form.depositAmount)} onChange={(e) => setCurrencyField("depositAmount", e.target.value)} />
+                              <FieldBlock label="Tiền cọc (VNĐ)" required error={getFieldError("depositAmount")}>
+                                   <Input
+                                        value={formatVNDInput(form.depositAmount)}
+                                        onChange={(e) => setCurrencyField("depositAmount", e.target.value)}
+                                        aria-invalid={getFieldError("depositAmount") ? true : undefined}
+                                   />
                                    {onSelectDepositPreset ? (
                                         <div className="pt-1">
                                              <p className="mb-1 text-[11px] text-muted-foreground">Chọn nhanh theo giá thuê</p>
@@ -296,15 +300,19 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                                    ) : null}
                               </FieldBlock>
 
-                              <FieldBlock label="Địa chỉ hành chính" className="md:col-span-2 xl:col-span-3">
+                              <FieldBlock label="Địa chỉ hành chính" required error={getFieldError("wardCode")} className="md:col-span-2 xl:col-span-3">
                                    <ApartmentAddressFields
                                         initialCodes={{ provinceCode: initialProvinceCode, wardCode: form.wardCode }}
                                         onChange={({ wardCode }: { wardCode?: number }) => setField("wardCode", wardCode)}
                                    />
                               </FieldBlock>
 
-                              <FieldBlock label="Số nhà, đường" className="md:col-span-2 xl:col-span-3">
-                                   <Input value={form.streetAddress || ""} onChange={(e) => setField("streetAddress", e.target.value || undefined)} />
+                              <FieldBlock label="Số nhà, đường" required error={getFieldError("streetAddress")} className="md:col-span-2 xl:col-span-3">
+                                   <Input
+                                        value={form.streetAddress || ""}
+                                        onChange={(e) => setField("streetAddress", e.target.value || undefined)}
+                                        aria-invalid={getFieldError("streetAddress") ? true : undefined}
+                                   />
                               </FieldBlock>
 
                               <FieldBlock label="Vĩ độ" className="md:col-span-1 xl:col-span-1">
