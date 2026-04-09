@@ -9,7 +9,50 @@ type UseApartmentEditorStateParams = {
      initialForm: ApartmentForm | null
      defaultCreateForm: ApartmentForm
      initialRoomTags: string[]
-     initialIotBoardId?: string
+}
+
+type ApartmentFormPatch = Partial<Record<keyof ApartmentForm, unknown>>
+
+const NUMBER_FIELDS = new Set<keyof ApartmentForm>([
+     "floorNumber",
+     "wardCode",
+     "latitude",
+     "longitude",
+     "yearBuilt",
+     "totalArea",
+     "usableArea",
+     "numberOfBedrooms",
+     "numberOfBathrooms",
+     "maxOccupants",
+])
+
+const CURRENCY_FIELDS = new Set<keyof ApartmentForm>([
+     "baseRentPrice",
+     "depositAmount",
+])
+
+const toNumberValue = (raw: unknown) => {
+     if (typeof raw === "number") {
+          return Number.isNaN(raw) ? undefined : raw
+     }
+
+     if (typeof raw === "string") {
+          return parseNumber(raw)
+     }
+
+     return undefined
+}
+
+const toCurrencyValue = (raw: unknown) => {
+     if (typeof raw === "number") {
+          return Number.isNaN(raw) ? undefined : raw
+     }
+
+     if (typeof raw === "string") {
+          return parseVNDInput(raw)
+     }
+
+     return undefined
 }
 
 export function useApartmentEditorState({
@@ -17,7 +60,6 @@ export function useApartmentEditorState({
      initialForm,
      defaultCreateForm,
      initialRoomTags,
-     initialIotBoardId,
 }: UseApartmentEditorStateParams) {
      const [manualEditMode, setManualEditMode] = useState(false)
      const [draftForm, setDraftForm] = useState<ApartmentForm | null>(() =>
@@ -26,43 +68,53 @@ export function useApartmentEditorState({
      const [selectedDepositPreset, setSelectedDepositPreset] = useState<DepositPreset | null>(null)
 
      const [tenantCount, setTenantCount] = useState(0)
-     const [selectedIotBoardId, setSelectedIotBoardId] = useState<string | undefined>()
      const [roomTags, setRoomTags] = useState<string[]>([])
 
      const form = useMemo(() => draftForm || initialForm, [draftForm, initialForm])
 
-     const setField = (key: string, value: unknown) => {
+     const updateField = (key: keyof ApartmentForm, rawValue: unknown): ApartmentFormPatch => {
+          let patch: ApartmentFormPatch = {}
+
+          if (CURRENCY_FIELDS.has(key)) {
+               const parsedValue = toCurrencyValue(rawValue)
+
+               if (key === "depositAmount") {
+                    setSelectedDepositPreset(null)
+               }
+
+               if (key === "baseRentPrice" && selectedDepositPreset && parsedValue !== undefined) {
+                    patch = {
+                         baseRentPrice: parsedValue,
+                         depositAmount: parsedValue > 0 ? parsedValue * selectedDepositPreset : undefined,
+                    }
+               } else {
+                    patch = { [key]: parsedValue }
+               }
+          } else if (NUMBER_FIELDS.has(key)) {
+               patch = { [key]: toNumberValue(rawValue) }
+          } else {
+               patch = { [key]: rawValue }
+          }
+
           setDraftForm((prev) => ({
                ...(prev || initialForm || defaultCreateForm),
-               [key]: value,
+               ...patch,
           } as ApartmentForm))
+
+          return patch
+     }
+
+     // Compatibility wrappers for existing call sites during migration.
+     const setField = (key: string, value: unknown) => {
+          updateField(key as keyof ApartmentForm, value)
      }
 
      const setNumberField = (key: string, raw: string) => {
-          setField(key, parseNumber(raw))
+          updateField(key as keyof ApartmentForm, raw)
      }
 
      const setCurrencyField = (key: string, raw: string) => {
-          const parsedValue = parseVNDInput(raw)
-
-          if (key === "depositAmount") {
-               setSelectedDepositPreset(null)
-          }
-
-          if (key === "baseRentPrice" && selectedDepositPreset && parsedValue !== undefined) {
-               setDraftForm((prev) => {
-                    const baseForm = prev || initialForm || defaultCreateForm
-                    const nextRent = parsedValue
-                    return {
-                         ...baseForm,
-                         baseRentPrice: nextRent,
-                         depositAmount: nextRent > 0 ? nextRent * selectedDepositPreset : undefined,
-                    } as ApartmentForm
-               })
-               return
-          }
-
-          setField(key, parsedValue)
+          updateField(key as keyof ApartmentForm, raw)
      }
 
      const applyDepositPreset = (value: DepositPreset) => {
@@ -78,7 +130,6 @@ export function useApartmentEditorState({
      const resetTransientState = () => {
           setSelectedDepositPreset(null)
           setRoomTags(initialRoomTags)
-          setSelectedIotBoardId(initialIotBoardId)
      }
 
      const startEditDraft = () => {
@@ -100,10 +151,9 @@ export function useApartmentEditorState({
           selectedDepositPreset,
           tenantCount,
           setTenantCount,
-          selectedIotBoardId,
-          setSelectedIotBoardId,
           roomTags,
           setRoomTags,
+          updateField,
           setField,
           setNumberField,
           setCurrencyField,

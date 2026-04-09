@@ -1,6 +1,6 @@
 "use client"
 
-import { ApartmentDetailEditor } from "@/components/apartment"
+import { ApartmentDetailEditor } from "@/components/apartment/apartment-detail-editor"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 
 type ApartmentDetailModalProps = {

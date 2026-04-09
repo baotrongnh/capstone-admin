@@ -18,13 +18,47 @@ type ApartmentRoomsSectionProps = {
      onRoomTagsChange: (value: string[]) => void
 }
 
-export function ApartmentRoomsSection({
-     editMode,
-     roomTags,
-     roomOptions,
-     rooms,
-     onRoomTagsChange,
-}: ApartmentRoomsSectionProps) {
+export type ApartmentRoomsSectionModel = {
+     editMode: boolean
+     roomTags: string[]
+     roomOptions: string[]
+     rooms: ApartmentRooms
+}
+
+export type ApartmentRoomsSectionActions = {
+     onRoomTagsChange: (value: string[]) => void
+}
+
+type ApartmentRoomsSectionModelProps = {
+     model: ApartmentRoomsSectionModel
+     actions: ApartmentRoomsSectionActions
+}
+
+function resolveRoomsSectionProps(
+     props: ApartmentRoomsSectionProps | ApartmentRoomsSectionModelProps,
+) {
+     if ("model" in props) {
+          return {
+               editMode: props.model.editMode,
+               roomTags: props.model.roomTags,
+               roomOptions: props.model.roomOptions,
+               rooms: props.model.rooms,
+               onRoomTagsChange: props.actions.onRoomTagsChange,
+          }
+     }
+
+     return props
+}
+
+export function ApartmentRoomsSection(props: ApartmentRoomsSectionProps | ApartmentRoomsSectionModelProps) {
+     const {
+          editMode,
+          roomTags,
+          roomOptions,
+          rooms,
+          onRoomTagsChange,
+     } = resolveRoomsSectionProps(props)
+
      return (
           <SectionCard>
                <SectionTitle
@@ -78,7 +112,17 @@ type ApartmentTenantSectionProps = {
      tenants: ApartmentTenants
 }
 
-export function ApartmentTenantSection({ tenants }: ApartmentTenantSectionProps) {
+export type ApartmentTenantSectionModel = {
+     tenants: ApartmentTenants
+}
+
+type ApartmentTenantSectionModelProps = {
+     model: ApartmentTenantSectionModel
+}
+
+export function ApartmentTenantSection(props: ApartmentTenantSectionProps | ApartmentTenantSectionModelProps) {
+     const tenants = "model" in props ? props.model.tenants : props.tenants
+
      return (
           <SectionCard>
                <SectionTitle
@@ -116,12 +160,46 @@ type ApartmentRentalSummarySectionProps = {
      onTenantCountChange: (value: number) => void
 }
 
-export function ApartmentRentalSummarySection({
-     editMode,
-     tenantCount,
-     utilityMeterCount,
-     onTenantCountChange,
-}: ApartmentRentalSummarySectionProps) {
+export type ApartmentRentalSummarySectionModel = {
+     editMode: boolean
+     tenantCount: number
+     utilityMeterCount: number
+}
+
+export type ApartmentRentalSummarySectionActions = {
+     onTenantCountChange: (value: number) => void
+}
+
+type ApartmentRentalSummarySectionModelProps = {
+     model: ApartmentRentalSummarySectionModel
+     actions: ApartmentRentalSummarySectionActions
+}
+
+function resolveRentalSummarySectionProps(
+     props: ApartmentRentalSummarySectionProps | ApartmentRentalSummarySectionModelProps,
+) {
+     if ("model" in props) {
+          return {
+               editMode: props.model.editMode,
+               tenantCount: props.model.tenantCount,
+               utilityMeterCount: props.model.utilityMeterCount,
+               onTenantCountChange: props.actions.onTenantCountChange,
+          }
+     }
+
+     return props
+}
+
+export function ApartmentRentalSummarySection(
+     props: ApartmentRentalSummarySectionProps | ApartmentRentalSummarySectionModelProps,
+) {
+     const {
+          editMode,
+          tenantCount,
+          utilityMeterCount,
+          onTenantCountChange,
+     } = resolveRentalSummarySectionProps(props)
+
      return (
           <SectionCard>
                <SectionTitle

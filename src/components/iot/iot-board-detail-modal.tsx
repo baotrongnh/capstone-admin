@@ -50,6 +50,12 @@ export function IotBoardDetailModal({
                                         <span className="text-muted-foreground">Căn hộ:</span> {board.apartment?.apartmentNumber || "Chưa liên kết"}
                                    </p>
                                    <p>
+                                        <span className="text-muted-foreground">Địa chỉ căn hộ:</span> {board.apartment?.address || "-"}
+                                   </p>
+                                   <p>
+                                        <span className="text-muted-foreground">ID căn hộ:</span> {board.apartment?.id || "-"}
+                                   </p>
+                                   <p>
                                         <span className="text-muted-foreground">Cập nhật:</span> {formatDateTime(board.updatedAt)}
                                    </p>
                                    <div className="md:col-span-2">

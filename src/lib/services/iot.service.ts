@@ -10,6 +10,8 @@ import {
      IotBoardDeviceUpdateResponse,
      IotBoardListQuery,
      IotBoardListResponse,
+     IotApartmentBoardsUnlinkResponse,
+     IotBoardUnlinkApartmentResponse,
      IotBoardUpdateRequest,
      IotBoardUpdateResponse,
 } from "@/types/iot"
@@ -42,6 +44,18 @@ export const iotService = {
 
      deleteBoard: async (boardId: string): Promise<IotBoardDeleteResponse> => {
           const { data } = await apiClient.delete(`${endpoints.iot}/boards/${boardId}`)
+          return data
+     },
+
+     unlinkBoardApartment: async (boardId: string): Promise<IotBoardUnlinkApartmentResponse> => {
+          const { data } = await apiClient.patch(`${endpoints.iot}/boards/${boardId}/unlink-apartment`)
+          return data
+     },
+
+     unlinkBoardsByApartment: async (apartmentId: string): Promise<IotApartmentBoardsUnlinkResponse> => {
+          const { data } = await apiClient.patch(
+               `${endpoints.iot}/boards/unlink-apartment-by-apartment/${apartmentId}`,
+          )
           return data
      },
 

@@ -31,13 +31,18 @@ export type ApartmentOwnerSummary = {
 export type GeocodeStatus = "idle" | "loading" | "success" | "not_found" | "error"
 
 export type ApartmentValidationField =
+     | "buildingName"
      | "apartmentNumber"
+     | "status"
      | "totalArea"
      | "numberOfBedrooms"
      | "numberOfBathrooms"
      | "maxOccupants"
      | "baseRentPrice"
+     | "depositAmount"
      | "furnishingStatus"
+     | "wardCode"
+     | "streetAddress"
 
 export type ApartmentFilterPatch = paths["/api/v1/apartments/search"]["get"]["parameters"]["query"]
 
