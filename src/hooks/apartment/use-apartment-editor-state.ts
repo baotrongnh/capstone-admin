@@ -9,7 +9,6 @@ type UseApartmentEditorStateParams = {
      initialForm: ApartmentForm | null
      defaultCreateForm: ApartmentForm
      initialRoomTags: string[]
-     initialIotBoardId?: string
 }
 
 export function useApartmentEditorState({
@@ -17,7 +16,6 @@ export function useApartmentEditorState({
      initialForm,
      defaultCreateForm,
      initialRoomTags,
-     initialIotBoardId,
 }: UseApartmentEditorStateParams) {
      const [manualEditMode, setManualEditMode] = useState(false)
      const [draftForm, setDraftForm] = useState<ApartmentForm | null>(() =>
@@ -26,7 +24,6 @@ export function useApartmentEditorState({
      const [selectedDepositPreset, setSelectedDepositPreset] = useState<DepositPreset | null>(null)
 
      const [tenantCount, setTenantCount] = useState(0)
-     const [selectedIotBoardId, setSelectedIotBoardId] = useState<string | undefined>()
      const [roomTags, setRoomTags] = useState<string[]>([])
 
      const form = useMemo(() => draftForm || initialForm, [draftForm, initialForm])
@@ -78,7 +75,6 @@ export function useApartmentEditorState({
      const resetTransientState = () => {
           setSelectedDepositPreset(null)
           setRoomTags(initialRoomTags)
-          setSelectedIotBoardId(initialIotBoardId)
      }
 
      const startEditDraft = () => {
@@ -100,8 +96,6 @@ export function useApartmentEditorState({
           selectedDepositPreset,
           tenantCount,
           setTenantCount,
-          selectedIotBoardId,
-          setSelectedIotBoardId,
           roomTags,
           setRoomTags,
           setField,

@@ -26,7 +26,6 @@ type IotBoardTableProps = {
      isDeletingBoard: boolean
      onEditBoard: (board: IotBoardItem) => void
      onViewBoardDetails: (board: IotBoardItem) => void
-     onCreateDevice: (boardId: string) => void
      onDeleteBoard: (boardId: string, boardName: string) => void
 }
 
@@ -36,7 +35,6 @@ export function IotBoardTable({
      isDeletingBoard,
      onEditBoard,
      onViewBoardDetails,
-     onCreateDevice,
      onDeleteBoard,
 }: IotBoardTableProps) {
      return (
@@ -120,7 +118,7 @@ export function IotBoardTable({
                                                             disabled={isDeletingBoard}
                                                             onClick={() => onDeleteBoard(board.id, board.name || board.id)}
                                                        >
-                                                            Xóa
+                                                            Vô hiệu hóa
                                                        </DropdownMenuItem>
                                                   </DropdownMenuContent>
                                              </DropdownMenu>

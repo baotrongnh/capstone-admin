@@ -2,6 +2,7 @@
 
 import { iotService } from "@/lib/services/iot.service"
 import {
+     IotApartmentBoardsUnlinkResponse,
      IotBoardCreateLiteRequest,
      IotBoardDeleteResponse,
      IotBoardDeviceCreateLiteRequest,
@@ -9,12 +10,17 @@ import {
      IotBoardDeviceUpdateRequest,
      IotBoardDeviceUpdateResponse,
      IotBoardListQuery,
+     IotBoardUnlinkApartmentResponse,
      IotBoardUpdateRequest,
 } from "@/types/iot"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { message } from "antd"
 
 const IOT_BOARD_QUERY_KEY = "iot-boards"
+
+const invalidateBoardQueries = (queryClient: QueryClient) => {
+     queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
+}
 
 export const useIotBoards = (params?: IotBoardListQuery) =>
      useQuery({
@@ -35,7 +41,7 @@ export const useCreateIotBoard = () => {
      return useMutation({
           mutationFn: (payload: IotBoardCreateLiteRequest) => iotService.createBoard(payload),
           onSuccess: () => {
-               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
+               invalidateBoardQueries(queryClient)
                message.success("Tạo board IoT thành công!")
           },
           onError: (error) => {
@@ -51,7 +57,7 @@ export const useUpdateIotBoard = () => {
           mutationFn: ({ boardId, payload }: { boardId: string; payload: IotBoardUpdateRequest }) =>
                iotService.updateBoard(boardId, payload),
           onSuccess: (_, variables) => {
-               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
+               invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
                message.success("Cập nhật board IoT thành công!")
           },
@@ -67,8 +73,43 @@ export const useDeleteIotBoard = () => {
      return useMutation({
           mutationFn: (boardId: string): Promise<IotBoardDeleteResponse> => iotService.deleteBoard(boardId),
           onSuccess: () => {
-               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
-               message.success("Đã xóa board IoT!")
+               invalidateBoardQueries(queryClient)
+               message.success("Đã khóa mạch IoT và thiết bị con!")
+          },
+          onError: (error) => {
+               message.error(error?.message || "Có lỗi xảy ra!")
+          },
+     })
+}
+
+export const useUnlinkBoardApartment = () => {
+     const queryClient = useQueryClient()
+
+     return useMutation({
+          mutationFn: (boardId: string): Promise<IotBoardUnlinkApartmentResponse> =>
+               iotService.unlinkBoardApartment(boardId),
+          onSuccess: (_, boardId) => {
+               invalidateBoardQueries(queryClient)
+               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, boardId] })
+               message.success("Đã hủy liên kết căn hộ khỏi mạch IoT!")
+          },
+          onError: (error) => {
+               message.error(error?.message || "Có lỗi xảy ra!")
+          },
+     })
+}
+
+export const useUnlinkBoardsByApartment = () => {
+     const queryClient = useQueryClient()
+
+     return useMutation({
+          mutationFn: (apartmentId: string): Promise<IotApartmentBoardsUnlinkResponse> =>
+               iotService.unlinkBoardsByApartment(apartmentId),
+          onSuccess: (response) => {
+               invalidateBoardQueries(queryClient)
+               const affectedBoards = response?.data?.affectedBoards ?? 0
+               const affectedDevices = response?.data?.affectedDevices ?? 0
+               message.success(`Đã hủy liên kết ${affectedBoards} mạch (${affectedDevices} thiết bị).`)
           },
           onError: (error) => {
                message.error(error?.message || "Có lỗi xảy ra!")
@@ -88,7 +129,7 @@ export const useCreateIotBoardDevice = () => {
                payload: IotBoardDeviceCreateLiteRequest
           }) => iotService.createBoardDevice(boardId, payload),
           onSuccess: (_, variables) => {
-               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
+               invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
                message.success("Thêm thiết bị IoT thành công!")
           },
@@ -113,7 +154,7 @@ export const useUpdateIotBoardDevice = () => {
           }): Promise<IotBoardDeviceUpdateResponse> =>
                iotService.updateBoardDevice(boardId, deviceId, payload),
           onSuccess: (_, variables) => {
-               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
+               invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
                message.success("Cập nhật thiết bị IoT thành công!")
           },
@@ -136,7 +177,7 @@ export const useDeleteIotBoardDevice = () => {
           }): Promise<IotBoardDeviceDeleteResponse> =>
                iotService.deleteBoardDevice(boardId, deviceId),
           onSuccess: (_, variables) => {
-               queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
+               invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
                message.success("Đã xóa thiết bị IoT!")
           },

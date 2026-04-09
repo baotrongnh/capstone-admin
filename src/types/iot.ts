@@ -32,6 +32,12 @@ export type IotBoardUpdateRequest = Omit<
 export type IotBoardUpdateResponse =
      paths["/api/v1/iot/boards/{boardId}"]["patch"]["responses"]["200"]["content"]["application/json"]
 
+export type IotBoardUnlinkApartmentResponse =
+     paths["/api/v1/iot/boards/{boardId}/unlink-apartment"]["patch"]["responses"]["200"]["content"]["application/json"]
+
+export type IotApartmentBoardsUnlinkResponse =
+     paths["/api/v1/iot/boards/unlink-apartment-by-apartment/{apartmentId}"]["patch"]["responses"]["200"]["content"]["application/json"]
+
 export type IotBoardDeleteResponse =
      paths["/api/v1/iot/boards/{boardId}"]["delete"]["responses"]["200"]["content"]["application/json"]
 
@@ -59,3 +65,5 @@ export type IotBoardItem = NonNullable<IotBoardListResponse["data"]>[number]
 export type IotBoardDetail = NonNullable<IotBoardDetailResponse["data"]>
 export type IotBoardDeviceItem = NonNullable<IotBoardDetail["devices"]>[number]
 export type IotBoardDeleteResult = NonNullable<IotBoardDeleteResponse["data"]>
+export type IotBoardUnlinkResult = NonNullable<IotBoardUnlinkApartmentResponse["data"]>
+export type IotApartmentBoardsUnlinkResult = NonNullable<IotApartmentBoardsUnlinkResponse["data"]>
