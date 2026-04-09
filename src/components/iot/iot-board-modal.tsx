@@ -97,8 +97,8 @@ export function IotBoardModal({
                                    <SelectContent>
                                         <SelectItem value="active">{STATUS_LABEL_MAP.active}</SelectItem>
                                         <SelectItem value="inactive">{STATUS_LABEL_MAP.inactive}</SelectItem>
-                                        <SelectItem value="maintenance">{STATUS_LABEL_MAP.maintenance}</SelectItem>
-                                        <SelectItem value="error">{STATUS_LABEL_MAP.error}</SelectItem>
+                                        {/* <SelectItem value="maintenance">{STATUS_LABEL_MAP.maintenance}</SelectItem> */}
+                                        {/* <SelectItem value="error">{STATUS_LABEL_MAP.error}</SelectItem> */}
                                    </SelectContent>
                               </Select>
                          </div>

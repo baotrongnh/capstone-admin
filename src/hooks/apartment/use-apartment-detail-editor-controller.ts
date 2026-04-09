@@ -4,6 +4,7 @@ import type { DepositPreset } from "@/hooks/apartment/use-apartment-editor-state
 import { useApartmentFormValidation } from "@/hooks/apartment/use-apartment-form-validation"
 import { useApartmentIotAssignment } from "@/hooks/apartment/use-apartment-iot-assignment"
 import { buildApartmentFormData } from "@/lib/apartment/apartment-form-data"
+import type { ApartmentStatus } from "@/types/apartment"
 import type { ApartmentForm } from "@/types/apartment-form"
 import { message } from "antd"
 
@@ -18,6 +19,7 @@ type UseApartmentDetailEditorControllerParams = {
           isRouteEditMode: boolean
           allowEdit: boolean
           apartmentId: string | null
+          initialStatus?: ApartmentStatus | null
           roomTags: string[]
           initialRoomTags: string[]
           canSaveChanges: boolean
@@ -79,6 +81,7 @@ export function useApartmentDetailEditorController({
           isRouteEditMode,
           allowEdit,
           apartmentId,
+          initialStatus,
           roomTags,
           initialRoomTags,
           canSaveChanges,
@@ -132,6 +135,15 @@ export function useApartmentDetailEditorController({
      }
 
      const validateBeforeSave = async () => {
+          if (
+               !isCreateMode &&
+               (initialStatus === "occupied" || initialStatus === "reserved") &&
+               form?.status === "available"
+          ) {
+               message.error("Căn hộ đang cho thuê hoặc đã đặt cọc không thể chuyển về trạng thái còn trống")
+               return false
+          }
+
           const validationResult = await formValidation.validateRequired()
           if (!validationResult.isValid) {
                message.error(validationResult.firstErrorMessage || "Vui lòng kiểm tra lại thông tin bắt buộc")
