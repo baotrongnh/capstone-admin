@@ -49,6 +49,7 @@
       "time": "Time",
       "minutes": "minutes",
       "location": "Location",
+      "note": "Note",
       "guestNotes": "Guest notes",
       "staffNotes": "Staff notes"
     },

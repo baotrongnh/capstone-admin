@@ -18,23 +18,32 @@ type MyViewingRequestItem = NonNullable<MyViewingRequestsResponse["data"]>[numbe
 
 const normalizeMyViewingRequest = (
     appointment: MyViewingRequestItem,
-): Appointment => ({
-    id: appointment.appointmentId,
-    apartmentId: appointment.apartment.id,
-    assignedStaffId: appointment.assignedStaff.id,
-    appointmentDate: appointment.appointmentAt,
-    appointmentTime: appointment.appointmentAt,
-    durationMinutes: appointment.durationMinutes,
-    meetingLocation: appointment.apartment.streetAddress ?? null,
-    type: "physical_viewing",
-    status: appointment.status,
-    guestNotes: appointment.note ?? null,
-    staffNotes: null,
-    outcome: null,
-    followupRequired: false,
-    createdAt: appointment.createdAt,
-    updatedAt: appointment.createdAt,
-})
+): Appointment => {
+    const cancellationReason =
+        "cancellationReason" in appointment &&
+            typeof appointment.cancellationReason === "string" &&
+            appointment.cancellationReason.trim().length > 0
+            ? appointment.cancellationReason
+            : null
+
+    return {
+        id: appointment.appointmentId,
+        apartmentId: appointment.apartment.id,
+        assignedStaffId: appointment.assignedStaff.id,
+        appointmentDate: appointment.appointmentAt,
+        appointmentTime: appointment.appointmentAt,
+        durationMinutes: appointment.durationMinutes,
+        meetingLocation: appointment.apartment.streetAddress ?? null,
+        type: "physical_viewing",
+        status: appointment.status,
+        guestNotes: appointment.note ?? null,
+        staffNotes: cancellationReason,
+        outcome: null,
+        followupRequired: false,
+        createdAt: appointment.createdAt,
+        updatedAt: appointment.createdAt,
+    }
+}
 
 export const viewingRequestService = {
     getAppointments: async (): Promise<AssignedAppointmentsResponse> => {
