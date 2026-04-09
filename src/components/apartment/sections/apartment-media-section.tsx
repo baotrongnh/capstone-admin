@@ -26,6 +26,50 @@ type ApartmentMediaSectionProps = {
      onRemoveSelectedVideo: () => void
 }
 
+export type ApartmentMediaSectionModel = {
+     editMode: boolean
+     existingImages: string[]
+     selectedImagePreviews: ImagePreview[]
+     selectedVideoFile: File | null
+     selectedVideoPreviewUrl: string
+     videoTourUrl?: string
+}
+
+export type ApartmentMediaSectionActions = {
+     onSelectImages: (event: ChangeEvent<HTMLInputElement>) => void
+     onSelectVideo: (event: ChangeEvent<HTMLInputElement>) => void
+     onRemoveExistingImage: (index: number) => void
+     onRemoveSelectedImage: (index: number) => void
+     onRemoveSelectedVideo: () => void
+}
+
+type ApartmentMediaSectionModelProps = {
+     model: ApartmentMediaSectionModel
+     actions: ApartmentMediaSectionActions
+}
+
+function resolveMediaSectionProps(
+     props: ApartmentMediaSectionProps | ApartmentMediaSectionModelProps,
+) {
+     if ("model" in props) {
+          return {
+               editMode: props.model.editMode,
+               existingImages: props.model.existingImages,
+               selectedImagePreviews: props.model.selectedImagePreviews,
+               selectedVideoFile: props.model.selectedVideoFile,
+               selectedVideoPreviewUrl: props.model.selectedVideoPreviewUrl,
+               videoTourUrl: props.model.videoTourUrl,
+               onSelectImages: props.actions.onSelectImages,
+               onSelectVideo: props.actions.onSelectVideo,
+               onRemoveExistingImage: props.actions.onRemoveExistingImage,
+               onRemoveSelectedImage: props.actions.onRemoveSelectedImage,
+               onRemoveSelectedVideo: props.actions.onRemoveSelectedVideo,
+          }
+     }
+
+     return props
+}
+
 type VideoPreviewCardProps = {
      src: string
      title: string
@@ -88,19 +132,21 @@ function MediaImageCard({ src, alt, onRemove, removeAriaLabel }: MediaImageCardP
      )
 }
 
-export function ApartmentMediaSection({
-     editMode,
-     existingImages,
-     selectedImagePreviews,
-     selectedVideoFile,
-     selectedVideoPreviewUrl,
-     videoTourUrl,
-     onSelectImages,
-     onSelectVideo,
-     onRemoveExistingImage,
-     onRemoveSelectedImage,
-     onRemoveSelectedVideo,
-}: ApartmentMediaSectionProps) {
+export function ApartmentMediaSection(props: ApartmentMediaSectionProps | ApartmentMediaSectionModelProps) {
+     const {
+          editMode,
+          existingImages,
+          selectedImagePreviews,
+          selectedVideoFile,
+          selectedVideoPreviewUrl,
+          videoTourUrl,
+          onSelectImages,
+          onSelectVideo,
+          onRemoveExistingImage,
+          onRemoveSelectedImage,
+          onRemoveSelectedVideo,
+     } = resolveMediaSectionProps(props)
+
      const [videoDialog, setVideoDialog] = useState<{
           open: boolean
           url: string | null

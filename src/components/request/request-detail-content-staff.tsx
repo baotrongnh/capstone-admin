@@ -1,5 +1,11 @@
 "use client";
 
+import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section";
+import { ApartmentMediaSection } from "@/components/apartment/sections/apartment-media-section";
+import {
+  ApartmentAmenitySection,
+  ApartmentOwnerSection,
+} from "@/components/apartment/sections/apartment-profile-sections";
 import { Button } from "@/components/ui/button";
 import { useFullAddress } from "@/hooks/query/useAddress";
 import { useAmenities } from "@/hooks/query/useAmenities";
@@ -36,14 +42,8 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import {
-  ApartmentDetailsSection,
-  ApartmentAmenitySection,
-  ApartmentOwnerSection,
-  ApartmentMediaSection,
-} from "@/components/apartment";
 import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 type RequestDetailContentProps = {
   apartmentId: string | null;
@@ -474,16 +474,20 @@ export function RequestDetailContent({
         {detailApartment && form && (
           <div className="space-y-5">
             <ApartmentDetailsSection
-              editMode={editMode}
-              form={form}
-              detailItems={detailItems}
-              fullAddress={fullAddress}
-              availableYears={availableYears}
-              usableAreaInvalid={usableAreaInvalid}
-              initialProvinceCode={detailApartment.provinceCode || undefined}
-              setField={setField}
-              setNumberField={setNumberField}
-              setCurrencyField={setCurrencyField}
+              model={{
+                editMode,
+                form,
+                detailItems,
+                fullAddress,
+                availableYears,
+                usableAreaInvalid,
+                initialProvinceCode: detailApartment.provinceCode || undefined,
+              } satisfies ApartmentDetailsSectionModel}
+              actions={{
+                setField,
+                setNumberField,
+                setCurrencyField,
+              } satisfies ApartmentDetailsSectionActions}
             />
 
             <ApartmentOwnerSection

@@ -22,14 +22,50 @@ type ApartmentOwnerSectionProps = {
      onOwnerChange: (ownerId?: string) => void
 }
 
-export function ApartmentOwnerSection({
-     editMode,
-     ownerSummary,
-     ownerId,
-     ownerOptions,
-     usersLoading,
-     onOwnerChange,
-}: ApartmentOwnerSectionProps) {
+export type ApartmentOwnerSectionModel = {
+     editMode: boolean
+     ownerSummary: ApartmentOwnerSummary
+     ownerId?: string
+     ownerOptions: ApartmentOwnerOption[]
+     usersLoading: boolean
+}
+
+export type ApartmentOwnerSectionActions = {
+     onOwnerChange: (ownerId?: string) => void
+}
+
+type ApartmentOwnerSectionModelProps = {
+     model: ApartmentOwnerSectionModel
+     actions: ApartmentOwnerSectionActions
+}
+
+function resolveOwnerSectionProps(
+     props: ApartmentOwnerSectionProps | ApartmentOwnerSectionModelProps,
+) {
+     if ("model" in props) {
+          return {
+               editMode: props.model.editMode,
+               ownerSummary: props.model.ownerSummary,
+               ownerId: props.model.ownerId,
+               ownerOptions: props.model.ownerOptions,
+               usersLoading: props.model.usersLoading,
+               onOwnerChange: props.actions.onOwnerChange,
+          }
+     }
+
+     return props
+}
+
+export function ApartmentOwnerSection(props: ApartmentOwnerSectionProps | ApartmentOwnerSectionModelProps) {
+     const {
+          editMode,
+          ownerSummary,
+          ownerId,
+          ownerOptions,
+          usersLoading,
+          onOwnerChange,
+     } = resolveOwnerSectionProps(props)
+
      const currentOwnerId = ownerId || ownerSummary.id || undefined
 
      return (
@@ -87,15 +123,53 @@ type ApartmentAmenitySectionProps = {
      onAmenitiesChange: (value: string[]) => void
 }
 
-export function ApartmentAmenitySection({
-     editMode,
-     description,
-     amenityIds,
-     options,
-     amenitiesLoading = false,
-     onDescriptionChange,
-     onAmenitiesChange,
-}: ApartmentAmenitySectionProps) {
+export type ApartmentAmenitySectionModel = {
+     editMode: boolean
+     description?: string
+     amenityIds: string[]
+     options: AmenityOption[]
+     amenitiesLoading?: boolean
+}
+
+export type ApartmentAmenitySectionActions = {
+     onDescriptionChange: (value?: string) => void
+     onAmenitiesChange: (value: string[]) => void
+}
+
+type ApartmentAmenitySectionModelProps = {
+     model: ApartmentAmenitySectionModel
+     actions: ApartmentAmenitySectionActions
+}
+
+function resolveAmenitySectionProps(
+     props: ApartmentAmenitySectionProps | ApartmentAmenitySectionModelProps,
+) {
+     if ("model" in props) {
+          return {
+               editMode: props.model.editMode,
+               description: props.model.description,
+               amenityIds: props.model.amenityIds,
+               options: props.model.options,
+               amenitiesLoading: props.model.amenitiesLoading,
+               onDescriptionChange: props.actions.onDescriptionChange,
+               onAmenitiesChange: props.actions.onAmenitiesChange,
+          }
+     }
+
+     return props
+}
+
+export function ApartmentAmenitySection(props: ApartmentAmenitySectionProps | ApartmentAmenitySectionModelProps) {
+     const {
+          editMode,
+          description,
+          amenityIds,
+          options,
+          amenitiesLoading = false,
+          onDescriptionChange,
+          onAmenitiesChange,
+     } = resolveAmenitySectionProps(props)
+
      const optionLabelMap = new Map(options.map((item) => [item.value, item.label]))
 
      return (

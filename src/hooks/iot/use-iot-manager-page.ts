@@ -11,6 +11,7 @@ import {
      useCreateIotBoard,
      useDeleteIotBoard,
      useIotBoards,
+     useUnlinkBoardApartment,
      useUpdateIotBoard,
 } from "@/hooks/query/useIotDevices"
 import type {
@@ -27,6 +28,8 @@ export function useIotManagerPage() {
 
      const [isBoardDialogOpen, setIsBoardDialogOpen] = useState(false)
      const [editingBoardId, setEditingBoardId] = useState<string | null>(null)
+     const [initialEditApartmentId, setInitialEditApartmentId] = useState<string | null>(null)
+     const [canSelectApartment, setCanSelectApartment] = useState(true)
      const [boardForm, setBoardForm] = useState<BoardFormState>(createDefaultBoardForm)
      const [isBoardDetailDialogOpen, setIsBoardDetailDialogOpen] = useState(false)
      const [detailBoardId, setDetailBoardId] = useState<string | null>(null)
@@ -46,6 +49,7 @@ export function useIotManagerPage() {
      const createBoard = useCreateIotBoard()
      const updateBoard = useUpdateIotBoard()
      const deleteBoard = useDeleteIotBoard()
+     const unlinkBoardApartment = useUnlinkBoardApartment()
 
      const boards = useMemo(() => boardsResponse?.data ?? [], [boardsResponse?.data])
      const apartmentOptions = apartmentResponse?.data || []
@@ -77,7 +81,7 @@ export function useIotManagerPage() {
           [boards, detailBoardId],
      )
 
-     const isBoardSaving = createBoard.isPending || updateBoard.isPending
+     const isBoardSaving = createBoard.isPending || updateBoard.isPending || unlinkBoardApartment.isPending
 
      const mapBoardToForm = (board: IotBoardItem, appendBlankDevice = false): BoardFormState => {
           const devicesFromBoard: CreateDeviceRow[] = board.devices.map((device) => {
@@ -111,11 +115,15 @@ export function useIotManagerPage() {
      const resetBoardDialog = () => {
           setIsBoardDialogOpen(false)
           setEditingBoardId(null)
+          setInitialEditApartmentId(null)
+          setCanSelectApartment(true)
           setBoardForm(createDefaultBoardForm())
      }
 
      const openCreateBoardDialog = () => {
           setEditingBoardId(null)
+          setInitialEditApartmentId(null)
+          setCanSelectApartment(true)
           setBoardForm(createDefaultBoardForm())
           setIsBoardDialogOpen(true)
      }
@@ -141,6 +149,8 @@ export function useIotManagerPage() {
      const openEditBoardDialog = (board: IotBoardItem) => {
           closeBoardDetailDialog()
           setEditingBoardId(board.id)
+          setInitialEditApartmentId(board.apartment?.id || null)
+          setCanSelectApartment(!board.apartment?.id)
           setBoardForm(mapBoardToForm(board))
           setIsBoardDialogOpen(true)
      }
@@ -151,6 +161,8 @@ export function useIotManagerPage() {
 
           closeBoardDetailDialog()
           setEditingBoardId(board.id)
+          setInitialEditApartmentId(board.apartment?.id || null)
+          setCanSelectApartment(!board.apartment?.id)
           setBoardForm(mapBoardToForm(board, true))
           setIsBoardDialogOpen(true)
      }
@@ -256,11 +268,15 @@ export function useIotManagerPage() {
                          return
                     }
 
+                    const apartmentId = canSelectApartment
+                         ? boardForm.apartmentId || undefined
+                         : undefined
+
                     await updateBoard.mutateAsync({
                          boardId: editingBoardId,
                          payload: {
                               id: boardId,
-                              apartmentId: boardForm.apartmentId || undefined,
+                              apartmentId,
                               status: boardForm.status,
                               devices: normalized,
                          },
@@ -281,6 +297,25 @@ export function useIotManagerPage() {
                }
 
                resetBoardDialog()
+          } catch {
+               // Error toast handled in hooks.
+          }
+     }
+
+     const handleUnlinkCurrentApartmentBeforeRelink = async () => {
+          if (!editingBoardId || !initialEditApartmentId) {
+               return
+          }
+
+          try {
+               await unlinkBoardApartment.mutateAsync(editingBoardId)
+               setInitialEditApartmentId(null)
+               setCanSelectApartment(true)
+               setBoardForm((prev) => ({
+                    ...prev,
+                    apartmentId: "",
+               }))
+               message.info("Đã hủy liên kết hiện tại. Bạn có thể chọn căn hộ mới.")
           } catch {
                // Error toast handled in hooks.
           }
@@ -330,6 +365,9 @@ export function useIotManagerPage() {
 
           isBoardDialogOpen,
           editingBoardId,
+          apartmentSelectDisabled: !!editingBoardId && !canSelectApartment,
+          showUnlinkCurrentApartment: !!editingBoardId && !!initialEditApartmentId && !canSelectApartment,
+          isUnlinkingCurrentApartment: unlinkBoardApartment.isPending,
           boardForm,
           isBoardSaving,
           isBoardDetailDialogOpen,
@@ -343,6 +381,7 @@ export function useIotManagerPage() {
           resetBoardDialog,
           handleSaveBoard,
           onBoardFieldChange,
+          handleUnlinkCurrentApartmentBeforeRelink,
           addCreateDeviceRow,
           removeCreateDeviceRow,
           setCreateDeviceField,

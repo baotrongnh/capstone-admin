@@ -1,17 +1,10 @@
 "use client"
 
+import { IotActionConfirmDialog } from "@/components/iot/iot-action-confirm-dialog"
 import { IotBoardDetailModal } from "@/components/iot/iot-board-detail-modal"
 import { IotBoardModal } from "@/components/iot/iot-board-modal"
 import { IotBoardTable } from "@/components/iot/iot-board-table"
 import { Button } from "@/components/ui/button"
-import {
-     Dialog,
-     DialogContent,
-     DialogDescription,
-     DialogFooter,
-     DialogHeader,
-     DialogTitle,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {
      Select,
@@ -41,6 +34,9 @@ export default function IotManagerPage() {
           deleteBoardTargetName,
           isBoardDialogOpen,
           editingBoardId,
+          apartmentSelectDisabled,
+          showUnlinkCurrentApartment,
+          isUnlinkingCurrentApartment,
           boardForm,
           isBoardSaving,
           isBoardDetailDialogOpen,
@@ -53,6 +49,7 @@ export default function IotManagerPage() {
           resetBoardDialog,
           handleSaveBoard,
           onBoardFieldChange,
+          handleUnlinkCurrentApartmentBeforeRelink,
           addCreateDeviceRow,
           removeCreateDeviceRow,
           setCreateDeviceField,
@@ -123,7 +120,6 @@ export default function IotManagerPage() {
                     isDeletingBoard={isDeletingBoard}
                     onEditBoard={openEditBoardDialog}
                     onViewBoardDetails={openBoardDetailDialog}
-                    onCreateDevice={openEditBoardForAddDevice}
                     onDeleteBoard={handleDeleteBoard}
                />
 
@@ -141,34 +137,31 @@ export default function IotManagerPage() {
                     isSaving={isBoardSaving}
                     form={boardForm}
                     apartmentOptions={apartmentOptions}
+                    apartmentSelectDisabled={apartmentSelectDisabled}
+                    showUnlinkCurrentApartment={showUnlinkCurrentApartment}
+                    isUnlinkingCurrentApartment={isUnlinkingCurrentApartment}
                     onOpenChange={onBoardDialogOpenChange}
                     onCancel={resetBoardDialog}
                     onSubmit={handleSaveBoard}
                     onFieldChange={onBoardFieldChange}
+                    onUnlinkCurrentApartment={() => void handleUnlinkCurrentApartmentBeforeRelink()}
                     onAddDevice={addCreateDeviceRow}
                     onRemoveDevice={removeCreateDeviceRow}
                     onDeviceChange={setCreateDeviceField}
                />
 
-               <Dialog open={isDeleteBoardDialogOpen} onOpenChange={onDeleteBoardDialogOpenChange}>
-                    <DialogContent showCloseButton={!isDeletingBoard} className="sm:max-w-md">
-                         <DialogHeader>
-                              <DialogTitle>Xóa mạch IoT</DialogTitle>
-                              <DialogDescription>
-                                   Bạn có chắc chắn muốn xóa mạch {deleteBoardTargetName}? Hành động này không thể hoàn tác.
-                              </DialogDescription>
-                         </DialogHeader>
-
-                         <DialogFooter>
-                              <Button variant="outline" onClick={closeDeleteBoardDialog} disabled={isDeletingBoard}>
-                                   Hủy
-                              </Button>
-                              <Button variant="destructive" onClick={() => void confirmDeleteBoard()} disabled={isDeletingBoard}>
-                                   {isDeletingBoard ? "Đang xóa..." : "Xóa mạch"}
-                              </Button>
-                         </DialogFooter>
-                    </DialogContent>
-               </Dialog>
+               <IotActionConfirmDialog
+                    open={isDeleteBoardDialogOpen}
+                    isSubmitting={isDeletingBoard}
+                    title="Khóa mạch IoT"
+                    description={`Bạn có chắc chắn muốn khóa mạch ${deleteBoardTargetName}? Mạch và thiết bị con sẽ bị vô hiệu hóa.`}
+                    confirmText="Khóa mạch"
+                    submittingText="Đang khóa..."
+                    confirmVariant="destructive"
+                    onOpenChange={onDeleteBoardDialogOpenChange}
+                    onCancel={closeDeleteBoardDialog}
+                    onConfirm={() => void confirmDeleteBoard()}
+               />
           </div>
      )
 }

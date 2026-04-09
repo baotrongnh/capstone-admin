@@ -15,7 +15,7 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select"
-import { PlusIcon, Trash2Icon } from "lucide-react"
+import { AlertTriangleIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import type { BoardFormState, CreateDeviceRow } from "./iot-shared"
 import { STATUS_LABEL_MAP, TOPIC_LABEL_MAP, TOPIC_OPTIONS } from "./iot-shared"
 
@@ -31,10 +31,14 @@ type IotBoardModalProps = {
      isSaving: boolean
      form: BoardFormState
      apartmentOptions: ApartmentOption[]
+     apartmentSelectDisabled?: boolean
+     showUnlinkCurrentApartment?: boolean
+     isUnlinkingCurrentApartment?: boolean
      onOpenChange: (open: boolean) => void
      onCancel: () => void
      onSubmit: () => void
      onFieldChange: (field: "id" | "apartmentId" | "status", value: string) => void
+     onUnlinkCurrentApartment?: () => void
      onAddDevice: () => void
      onRemoveDevice: (index: number) => void
      onDeviceChange: (index: number, field: keyof CreateDeviceRow, value: string) => void
@@ -46,10 +50,14 @@ export function IotBoardModal({
      isSaving,
      form,
      apartmentOptions,
+     apartmentSelectDisabled = false,
+     showUnlinkCurrentApartment = false,
+     isUnlinkingCurrentApartment = false,
      onOpenChange,
      onCancel,
      onSubmit,
      onFieldChange,
+     onUnlinkCurrentApartment,
      onAddDevice,
      onRemoveDevice,
      onDeviceChange,
@@ -98,16 +106,17 @@ export function IotBoardModal({
                          <div className="space-y-1.5 min-w-0">
                               <p className="text-xs text-muted-foreground">Căn hộ liên kết</p>
                               <Select
-                                   value={form.apartmentId || "__none__"}
+                                   value={isEdit ? form.apartmentId || undefined : form.apartmentId || "__none__"}
                                    onValueChange={(value) =>
-                                        onFieldChange("apartmentId", value === "__none__" ? "" : value)
+                                        onFieldChange("apartmentId", !isEdit && value === "__none__" ? "" : value)
                                    }
+                                   disabled={isEdit && apartmentSelectDisabled}
                               >
                                    <SelectTrigger className="w-full min-w-0">
-                                        <SelectValue placeholder="Không liên kết căn hộ" />
+                                        <SelectValue placeholder="Chọn căn hộ để liên kết" />
                                    </SelectTrigger>
                                    <SelectContent>
-                                        <SelectItem value="__none__">Không liên kết</SelectItem>
+                                        {!isEdit ? <SelectItem value="__none__">Không liên kết</SelectItem> : null}
                                         {apartmentOptions.map((item) => {
                                              const apartmentLabel = `${item.apartmentNumber || "-"} - ${item.buildingName || "Không rõ tòa nhà"}`
                                              return (
@@ -120,6 +129,29 @@ export function IotBoardModal({
                                         })}
                                    </SelectContent>
                               </Select>
+
+                              {isEdit && showUnlinkCurrentApartment ? (
+                                   <div className="rounded-lg border border-amber-300/70 bg-amber-50/60 p-2.5 dark:border-amber-500/40 dark:bg-amber-900/10">
+                                        <div className="flex items-start gap-2">
+                                             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
+                                             <div className="min-w-0 flex-1 space-y-2">
+                                                  <p className="text-xs text-amber-900 dark:text-amber-200">
+                                                       Cần hủy liên kết căn hộ hiện tại trước khi chọn căn hộ mới.
+                                                  </p>
+                                                  <Button
+                                                       type="button"
+                                                       variant="destructive"
+                                                       size="sm"
+                                                       className="h-7"
+                                                       disabled={isSaving || isUnlinkingCurrentApartment}
+                                                       onClick={onUnlinkCurrentApartment}
+                                                  >
+                                                       {isUnlinkingCurrentApartment ? "Đang hủy liên kết..." : "Hủy liên kết hiện tại"}
+                                                  </Button>
+                                             </div>
+                                        </div>
+                                   </div>
+                              ) : null}
                          </div>
                     </div>
 
