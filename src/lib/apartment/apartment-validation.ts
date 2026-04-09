@@ -10,6 +10,16 @@ export type ApartmentValidationError = {
 
 export type ApartmentFieldErrors = Partial<Record<ApartmentValidationField, string>>
 
+export const APARTMENT_REQUIRED_FIELDS: ApartmentValidationField[] = [
+     "apartmentNumber",
+     "totalArea",
+     "numberOfBedrooms",
+     "numberOfBathrooms",
+     "maxOccupants",
+     "baseRentPrice",
+     "furnishingStatus",
+]
+
 export const toApartmentFieldErrors = (
      errors: ApartmentValidationError[],
 ): ApartmentFieldErrors => {

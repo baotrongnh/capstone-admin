@@ -8,14 +8,12 @@ import {
      useUpdateIotBoard,
 } from "@/hooks/query/useIotDevices"
 import type { IotBoardItem } from "@/types/iot"
-import { Modal } from "antd"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 type UseApartmentIotAssignmentParams = {
      apartmentId?: string | null
      isCreateMode: boolean
      editMode: boolean
-     refetchApartmentDetail: () => Promise<unknown>
 }
 
 type SyncIotBoardAssignmentParams = {
@@ -32,12 +30,13 @@ const findInitialIotBoardIds = (boards: IotBoardItem[], apartmentId?: string | n
      return boards.filter((board) => board.apartment?.id === apartmentId).map((board) => board.id)
 }
 
-export function useApartmentIotAssignment({
-     apartmentId,
-     isCreateMode,
-     editMode,
-     refetchApartmentDetail,
-}: UseApartmentIotAssignmentParams) {
+export function useApartmentIotAssignment(params: UseApartmentIotAssignmentParams) {
+     const {
+          apartmentId,
+          isCreateMode,
+          editMode,
+     } = params
+
      const updateIotBoard = useUpdateIotBoard()
      const unlinkBoardApartment = useUnlinkBoardApartment()
      const unlinkBoardsByApartment = useUnlinkBoardsByApartment()
@@ -46,7 +45,6 @@ export function useApartmentIotAssignment({
           data: iotBoardsResponse,
           isLoading: isIotBoardsLoading,
           isFetching: isIotBoardsFetching,
-          refetch: refetchIotBoards,
      } = useIotBoards()
 
      const [selectedBoardIds, setSelectedBoardIds] = useState<string[]>([])
@@ -61,9 +59,7 @@ export function useApartmentIotAssignment({
      )
 
      useEffect(() => {
-          if (!editMode || isCreateMode || isSelectionTouched) {
-               return
-          }
+          if (!editMode || isCreateMode || isSelectionTouched) return
 
           if (selectedBoardIds.length === 0 && initialBoardIds.length > 0) {
                setSelectedBoardIds(initialBoardIds)
@@ -76,7 +72,7 @@ export function useApartmentIotAssignment({
                     .filter((board) => !board.apartment?.id || board.apartment.id === apartmentId)
                     .map((board) => ({
                          id: board.id,
-                         label: `${board.name} - ${board.id}`,
+                         label: `${board.id}`,
                          deviceCount: board.deviceCount,
                     })),
           [apartmentId, iotBoards],
@@ -154,59 +150,34 @@ export function useApartmentIotAssignment({
      }, [initialBoardIds])
 
      const unlinkLinkedBoard = useCallback(
-          (boardId: string) => {
+          async (boardId: string) => {
                if (!apartmentId || unlinkBoardApartment.isPending) {
-                    return
+                    return false
                }
 
-               const board = linkedBoards.find((item) => item.id === boardId)
-               const boardName = board?.name || boardId
-
-               Modal.confirm({
-                    title: "Hủy liên kết mạch",
-                    content: `Bạn có chắc chắn muốn hủy liên kết mạch ${boardName} khỏi căn hộ này không?`,
-                    okText: "Xác nhận",
-                    okType: "danger",
-                    cancelText: "Hủy",
-                    async onOk() {
-                         try {
-                              setUnlinkingBoardId(boardId)
-                              await unlinkBoardApartment.mutateAsync(boardId)
-                              setIsSelectionTouched(true)
-                              setSelectedBoardIds((prev) => prev.filter((id) => id !== boardId))
-                              await Promise.all([refetchApartmentDetail(), refetchIotBoards()])
-                         } finally {
-                              setUnlinkingBoardId(null)
-                         }
-                    },
-               })
+               try {
+                    setUnlinkingBoardId(boardId)
+                    await unlinkBoardApartment.mutateAsync(boardId)
+                    setIsSelectionTouched(true)
+                    setSelectedBoardIds((prev) => prev.filter((id) => id !== boardId))
+                    return true
+               } finally {
+                    setUnlinkingBoardId(null)
+               }
           },
-          [apartmentId, linkedBoards, refetchApartmentDetail, refetchIotBoards, unlinkBoardApartment],
+          [apartmentId, unlinkBoardApartment],
      )
 
-     const unlinkAllLinkedBoards = useCallback(() => {
+     const unlinkAllLinkedBoards = useCallback(async () => {
           if (!apartmentId || unlinkBoardsByApartment.isPending) {
-               return
+               return false
           }
 
-          Modal.confirm({
-               title: "Hủy liên kết toàn bộ mạch",
-               content: "Bạn có chắc chắn muốn gỡ liên kết apartment khỏi tất cả mạch đang gắn không?",
-               okText: "Xác nhận",
-               okType: "danger",
-               cancelText: "Hủy",
-               async onOk() {
-                    try {
-                         await unlinkBoardsByApartment.mutateAsync(apartmentId)
-                         setIsSelectionTouched(true)
-                         setSelectedBoardIds([])
-                         await Promise.all([refetchApartmentDetail(), refetchIotBoards()])
-                    } catch {
-                         // Error toast is already handled in useUnlinkBoardsByApartment
-                    }
-               },
-          })
-     }, [apartmentId, refetchApartmentDetail, refetchIotBoards, unlinkBoardsByApartment])
+          await unlinkBoardsByApartment.mutateAsync(apartmentId)
+          setIsSelectionTouched(true)
+          setSelectedBoardIds([])
+          return true
+     }, [apartmentId, unlinkBoardsByApartment])
 
      return {
           iotBoards,

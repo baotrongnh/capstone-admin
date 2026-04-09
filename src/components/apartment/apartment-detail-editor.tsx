@@ -1,63 +1,53 @@
 "use client"
 
-import { ApartmentDetailsSection } from "@/components/apartment/sections/apartment-details-section"
+import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section"
 import { ApartmentIotSection } from "@/components/apartment/sections/apartment-iot-section"
-import { ApartmentMediaSection } from "@/components/apartment/sections/apartment-media-section"
+import {
+     ApartmentMediaSection,
+     type ApartmentMediaSectionActions,
+     type ApartmentMediaSectionModel,
+} from "@/components/apartment/sections/apartment-media-section"
 import {
      ApartmentRentalSummarySection,
      ApartmentRoomsSection,
      ApartmentTenantSection,
+     type ApartmentRentalSummarySectionActions,
+     type ApartmentRentalSummarySectionModel,
+     type ApartmentRoomsSectionActions,
+     type ApartmentRoomsSectionModel,
+     type ApartmentTenantSectionModel,
 } from "@/components/apartment/sections/apartment-occupancy-sections"
 import {
      ApartmentAmenitySection,
      ApartmentOwnerSection,
+     type ApartmentAmenitySectionActions,
+     type ApartmentAmenitySectionModel,
+     type ApartmentOwnerSectionActions,
+     type ApartmentOwnerSectionModel,
 } from "@/components/apartment/sections/apartment-profile-sections"
+import {
+     AVAILABLE_YEARS,
+     buildApartmentDetailItems,
+     DEFAULT_CREATE_FORM,
+     DEFAULT_SECTION_VISIBILITY,
+     hasApartmentFormChanged,
+} from "@/components/apartment/apartment-detail-editor.helpers"
 import { Button } from "@/components/ui/button"
-import { useApartmentIotAssignment } from "@/hooks/apartment/use-apartment-iot-assignment"
+import { useApartmentDetailEditorController } from "@/hooks/apartment/use-apartment-detail-editor-controller"
 import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
+import { useApartmentFormValidation } from "@/hooks/apartment/use-apartment-form-validation"
 import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding"
+import { useApartmentIotAssignment } from "@/hooks/apartment/use-apartment-iot-assignment"
 import { useApartmentMediaState } from "@/hooks/apartment/use-apartment-media-state"
 import { useFullAddress } from "@/hooks/query/useAddress"
 import { useAmenities } from "@/hooks/query/useAmenities"
 import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
 import { useUser, useUsers } from "@/hooks/query/useUsers"
-import {
-     mapAmenitiesToOptions,
-     mergeAmenityOptions,
-     withFallbackAmenityOptions,
-} from "@/lib/apartment/amenity-mapping"
-import {
-     ApartmentFieldErrors,
-     ApartmentValidationField,
-     toApartmentFieldErrors,
-     validateApartmentForm,
-} from "@/lib/apartment/apartment-validation"
-import { buildApartmentFormData } from "@/lib/apartment/apartment-form-data"
-import type { ApartmentDetailData } from "@/types/apartment"
-import {
-     ApartmentForm,
-     buildApartmentForm,
-} from "@/types/apartment-form"
-import { APARTMENT_FURNITURE_LABELS, formatDateTime, formatStatus, formatVND } from "@/utils/format"
-import { message } from "antd"
-import {
-     Bath,
-     BedDouble,
-     Building2,
-     CalendarDays,
-     CircleDollarSign,
-     Clock3,
-     Hash,
-     Home,
-     Info,
-     Landmark,
-     MapPin,
-     Ruler,
-     Star,
-     Users,
-} from "lucide-react"
+import { mapAmenitiesToOptions, mergeAmenityOptions, withFallbackAmenityOptions } from "@/lib/apartment/amenity-mapping"
+import { buildApartmentForm } from "@/types/apartment-form"
+import { Modal } from "antd"
 import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 
 type ApartmentDetailEditorProps = {
      apartmentId: string | null
@@ -67,7 +57,16 @@ type ApartmentDetailEditorProps = {
      onCreateSuccess?: () => void
      onCreateCancel?: () => void
      actionLabels?: ApartmentEditorActionLabels
-     sectionVisibility?: ApartmentEditorSectionVisibility
+     sectionVisibility?: {
+          showDetailsSection?: boolean
+          showOwnerSection?: boolean
+          showAmenitySection?: boolean
+          showMediaSection?: boolean
+          showRentalSummarySection?: boolean
+          showIotSection?: boolean
+          showRoomsSection?: boolean
+          showTenantSection?: boolean
+     }
 }
 
 export type ApartmentEditorActionLabels = {
@@ -77,111 +76,6 @@ export type ApartmentEditorActionLabels = {
      updateLoadingButton?: string
      editButton?: string
      cancelButton?: string
-}
-
-export type ApartmentEditorSectionVisibility = {
-     showDetailsSection?: boolean
-     showOwnerSection?: boolean
-     showAmenitySection?: boolean
-     showMediaSection?: boolean
-     showRentalSummarySection?: boolean
-     showIotSection?: boolean
-     showRoomsSection?: boolean
-     showTenantSection?: boolean
-}
-
-const DEFAULT_CREATE_FORM: ApartmentForm = {
-     furnishingStatus: "unfurnished",
-     status: "available",
-     amenityIds: [],
-     images: [],
-     maxOccupants: undefined,
-}
-
-const DEFAULT_SECTION_VISIBILITY: Required<ApartmentEditorSectionVisibility> = {
-     showDetailsSection: true,
-     showOwnerSection: true,
-     showAmenitySection: true,
-     showMediaSection: true,
-     showRentalSummarySection: true,
-     showIotSection: true,
-     showRoomsSection: true,
-     showTenantSection: true,
-}
-
-const hasApartmentFormChanged = (
-     initialForm: ApartmentForm | null,
-     currentForm: ApartmentForm | null,
-) => {
-     if (!initialForm || !currentForm) return false
-
-     const initialData = initialForm as Record<string, unknown>
-     const currentData = currentForm as Record<string, unknown>
-     const keys = Array.from(new Set([...Object.keys(initialData), ...Object.keys(currentData)]))
-
-     return keys.some((key) => {
-          const before = initialData[key] ?? null
-          const after = currentData[key] ?? null
-          return JSON.stringify(before) !== JSON.stringify(after)
-     })
-}
-
-const AVAILABLE_YEARS = (() => {
-     const currentYear = new Date().getFullYear()
-     return Array.from({ length: currentYear - 1950 + 1 }, (_, idx) => currentYear - idx)
-})()
-
-const buildApartmentDetailItems = (
-     detailApartment: ApartmentDetailData,
-     fullAddress: string,
-) => {
-     return [
-          { label: "ID", value: detailApartment.id, icon: Hash },
-          { label: "Mã căn hộ", value: detailApartment.apartmentNumber, icon: Home },
-          { label: "Tên tòa nhà", value: detailApartment.buildingName, icon: Building2 },
-          { label: "Tầng", value: detailApartment.floorNumber, icon: Building2 },
-          { label: "Trạng thái", value: formatStatus(detailApartment.status), icon: Info },
-          { label: "Đánh giá trung bình", value: detailApartment.rating, icon: Star },
-          { label: "Nội thất", value: APARTMENT_FURNITURE_LABELS[detailApartment.furnishingStatus], icon: Home },
-          {
-               label: "Giá thuê",
-               value: formatVND(detailApartment.baseRentPrice, true),
-               icon: CircleDollarSign,
-          },
-          {
-               label: "Tiền cọc",
-               value: detailApartment.depositAmount
-                    ? formatVND(detailApartment.depositAmount, true)
-                    : "-",
-               icon: Landmark,
-          },
-          { label: "Diện tích tổng", value: `${detailApartment.totalArea} m²`, icon: Ruler },
-          {
-               label: "Diện tích sử dụng",
-               value: detailApartment.usableArea ? `${detailApartment.usableArea} m²` : "-",
-               icon: Ruler,
-          },
-          { label: "Số phòng ngủ", value: detailApartment.numberOfBedrooms, icon: BedDouble },
-          { label: "Số phòng tắm", value: detailApartment.numberOfBathrooms, icon: Bath },
-          { label: "Số người ở tối đa", value: detailApartment.maxOccupants, icon: Users },
-          { label: "Địa chỉ đầy đủ", value: fullAddress, icon: MapPin },
-          { label: "Mã phường/xã", value: detailApartment.wardCode, icon: Hash },
-          { label: "Mã tỉnh/thành", value: detailApartment.provinceCode, icon: Hash },
-          { label: "Vĩ độ", value: detailApartment.latitude, icon: MapPin },
-          { label: "Kinh độ", value: detailApartment.longitude, icon: MapPin },
-          { label: "Năm xây dựng", value: detailApartment.yearBuilt, icon: CalendarDays },
-          {
-               label: "Ngày duyệt",
-               value: formatDateTime(detailApartment.approvedAt),
-               icon: Clock3,
-          },
-          { label: "Ngày tạo", value: formatDateTime(detailApartment.createdAt), icon: Clock3 },
-          {
-               label: "Cập nhật lần cuối",
-               value: formatDateTime(detailApartment.updatedAt),
-               icon: Clock3,
-          },
-     ]
 }
 
 export function ApartmentDetailEditor({
@@ -244,9 +138,7 @@ export function ApartmentDetailEditor({
           setTenantCount,
           roomTags,
           setRoomTags,
-          setField,
-          setNumberField,
-          setCurrencyField,
+          updateField,
           applyDepositPreset,
           resetTransientState,
           startEditDraft,
@@ -265,7 +157,6 @@ export function ApartmentDetailEditor({
           apartmentId: detailApartment?.id,
           isCreateMode,
           editMode,
-          refetchApartmentDetail,
      })
 
      const {
@@ -280,7 +171,7 @@ export function ApartmentDetailEditor({
           resetMediaState,
      } = useApartmentMediaState()
 
-     const [fieldErrors, setFieldErrors] = useState<ApartmentFieldErrors>({})
+     const formValidation = useApartmentFormValidation({ form })
 
      const {
           data: amenitiesResponse,
@@ -324,8 +215,9 @@ export function ApartmentDetailEditor({
           form,
           fullAddress,
           onAutoCoordinate: ({ latitude, longitude }) => {
-               setField("latitude", latitude)
-               setField("longitude", longitude)
+               const latitudePatch = updateField("latitude", latitude)
+               const longitudePatch = updateField("longitude", longitude)
+               formValidation.syncValues({ ...latitudePatch, ...longitudePatch })
           },
      })
 
@@ -372,195 +264,174 @@ export function ApartmentDetailEditor({
           !usableAreaInvalid &&
           (isCreateMode || hasFormChanges || hasMediaChanges || hasClientChanges)
 
-     const clearFieldError = (field: ApartmentValidationField) => {
-          setFieldErrors((prev) => {
-               if (!prev[field]) {
-                    return prev
-               }
+     const controller = useApartmentDetailEditorController({
+          context: {
+               isCreateMode,
+               isRouteEditMode,
+               allowEdit,
+               apartmentId,
+               detailApartment,
+               roomTags,
+               initialRoomTags,
+               canSaveChanges,
+               usableAreaInvalid,
+               showIotSection: resolvedSectionVisibility.showIotSection,
+          },
+          editorState: {
+               form,
+               updateField,
+               setTenantCount,
+               setRoomTags,
+               resetTransientState,
+               startEditDraft,
+               resetCreateDraft,
+               setDraftForm,
+               setManualEditMode,
+               applyDepositPreset,
+          },
+          mediaState: {
+               selectedImageFiles,
+               selectedVideoFile,
+               resetMediaState,
+          },
+          iotAssignment,
+          formValidation,
+          geocoding: {
+               resetGeocodeTracking,
+               markManualCoordinatePick,
+          },
+          actions: {
+               onCreateSuccess,
+               onCreateCancel,
+               refetchApartmentDetail,
+               createApartmentMutate: createApartment.mutateAsync,
+               updateApartmentMutate: updateApartment.mutateAsync,
+          },
+          router,
+     })
 
-               const next = { ...prev }
-               delete next[field]
-               return next
-          })
-     }
+     const handleConfirmUnlinkLinkedBoard = (boardId: string) => {
+          const board = iotAssignment.linkedBoards.find((item) => item.id === boardId)
+          const boardLabel = board?.name || boardId
 
-     const handleFieldChange = (field: string, value: unknown) => {
-          setField(field, value)
-          clearFieldError(field as ApartmentValidationField)
-     }
-
-     const handleNumberFieldChange = (key: string, raw: string) => {
-          setNumberField(key, raw)
-          clearFieldError(key as ApartmentValidationField)
-     }
-
-     const handleCurrencyFieldChange = (key: string, raw: string) => {
-          setCurrencyField(key, raw)
-          clearFieldError(key as ApartmentValidationField)
-     }
-
-     const validateBeforeSave = (targetForm: ApartmentForm) => {
-          const validationErrors = validateApartmentForm(targetForm)
-          if (validationErrors.length > 0) {
-               setFieldErrors(toApartmentFieldErrors(validationErrors))
-               message.error(validationErrors[0].message)
-               return false
-          }
-
-          setFieldErrors({})
-
-          if (usableAreaInvalid) {
-               message.error("Diện tích sử dụng không được lớn hơn diện tích tổng")
-               return false
-          }
-
-          return true
-     }
-
-     const handleCreateApartment = async (payloadData: FormData) => {
-          try {
-               const createdApartmentResponse = await createApartment.mutateAsync(payloadData)
-               const createdApartmentId = createdApartmentResponse?.data?.id
-
-               if (
-                    createdApartmentId &&
-                    resolvedSectionVisibility.showIotSection &&
-                    iotAssignment.selectedBoardIds.length > 0
-               ) {
-                    try {
-                         await iotAssignment.syncIotBoardAssignment({
-                              apartmentTargetId: createdApartmentId,
-                              previousBoardIds: [],
-                              nextBoardIds: iotAssignment.selectedBoardIds,
-                         })
-                    } catch {
-                         message.warning("Đã tạo căn hộ nhưng chưa gắn được mạch IoT. Vui lòng thử lại.")
+          Modal.confirm({
+               title: "Hủy liên kết mạch",
+               content: `Bạn có chắc chắn muốn hủy liên kết mạch ${boardLabel} khỏi căn hộ này không?`,
+               okText: "Xác nhận",
+               okType: "danger",
+               cancelText: "Hủy",
+               async onOk() {
+                    const success = await iotAssignment.unlinkLinkedBoard(boardId)
+                    if (success) {
+                         await refetchApartmentDetail()
                     }
-               }
-
-               resetMediaState()
-               resetTransientState()
-               resetCreateDraft()
-               if (onCreateSuccess) {
-                    onCreateSuccess()
-               } else {
-                    router.push("/operator/apartments")
-               }
-          } catch {
-               // Error toast is already handled in useCreateApartment
-          }
-     }
-
-     const handleUpdateApartment = async (payloadData: FormData) => {
-          if (!apartmentId) return
-
-          if (!canSaveChanges) {
-               message.info("Chưa có thay đổi để lưu")
-               return
-          }
-
-          try {
-               await updateApartment.mutateAsync({ id: apartmentId, data: payloadData })
-
-               if (resolvedSectionVisibility.showIotSection && iotAssignment.hasSelectionChanges) {
-                    await iotAssignment.syncIotBoardAssignment({
-                         apartmentTargetId: apartmentId,
-                         previousBoardIds: iotAssignment.normalizedInitialBoardIds,
-                         nextBoardIds: iotAssignment.normalizedSelectedBoardIds,
-                    })
-               }
-
-               if (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags)) {
-                    message.info("Danh sách phòng đã cập nhật trên UI và sẵn sàng nối BE.")
-               }
-
-               await refetchApartmentDetail()
-               handleCancelEdit()
-          } catch {
-               // Error toast is already handled in useUpdateApartment
-          }
-     }
-
-     const handlePickCoordinate = (value: { latitude: number; longitude: number }) => {
-          handleFieldChange("latitude", value.latitude)
-          handleFieldChange("longitude", value.longitude)
-          markManualCoordinatePick()
-     }
-
-     const handleStartEdit = () => {
-          if (isCreateMode) return
-          if (!allowEdit) return
-
-          if (!startEditDraft()) return
-
-          setTenantCount(detailApartment?.userApartments.length ?? 0)
-          setRoomTags(initialRoomTags)
-          iotAssignment.resetSelectionToInitial()
-          setFieldErrors({})
-          resetGeocodeTracking()
-          setManualEditMode(true)
-     }
-
-     const handleCancelEdit = () => {
-          resetMediaState()
-          resetTransientState()
-          iotAssignment.resetSelectionToInitial()
-          setFieldErrors({})
-          resetGeocodeTracking()
-
-          if (isCreateMode) {
-               resetCreateDraft()
-               if (onCreateCancel) {
-                    onCreateCancel()
-               } else {
-                    router.push("/operator/apartments")
-               }
-               return
-          }
-
-          setDraftForm(null)
-          setManualEditMode(false)
-
-          if (isRouteEditMode && apartmentId) {
-               router.replace(`/operator/apartments/${apartmentId}`)
-          }
-     }
-
-     const handleRemoveExistingImage = (index: number) => {
-          if (!form) return
-
-          setField(
-               "images",
-               (form.images || []).filter((_, currentIndex) => currentIndex !== index),
-          )
-     }
-
-     const handleSave = async () => {
-          if (!form) return
-
-          if (!validateBeforeSave(form)) {
-               return
-          }
-
-          const payloadData = buildApartmentFormData(form, {
-               mode: isCreateMode ? "create" : "update",
-               imageFiles: selectedImageFiles,
-               videoFile: selectedVideoFile,
+               },
           })
-
-          if (isCreateMode) {
-               await handleCreateApartment(payloadData)
-               return
-          }
-
-          await handleUpdateApartment(payloadData)
      }
 
-     const handleSelectDepositPreset = (value: 1 | 2) => {
-          const applied = applyDepositPreset(value)
-          if (!applied) {
-               message.info("Vui lòng nhập giá thuê trước khi chọn nhanh tiền cọc")
-          }
+     const handleConfirmUnlinkAllLinkedBoards = () => {
+          Modal.confirm({
+               title: "Hủy liên kết toàn bộ mạch",
+               content: "Bạn có chắc chắn muốn gỡ liên kết apartment khỏi tất cả mạch đang gắn không?",
+               okText: "Xác nhận",
+               okType: "danger",
+               cancelText: "Hủy",
+               async onOk() {
+                    const success = await iotAssignment.unlinkAllLinkedBoards()
+                    if (success) {
+                         await refetchApartmentDetail()
+                    }
+               },
+          })
+     }
+
+     const detailsSectionModel: ApartmentDetailsSectionModel = {
+          editMode,
+          form: form || DEFAULT_CREATE_FORM,
+          fieldErrors: formValidation.fieldErrors,
+          detailItems,
+          fullAddress,
+          availableYears,
+          usableAreaInvalid,
+          initialProvinceCode: detailApartment?.provinceCode || undefined,
+          selectedDepositPreset,
+          geocodeStatus,
+          geocodeErrorMessage,
+     }
+
+     const detailsSectionActions: ApartmentDetailsSectionActions = {
+          setField: controller.handleFieldChange,
+          setNumberField: controller.handleNumberFieldChange,
+          setCurrencyField: controller.handleCurrencyFieldChange,
+          onSelectDepositPreset: controller.handleSelectDepositPreset,
+          onPickCoordinate: controller.handlePickCoordinate,
+     }
+
+     const ownerSectionModel: ApartmentOwnerSectionModel = {
+          editMode,
+          ownerSummary,
+          ownerId: form?.ownerId || undefined,
+          ownerOptions,
+          usersLoading,
+     }
+
+     const ownerSectionActions: ApartmentOwnerSectionActions = {
+          onOwnerChange: (value) => controller.handleFieldChange("ownerId", value),
+     }
+
+     const amenitySectionModel: ApartmentAmenitySectionModel = {
+          editMode,
+          description: form?.description,
+          amenityIds: form?.amenityIds || [],
+          options: amenityPresetOptions,
+          amenitiesLoading,
+     }
+
+     const amenitySectionActions: ApartmentAmenitySectionActions = {
+          onDescriptionChange: (value) => controller.handleFieldChange("description", value),
+          onAmenitiesChange: (value) => controller.handleFieldChange("amenityIds", value),
+     }
+
+     const mediaSectionModel: ApartmentMediaSectionModel = {
+          editMode,
+          existingImages: form?.images || [],
+          selectedImagePreviews: imagePreviews,
+          selectedVideoFile,
+          selectedVideoPreviewUrl,
+          videoTourUrl: form?.videoTourUrl,
+     }
+
+     const mediaSectionActions: ApartmentMediaSectionActions = {
+          onSelectImages: handleSelectImages,
+          onSelectVideo: handleSelectVideo,
+          onRemoveExistingImage: controller.handleRemoveExistingImage,
+          onRemoveSelectedImage: handleRemoveSelectedImage,
+          onRemoveSelectedVideo: handleRemoveSelectedVideo,
+     }
+
+     const rentalSummarySectionModel: ApartmentRentalSummarySectionModel = {
+          editMode,
+          tenantCount,
+          utilityMeterCount: detailApartment?.utilityMeters.length ?? 0,
+     }
+
+     const rentalSummarySectionActions: ApartmentRentalSummarySectionActions = {
+          onTenantCountChange: setTenantCount,
+     }
+
+     const roomsSectionModel: ApartmentRoomsSectionModel = {
+          editMode,
+          roomTags,
+          roomOptions,
+          rooms: detailApartment?.rooms || [],
+     }
+
+     const roomsSectionActions: ApartmentRoomsSectionActions = {
+          onRoomTagsChange: setRoomTags,
+     }
+
+     const tenantSectionModel: ApartmentTenantSectionModel = {
+          tenants: detailApartment?.userApartments || [],
      }
 
      const canRenderForm = isCreateMode ? !!form : !!detailApartment && !!form
@@ -603,70 +474,36 @@ export function ApartmentDetailEditor({
                          <div className="space-y-5">
                               {resolvedSectionVisibility.showDetailsSection ? (
                                    <ApartmentDetailsSection
-                                        editMode={editMode}
-                                        form={form}
-                                        fieldErrors={fieldErrors}
-                                        detailItems={detailItems}
-                                        fullAddress={fullAddress}
-                                        availableYears={availableYears}
-                                        usableAreaInvalid={usableAreaInvalid}
-                                        initialProvinceCode={detailApartment?.provinceCode || undefined}
-                                        selectedDepositPreset={selectedDepositPreset}
-                                        geocodeStatus={geocodeStatus}
-                                        geocodeErrorMessage={geocodeErrorMessage}
-                                        setField={handleFieldChange}
-                                        setNumberField={handleNumberFieldChange}
-                                        setCurrencyField={handleCurrencyFieldChange}
-                                        onSelectDepositPreset={handleSelectDepositPreset}
-                                        onPickCoordinate={handlePickCoordinate}
+                                        model={detailsSectionModel}
+                                        actions={detailsSectionActions}
                                    />
                               ) : null}
 
                               {resolvedSectionVisibility.showOwnerSection ? (
                                    <ApartmentOwnerSection
-                                        editMode={editMode}
-                                        ownerSummary={ownerSummary}
-                                        ownerId={form.ownerId || undefined}
-                                        ownerOptions={ownerOptions}
-                                        usersLoading={usersLoading}
-                                        onOwnerChange={(value) => setField("ownerId", value)}
+                                        model={ownerSectionModel}
+                                        actions={ownerSectionActions}
                                    />
                               ) : null}
 
                               {resolvedSectionVisibility.showAmenitySection ? (
                                    <ApartmentAmenitySection
-                                        editMode={editMode}
-                                        description={form.description}
-                                        amenityIds={form.amenityIds || []}
-                                        options={amenityPresetOptions}
-                                        amenitiesLoading={amenitiesLoading}
-                                        onDescriptionChange={(value) => setField("description", value)}
-                                        onAmenitiesChange={(value) => setField("amenityIds", value)}
+                                        model={amenitySectionModel}
+                                        actions={amenitySectionActions}
                                    />
                               ) : null}
 
                               {resolvedSectionVisibility.showMediaSection ? (
                                    <ApartmentMediaSection
-                                        editMode={editMode}
-                                        existingImages={form.images || []}
-                                        selectedImagePreviews={imagePreviews}
-                                        selectedVideoFile={selectedVideoFile}
-                                        selectedVideoPreviewUrl={selectedVideoPreviewUrl}
-                                        videoTourUrl={form.videoTourUrl}
-                                        onSelectImages={handleSelectImages}
-                                        onSelectVideo={handleSelectVideo}
-                                        onRemoveExistingImage={handleRemoveExistingImage}
-                                        onRemoveSelectedImage={handleRemoveSelectedImage}
-                                        onRemoveSelectedVideo={handleRemoveSelectedVideo}
+                                        model={mediaSectionModel}
+                                        actions={mediaSectionActions}
                                    />
                               ) : null}
 
                               {resolvedSectionVisibility.showRentalSummarySection ? (
                                    <ApartmentRentalSummarySection
-                                        editMode={editMode}
-                                        tenantCount={tenantCount}
-                                        utilityMeterCount={detailApartment?.utilityMeters.length ?? 0}
-                                        onTenantCountChange={setTenantCount}
+                                        model={rentalSummarySectionModel}
+                                        actions={rentalSummarySectionActions}
                                    />
                               ) : null}
 
@@ -678,7 +515,7 @@ export function ApartmentDetailEditor({
                                              boardOptions: iotAssignment.boardOptions,
                                              linkedBoards: iotAssignment.linkedBoards.map((board) => ({
                                                   id: board.id,
-                                                  label: `${board.name} - ${board.id}`,
+                                                  label: `${board.id}`,
                                                   deviceCount: board.deviceCount,
                                              })),
                                              boardsLoading: iotAssignment.iotBoardsLoading,
@@ -690,24 +527,21 @@ export function ApartmentDetailEditor({
                                         }}
                                         actions={{
                                              onSelectedBoardsChange: iotAssignment.handleSelectedBoardsChange,
-                                             onUnlinkLinkedBoard: iotAssignment.unlinkLinkedBoard,
-                                             onBulkUnlinkBoards: iotAssignment.unlinkAllLinkedBoards,
+                                             onUnlinkLinkedBoard: handleConfirmUnlinkLinkedBoard,
+                                             onBulkUnlinkBoards: handleConfirmUnlinkAllLinkedBoards,
                                         }}
                                    />
                               ) : null}
 
                               {resolvedSectionVisibility.showRoomsSection ? (
                                    <ApartmentRoomsSection
-                                        editMode={editMode}
-                                        roomTags={roomTags}
-                                        roomOptions={roomOptions}
-                                        rooms={detailApartment?.rooms || []}
-                                        onRoomTagsChange={setRoomTags}
+                                        model={roomsSectionModel}
+                                        actions={roomsSectionActions}
                                    />
                               ) : null}
 
                               {resolvedSectionVisibility.showTenantSection ? (
-                                   <ApartmentTenantSection tenants={detailApartment?.userApartments || []} />
+                                   <ApartmentTenantSection model={tenantSectionModel} />
                               ) : null}
 
                               <div className="sticky bottom-0 space-y-2 rounded-xl border bg-background/95 p-3 backdrop-blur">
@@ -729,10 +563,10 @@ export function ApartmentDetailEditor({
                                    <div className="flex justify-end gap-2">
                                         {editMode ? (
                                              <>
-                                                  <Button variant="outline" onClick={handleCancelEdit}>
+                                                  <Button variant="outline" onClick={controller.handleCancelEdit}>
                                                        {cancelButtonLabel}
                                                   </Button>
-                                                  <Button onClick={handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
+                                                  <Button onClick={controller.handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
                                                        {isCreateMode
                                                             ? isSaving
                                                                  ? createLoadingButtonLabel
@@ -743,7 +577,7 @@ export function ApartmentDetailEditor({
                                                   </Button>
                                              </>
                                         ) : allowEdit && !isCreateMode ? (
-                                             <Button onClick={handleStartEdit}>{editButtonLabel}</Button>
+                                             <Button onClick={controller.handleStartEdit}>{editButtonLabel}</Button>
                                         ) : null}
                                    </div>
                               </div>
