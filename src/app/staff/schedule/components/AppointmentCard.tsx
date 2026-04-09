@@ -30,8 +30,16 @@ export default function AppointmentCard({
         apartmentDetail?.provinceCode || undefined,
         apartmentDetail?.wardCode || undefined,
     )
-    const showStaffNotes =
-        appointment.status === "completed" || appointment.status === "cancelled"
+
+    const cancellationReason =
+        "cancellationReason" in appointment &&
+            typeof appointment.cancellationReason === "string"
+            ? appointment.cancellationReason
+            : null
+
+    const noteValue = toSafeString(
+        cancellationReason || appointment.staffNotes || appointment.guestNotes,
+    )
 
     const apartmentLabel = [
         toSafeString(apartmentDetail?.buildingName),
@@ -65,13 +73,8 @@ export default function AppointmentCard({
                 {t("fields.location")}: {locationLabel}
             </p>
             <p className="text-sm text-gray-600">
-                {t("fields.guestNotes")}: {toSafeString(appointment.guestNotes)}
+                {t("fields.note")}: {noteValue}
             </p>
-            {showStaffNotes && (
-                <p className="text-sm text-gray-600">
-                    {t("fields.staffNotes")}: {toSafeString(appointment.staffNotes)}
-                </p>
-            )}
 
             <AppointmentActions
                 appointment={appointment}

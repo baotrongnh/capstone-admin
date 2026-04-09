@@ -220,7 +220,7 @@ export default function ScheduleStaff() {
                     <Alert
                          type="error"
                          showIcon
-                         message={t("errorTitle")}
+                         title={t("errorTitle")}
                          description={(error as Error)?.message || t("errorDescription")}
                     />
                )}
