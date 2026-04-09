@@ -82,6 +82,7 @@ type ApartmentAmenitySectionProps = {
      description?: string
      amenityIds: string[]
      options: AmenityOption[]
+     amenitiesLoading?: boolean
      onDescriptionChange: (value?: string) => void
      onAmenitiesChange: (value: string[]) => void
 }
@@ -91,6 +92,7 @@ export function ApartmentAmenitySection({
      description,
      amenityIds,
      options,
+     amenitiesLoading = false,
      onDescriptionChange,
      onAmenitiesChange,
 }: ApartmentAmenitySectionProps) {
@@ -116,6 +118,7 @@ export function ApartmentAmenitySection({
                               <AntdSelect
                                    mode="multiple"
                                    showSearch
+                                   loading={amenitiesLoading}
                                    value={amenityIds}
                                    onChange={(value) => onAmenitiesChange(value as string[])}
                                    placeholder="Tìm và chọn tiện ích"

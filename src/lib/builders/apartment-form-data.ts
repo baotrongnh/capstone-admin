@@ -6,6 +6,33 @@ type BuildApartmentFormDataOptions = {
      videoFile?: File | null;
 };
 
+const toFiniteNumber = (value: unknown): number | undefined => {
+     if (typeof value === "number" && Number.isFinite(value)) {
+          return value
+     }
+
+     if (typeof value !== "string") {
+          return undefined
+     }
+
+     const trimmed = value.trim()
+     if (!trimmed) {
+          return undefined
+     }
+
+     const decimalComma = /^-?\d+,\d+$/.test(trimmed)
+     const thousandsComma = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(trimmed)
+
+     const normalized = decimalComma
+          ? trimmed.replace(",", ".")
+          : thousandsComma
+               ? trimmed.replace(/,/g, "")
+               : trimmed
+
+     const parsed = Number(normalized)
+     return Number.isFinite(parsed) ? parsed : undefined
+}
+
 const STRING_FIELDS = [
      "buildingName",
      "apartmentNumber",
@@ -45,8 +72,9 @@ export const buildApartmentFormData = (
 
      for (const key of NUMBER_FIELDS) {
           const value = payloadData[key]
-          if (typeof value === "number" && Number.isFinite(value)) {
-               formData.append(key, String(value));
+          const numericValue = toFiniteNumber(value)
+          if (numericValue !== undefined) {
+               formData.append(key, String(numericValue));
           }
      }
 

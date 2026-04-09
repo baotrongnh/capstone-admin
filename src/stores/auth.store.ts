@@ -9,24 +9,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     isHydrated: false,
 
     setAuth: (user: UserDetail, tokens) => {
-        localStorage.setItem('accessToken', tokens.accessToken)
-        localStorage.setItem('refreshToken', tokens.refreshToken)
+        localStorage.setItem('adminAccessToken', tokens.accessToken)
+        localStorage.setItem('adminRefreshToken', tokens.refreshToken)
         localStorage.setItem('user', JSON.stringify(user))
         set({ user, tokens, isAuthenticated: true })
     },
     setTokens: (tokens: AuthTokens) => {
-        localStorage.setItem('accessToken', tokens.accessToken)
-        localStorage.setItem('refreshToken', tokens.refreshToken)
+        localStorage.setItem('adminAccessToken', tokens.accessToken)
+        localStorage.setItem('adminRefreshToken', tokens.refreshToken)
     },
     logout: () => {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('adminAccessToken')
+        localStorage.removeItem('adminRefreshToken')
         localStorage.removeItem('user')
         set({ user: null, tokens: null, isAuthenticated: false })
     },
     hydrate: () => {
-        const accessToken = localStorage.getItem('accessToken')
-        const refreshToken = localStorage.getItem('refreshToken')
+        const accessToken = localStorage.getItem('adminAccessToken')
+        const refreshToken = localStorage.getItem('adminRefreshToken')
         const userStr = localStorage.getItem('user')
 
         if (accessToken && refreshToken && userStr) {

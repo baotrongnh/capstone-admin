@@ -13,4 +13,5 @@ export const endpoints = {
   iot: createEndpoints("iot"),
   chat: createEndpoints("chat"),
   revenues: createEndpoints("revenues"),
-};
+  viewRequest: createEndpoints("viewing-requests"),
+}

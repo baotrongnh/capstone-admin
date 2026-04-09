@@ -6,6 +6,7 @@ export const ROUTE_STAFF = {
   CHAT: "/staff/chat",
   REQUEST: "/staff/request",
   CONTRACT: "/staff/contracts",
+  PAYOUTS: "/staff/payouts",
 } as const;
 
 export const ROUTE_ADMIN = {
