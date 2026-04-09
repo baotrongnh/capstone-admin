@@ -138,14 +138,14 @@ export default function ScheduleStaff() {
           )
      }
 
-     const handleSubmitReason = async (reason: string) => {
+     const handleSubmitNote = async (note: string) => {
           if (!pendingAppointment) return
 
           try {
                if (reasonMode === "deny") {
                     const response = await denyAppointment({
                          appointmentId: pendingAppointment.id,
-                         reason,
+                         reason: note,
                     })
                     const updated = response?.data
                     if (updated) {
@@ -160,7 +160,7 @@ export default function ScheduleStaff() {
                } else {
                     const response = await cancelAppointment({
                          appointmentId: pendingAppointment.id,
-                         reason,
+                         note,
                     })
                     const updated = response?.data
                     if (updated) {
@@ -220,7 +220,7 @@ export default function ScheduleStaff() {
                     <Alert
                          type="error"
                          showIcon
-                         message={t("errorTitle")}
+                         title={t("errorTitle")}
                          description={(error as Error)?.message || t("errorDescription")}
                     />
                )}
@@ -260,7 +260,7 @@ export default function ScheduleStaff() {
                     open={reasonModalOpen}
                     mode={reasonMode}
                     onClose={() => setReasonModalOpen(false)}
-                    onSubmit={handleSubmitReason}
+                    onSubmit={handleSubmitNote}
                     isSubmitting={isDenying || isCancelling}
                />
           </div>

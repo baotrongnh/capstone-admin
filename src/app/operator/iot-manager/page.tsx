@@ -4,6 +4,14 @@ import { IotBoardDetailModal } from "@/components/iot/iot-board-detail-modal"
 import { IotBoardModal } from "@/components/iot/iot-board-modal"
 import { IotBoardTable } from "@/components/iot/iot-board-table"
 import { Button } from "@/components/ui/button"
+import {
+     Dialog,
+     DialogContent,
+     DialogDescription,
+     DialogFooter,
+     DialogHeader,
+     DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import {
      Select,
@@ -29,6 +37,8 @@ export default function IotManagerPage() {
           isBoardListFetching,
           refetchBoards,
           isDeletingBoard,
+          isDeleteBoardDialogOpen,
+          deleteBoardTargetName,
           isBoardDialogOpen,
           editingBoardId,
           boardForm,
@@ -47,6 +57,9 @@ export default function IotManagerPage() {
           removeCreateDeviceRow,
           setCreateDeviceField,
           handleDeleteBoard,
+          closeDeleteBoardDialog,
+          onDeleteBoardDialogOpenChange,
+          confirmDeleteBoard,
           openEditBoardForAddDevice,
      } = useIotManagerPage()
 
@@ -136,6 +149,26 @@ export default function IotManagerPage() {
                     onRemoveDevice={removeCreateDeviceRow}
                     onDeviceChange={setCreateDeviceField}
                />
+
+               <Dialog open={isDeleteBoardDialogOpen} onOpenChange={onDeleteBoardDialogOpenChange}>
+                    <DialogContent showCloseButton={!isDeletingBoard} className="sm:max-w-md">
+                         <DialogHeader>
+                              <DialogTitle>Xóa mạch IoT</DialogTitle>
+                              <DialogDescription>
+                                   Bạn có chắc chắn muốn xóa mạch {deleteBoardTargetName}? Hành động này không thể hoàn tác.
+                              </DialogDescription>
+                         </DialogHeader>
+
+                         <DialogFooter>
+                              <Button variant="outline" onClick={closeDeleteBoardDialog} disabled={isDeletingBoard}>
+                                   Hủy
+                              </Button>
+                              <Button variant="destructive" onClick={() => void confirmDeleteBoard()} disabled={isDeletingBoard}>
+                                   {isDeletingBoard ? "Đang xóa..." : "Xóa mạch"}
+                              </Button>
+                         </DialogFooter>
+                    </DialogContent>
+               </Dialog>
           </div>
      )
 }

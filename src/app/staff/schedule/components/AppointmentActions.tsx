@@ -26,7 +26,7 @@ export default function AppointmentActions({
     if (!showConfirmDeny && !showCancel && !showDone) return null
 
     return (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap justify-end gap-2">
             {showConfirmDeny && (
                 <>
                     <Button

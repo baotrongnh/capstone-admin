@@ -49,6 +49,7 @@
       "time": "Thời gian",
       "minutes": "phút",
       "location": "Địa điểm",
+      "note": "Ghi chú",
       "guestNotes": "Ghi chú khách",
       "staffNotes": "Ghi chú nhân viên"
     },
@@ -66,8 +67,8 @@
       "titlePlaceholder": "Chọn lý do",
       "detailPlaceholder": "Chi tiết (không bắt buộc)",
       "titleRequired": "Vui lòng chọn tiêu đề lý do.",
-      "submitCancel": "Hủy",
-      "submitDeny": "Từ chối"
+      "submitCancel": "Xác nhận Hủy cuộc hẹn",
+      "submitDeny": "Từ chối cuộc hẹn"
     },
     "reasonOptions": {
       "staffUnavailable": "Nhân viên không có mặt",
