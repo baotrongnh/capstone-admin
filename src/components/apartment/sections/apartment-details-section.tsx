@@ -19,6 +19,7 @@ import type {
      ApartmentFieldErrors,
      ApartmentValidationField,
 } from "@/lib/apartment/apartment-validation"
+import type { ApartmentStatus } from "@/types/apartment"
 import type { ApartmentForm } from "@/types/apartment-form"
 import type { GeocodeStatus } from "@/types/apartment"
 import { formatVNDInput } from "@/utils/format"
@@ -26,6 +27,7 @@ import { ReactNode } from "react"
 import { Info, type LucideIcon } from "lucide-react"
 
 type DetailEntry = {
+     group?: string
      label: string
      value?: string | number | null
      icon?: LucideIcon
@@ -39,6 +41,7 @@ export type ApartmentDetailsSectionModel = {
      fullAddress: string
      availableYears: number[]
      usableAreaInvalid: boolean
+     initialStatus?: ApartmentStatus | null
      initialProvinceCode?: number
      selectedDepositPreset?: DepositPreset | null
      geocodeStatus?: GeocodeStatus
@@ -118,6 +121,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
           fullAddress,
           availableYears,
           usableAreaInvalid,
+          initialStatus,
           initialProvinceCode,
           selectedDepositPreset,
           geocodeStatus = "idle",
@@ -134,6 +138,8 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
 
      const baseRentPrice = form.baseRentPrice || 0
      const canPickDepositPreset = baseRentPrice > 0
+     const cannotSwitchToAvailable =
+          editMode && (initialStatus === "occupied" || initialStatus === "reserved")
 
      const getFieldError = (field: ApartmentValidationField) => fieldErrors?.[field]
 
@@ -179,13 +185,18 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                                              <SelectValue placeholder="Chọn trạng thái" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                             <SelectItem value="available">Còn trống</SelectItem>
+                                             <SelectItem value="available" disabled={cannotSwitchToAvailable}>Còn trống</SelectItem>
                                              <SelectItem value="occupied">Đang cho thuê</SelectItem>
                                              {/* <SelectItem value="maintenance">Bảo trì</SelectItem> */}
                                              <SelectItem value="reserved">Đã đặt cọc</SelectItem>
                                              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
                                         </SelectContent>
                                    </Select>
+                                   {cannotSwitchToAvailable ? (
+                                        <p className="text-xs text-muted-foreground">
+                                             Căn hộ đang cho thuê/đã đặt cọc không thể chuyển về trạng thái còn trống.
+                                        </p>
+                                   ) : null}
                               </FieldBlock>
 
                               <FieldBlock label="Nội thất" required error={getFieldError("furnishingStatus")}>
@@ -356,9 +367,62 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
                               </FieldBlock>
                          </>
                     ) : (
-                         detailItems.map((item) => <DetailItem key={item.label} label={item.label} value={item.value} icon={item.icon} />)
+                         <DetailViewGroups detailItems={detailItems} />
                     )}
                </div>
           </SectionCard>
+     )
+}
+
+function DetailViewGroups({ detailItems }: { detailItems: DetailEntry[] }) {
+     const hasGroupedData = detailItems.some((item) => !!item.group)
+
+     if (!hasGroupedData) {
+          return detailItems.map((item) => (
+               <DetailItem key={item.label} label={item.label} value={item.value} icon={item.icon} />
+          ))
+     }
+
+     const groupOrder = ["Thông tin căn hộ", "Thông tin địa chỉ", "Tọa độ", "Thông tin hệ thống"]
+     const groupedEntries = new Map<string, DetailEntry[]>()
+
+     detailItems.forEach((item) => {
+          const groupName = item.group || "Khác"
+          const current = groupedEntries.get(groupName) || []
+          current.push(item)
+          groupedEntries.set(groupName, current)
+     })
+
+     const orderedGroups = [
+          ...groupOrder.filter((group) => groupedEntries.has(group)),
+          ...Array.from(groupedEntries.keys()).filter((group) => !groupOrder.includes(group)),
+     ]
+
+     return (
+          <div className="space-y-4 md:col-span-2 xl:col-span-3">
+               {orderedGroups.map((groupName, index) => {
+                    const entries = groupedEntries.get(groupName) || []
+                    if (entries.length === 0) return null
+
+                    return (
+                         <div
+                              key={groupName}
+                              className={index > 0 ? "space-y-2 border-t pt-3" : "space-y-2"}
+                         >
+                              <p className="text-sm font-semibold">{groupName}</p>
+                              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                   {entries.map((item) => (
+                                        <DetailItem
+                                             key={`${groupName}-${item.label}`}
+                                             label={item.label}
+                                             value={item.value}
+                                             icon={item.icon}
+                                        />
+                                   ))}
+                              </div>
+                         </div>
+                    )
+               })}
+          </div>
      )
 }

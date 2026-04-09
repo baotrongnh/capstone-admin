@@ -1,4 +1,7 @@
-import type { ImagePreview } from "@/hooks/apartment/use-apartment-media-state"
+import {
+     APARTMENT_VIDEO_MAX_SIZE_MB,
+     type ImagePreview,
+} from "@/hooks/apartment/use-apartment-media-state"
 import { SectionCard, SectionTitle } from "@/components/apartment/ui/section-primitives"
 import {
      Dialog,
@@ -201,6 +204,9 @@ export function ApartmentMediaSection(props: ApartmentMediaSectionProps | Apartm
                                    Tải video lên
                                    <input type="file" accept="video/*" className="hidden" onChange={onSelectVideo} />
                               </label>
+                              <p className="text-xs text-muted-foreground">
+                                   Video tối đa {APARTMENT_VIDEO_MAX_SIZE_MB}MB.
+                              </p>
 
                               {selectedVideoFile ? (
                                    <div className="space-y-2">

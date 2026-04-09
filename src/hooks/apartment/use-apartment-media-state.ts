@@ -1,8 +1,8 @@
 import { message } from "antd"
 import { ChangeEvent, useEffect, useMemo, useState } from "react"
 
-const MAX_VIDEO_SIZE_MB = 50
-const MAX_VIDEO_SIZE_BYTES = MAX_VIDEO_SIZE_MB * 1024 * 1024
+export const APARTMENT_VIDEO_MAX_SIZE_MB = 20
+const MAX_VIDEO_SIZE_BYTES = APARTMENT_VIDEO_MAX_SIZE_MB * 1024 * 1024
 
 export type ImagePreview = {
      file: File
@@ -67,7 +67,7 @@ export function useApartmentMediaState() {
           }
 
           if (file.size > MAX_VIDEO_SIZE_BYTES) {
-               message.error(`Video không được vượt quá ${MAX_VIDEO_SIZE_MB}MB`)
+               message.error(`Video không được vượt quá ${APARTMENT_VIDEO_MAX_SIZE_MB}MB`)
                event.target.value = ""
                return
           }
