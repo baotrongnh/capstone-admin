@@ -52,3 +52,31 @@ export type ApartmentPayload = Partial<ApartmentCreateRequestBody & ApartmentUpd
 
 export type ViewingRequestBody = paths['/api/v1/viewing-requests/user/book']['post']['requestBody']['content']['application/json']
 export type ViewingRequestRespone = paths['/api/v1/viewing-requests/user/book']['post']['responses']['201']['content']['application/json']
+
+//PROPS:
+
+export type ApartmentDetailEditorProps = {
+     apartmentId: string | null
+     mode: "create" | "view" | "edit"
+     allowEdit?: boolean
+     inDialog?: boolean
+     onCreateSuccess?: () => void
+     onCreateCancel?: () => void
+     actionLabels?: {
+          createButton?: string
+          createLoadingButton?: string
+          updateButton?: string
+          updateLoadingButton?: string
+          editButton?: string
+          cancelButton?: string
+     }
+     sectionVisibility?: {
+          showDetailsSection?: boolean
+          showOwnerSection?: boolean
+          showAmenitySection?: boolean
+          showMediaSection?: boolean
+          showIotSection?: boolean
+          showRoomsSection?: boolean
+          showTenantSection?: boolean
+     }
+}

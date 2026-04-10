@@ -1,38 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import {
-     Dialog,
-     DialogContent,
-     DialogDescription,
-     DialogFooter,
-     DialogHeader,
-     DialogTitle,
-} from "@/components/ui/dialog"
-import {
-     DropdownMenu,
-     DropdownMenuContent,
-     DropdownMenuItem,
-     DropdownMenuSeparator,
-     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import {
-     Table,
-     TableBody,
-     TableCell,
-     TableHead,
-     TableHeader,
-     TableRow,
-} from "@/components/ui/table"
-import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-     useAmenities,
-     useCreateAmenity,
-     useDeactivateAmenity,
-     useUpdateAmenity,
-} from "@/hooks/query/useAmenities"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
+import { useAmenities, useCreateAmenity, useDeactivateAmenity, useUpdateAmenity } from "@/hooks/query/useAmenities"
 import { AmenityCreateRequestBody, AmenityItem } from "@/types/amenity"
 import { formatDateTime } from "@/utils/format"
 import { Badge, Modal, message } from "antd"

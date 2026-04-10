@@ -23,7 +23,6 @@ import {
 import {
   ApartmentForm,
   buildApartmentForm,
-  parseNumber,
 } from "@/types/apartment-form";
 import {
   formatDateTime,
@@ -31,6 +30,7 @@ import {
   formatVND,
   parseVNDInput,
 } from "@/utils/format";
+import { parseNumber } from "@/utils/number";
 import { message } from "antd";
 import {
   Bath,

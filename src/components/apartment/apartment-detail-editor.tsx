@@ -1,5 +1,12 @@
 "use client"
 
+import {
+     AVAILABLE_YEARS,
+     buildApartmentDetailItems,
+     DEFAULT_CREATE_FORM,
+     DEFAULT_SECTION_VISIBILITY,
+     hasApartmentFormChanged,
+} from "@/components/apartment/apartment-detail-editor.helpers"
 import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section"
 import { ApartmentIotSection } from "@/components/apartment/sections/apartment-iot-section"
 import {
@@ -22,13 +29,6 @@ import {
      type ApartmentOwnerSectionActions,
      type ApartmentOwnerSectionModel,
 } from "@/components/apartment/sections/apartment-profile-sections"
-import {
-     AVAILABLE_YEARS,
-     buildApartmentDetailItems,
-     DEFAULT_CREATE_FORM,
-     DEFAULT_SECTION_VISIBILITY,
-     hasApartmentFormChanged,
-} from "@/components/apartment/apartment-detail-editor.helpers"
 import { Button } from "@/components/ui/button"
 import { useApartmentDetailEditorController } from "@/hooks/apartment/use-apartment-detail-editor-controller"
 import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
@@ -41,39 +41,11 @@ import { useAmenities } from "@/hooks/query/useAmenities"
 import { useApartment, useCreateApartment, useUpdateApartment } from "@/hooks/query/useApartments"
 import { useUser, useUsers } from "@/hooks/query/useUsers"
 import { mapAmenitiesToOptions, mergeAmenityOptions, withFallbackAmenityOptions } from "@/lib/apartment/amenity-mapping"
-import type { ApartmentStatus } from "@/types/apartment"
+import type { ApartmentDetailEditorProps, ApartmentStatus } from "@/types/apartment"
 import { buildApartmentForm } from "@/types/apartment-form"
 import { Modal } from "antd"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
-
-type ApartmentDetailEditorProps = {
-     apartmentId: string | null
-     mode: "create" | "view" | "edit"
-     allowEdit?: boolean
-     inDialog?: boolean
-     onCreateSuccess?: () => void
-     onCreateCancel?: () => void
-     actionLabels?: ApartmentEditorActionLabels
-     sectionVisibility?: {
-          showDetailsSection?: boolean
-          showOwnerSection?: boolean
-          showAmenitySection?: boolean
-          showMediaSection?: boolean
-          showIotSection?: boolean
-          showRoomsSection?: boolean
-          showTenantSection?: boolean
-     }
-}
-
-export type ApartmentEditorActionLabels = {
-     createButton?: string
-     createLoadingButton?: string
-     updateButton?: string
-     updateLoadingButton?: string
-     editButton?: string
-     cancelButton?: string
-}
 
 export function ApartmentDetailEditor({
      apartmentId,
@@ -99,8 +71,7 @@ export function ApartmentDetailEditor({
 
      const detailApartment = apartmentDetailResponse?.data
      const detailLoading = isLoading || isFetching
-     const initialApartmentStatus =
-          (detailApartment?.status as ApartmentStatus | undefined) || null
+     const initialApartmentStatus = (detailApartment?.status as ApartmentStatus | undefined) || null
 
      const isCreateMode = mode === "create"
      const isRouteEditMode = mode === "edit"
