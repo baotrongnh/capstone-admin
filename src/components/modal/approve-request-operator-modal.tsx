@@ -2,16 +2,15 @@
 
 import { Button, Modal } from "antd";
 import { AlertCircle, CheckCircle2, Home } from "lucide-react";
-import type { Request, StaffUpdate } from "../../app/operator/request/types";
 import { useApproveCooperation } from "@/hooks/query/useApartments";
 import { useState } from "react";
+import { Request, StaffUpdate } from "@/types/request";
 
 interface ModalApproveRequestProps {
   open: boolean;
   request: Request | null;
   staffUpdate: StaffUpdate | undefined;
   onClose: () => void;
-  onReject: () => void;
   loading?: boolean;
 }
 

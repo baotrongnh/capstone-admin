@@ -16,14 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Request } from "@/types/request";
 import { MoreHorizontalIcon } from "lucide-react";
-import type { Request } from "../../app/operator/request/types";
-import { ApartmentItem } from "@/types/apartment";
 
 interface TableRequestOperatorProps {
   filteredRequests: Request[];
   onViewDetail: (request: Request) => void;
   onOpenApprove: (request: Request) => void;
+  onOpenReject: (request: Request) => void;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -35,7 +35,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 export function TableRequestOperator({
   filteredRequests,
-
+  onOpenReject,
   onOpenApprove,
   onViewDetail,
 }: TableRequestOperatorProps) {
@@ -63,7 +63,7 @@ export function TableRequestOperator({
               <TableCell>
                 <div>
                   <p className="font-medium text-sm">
-                    {request.apartmentName?.split(" - ")[1] || "N/A"}
+                    {request.apartmentName || "N/A"}
                   </p>
                   <p className="text-xs text-gray-500">
                     {request.bedrooms} phòng • {request.area}
@@ -112,8 +112,11 @@ export function TableRequestOperator({
                       Duyệt
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      Xóa
+                    <DropdownMenuItem
+                      onClick={() => onOpenReject(request)}
+                      variant="destructive"
+                    >
+                      Từ chối
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

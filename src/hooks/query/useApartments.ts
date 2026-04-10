@@ -1,9 +1,7 @@
 "use client";
 
 import { apartmentService } from "@/lib/services/apartment.service";
-import {
-  ApartmentQueryParams,
-} from "@/types/apartment";
+import { ApartmentQueryParams } from "@/types/apartment";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
 import { useState } from "react";
@@ -60,13 +58,7 @@ export const useUpdateApartment = () => {
   const [uploadPercent, setUploadPercent] = useState(0);
 
   const mutation = useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string | number;
-      data: FormData;
-    }) =>
+    mutationFn: ({ id, data }: { id: string | number; data: FormData }) =>
       apartmentService.update(id, data, {
         onUploadProgress: (event) => {
           if (!event.total) return;
@@ -136,6 +128,21 @@ export const useApproveCooperation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["apartments"] });
       message.success("Duyệt hợp tác thành công!");
+    },
+    onError: (error) => {
+      message.error(error?.message || "Có lỗi xảy ra!");
+    },
+  });
+};
+
+export const useRejectCooperation = (apartmentId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: object) =>
+      apartmentService.rejectCooperation(apartmentId, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apartments"] });
+      message.success("Từ chối hợp tác thành công!");
     },
     onError: (error) => {
       message.error(error?.message || "Có lỗi xảy ra!");
