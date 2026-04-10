@@ -1,27 +1,7 @@
 import type { ApartmentDetailData } from "@/types/apartment"
 import type { ApartmentForm } from "@/types/apartment-form"
-import {
-     APARTMENT_FURNITURE_LABELS,
-     formatDateTime,
-     formatStatus,
-     formatVND,
-} from "@/utils/format"
-import {
-     Bath,
-     BedDouble,
-     Building2,
-     CalendarDays,
-     CircleDollarSign,
-     Clock3,
-     Hash,
-     Home,
-     Info,
-     Landmark,
-     MapPin,
-     Ruler,
-     Star,
-     Users,
-} from "lucide-react"
+import { APARTMENT_FURNITURE_LABELS, formatDateTime, formatStatus, formatVND } from "@/utils/format"
+import { Bath, BedDouble, Building2, CalendarDays, CircleDollarSign, Clock3, Hash, Home, Info, Landmark, MapPin, Ruler, Star, Users } from "lucide-react"
 
 export const DEFAULT_CREATE_FORM: ApartmentForm = {
      furnishingStatus: "unfurnished",
@@ -65,10 +45,7 @@ export const hasApartmentFormChanged = (
      })
 }
 
-export const buildApartmentDetailItems = (
-     detailApartment: ApartmentDetailData,
-     fullAddress: string,
-) => {
+export const buildApartmentDetailItems = (detailApartment: ApartmentDetailData, fullAddress: string) => {
      return [
           { group: "Thông tin căn hộ", label: "ID", value: detailApartment.id, icon: Hash },
           { group: "Thông tin căn hộ", label: "Mã căn hộ", value: detailApartment.apartmentNumber, icon: Home },

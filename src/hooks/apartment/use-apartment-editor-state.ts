@@ -1,5 +1,6 @@
-import { ApartmentForm, parseNumber } from "@/types/apartment-form"
+import { ApartmentForm } from "@/types/apartment-form"
 import { parseVNDInput } from "@/utils/format"
+import { parseNumber } from "@/utils/number"
 import { useMemo, useState } from "react"
 
 export type DepositPreset = 1 | 2
