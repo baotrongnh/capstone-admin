@@ -14,8 +14,9 @@ import { ChevronDown, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ModalApproveRequest } from "../../../components/modal/approve-request-operator-modal";
 import { TableRequestOperator } from "../../../components/table/table-request-operator";
-import type { Request } from "./types";
 import { useRouter } from "next/navigation";
+import { Request } from "@/types/request";
+import ModalRejectRequest from "@/components/modal/reject-request-operator-modal";
 
 export default function RequestOperatorPage() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function RequestOperatorPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 7;
@@ -43,13 +45,6 @@ export default function RequestOperatorPage() {
   const handleOpenApproveModal = (request: Request) => {
     setSelectedRequest(request);
     setApproveModalOpen(true);
-  };
-
-  const handleReject = () => {
-    if (selectedRequest) {
-      console.log("Request rejected:", selectedRequest.id);
-      setApproveModalOpen(false);
-    }
   };
 
   const filteredRequests: Request[] = useMemo(() => {
@@ -115,6 +110,11 @@ export default function RequestOperatorPage() {
 
   const handleViewDetail = (request: Request) => {
     router.push(`/operator/apartments/${request.id}`);
+  };
+
+  const handleOpenRejectModal = (request: Request) => {
+    setSelectedRequest(request);
+    setRejectModalOpen(true);
   };
 
   return (
@@ -208,6 +208,7 @@ export default function RequestOperatorPage() {
           filteredRequests={paginatedRequests}
           onOpenApprove={(request) => handleOpenApproveModal(request)}
           onViewDetail={(request) => handleViewDetail(request)}
+          onOpenReject={(request) => handleOpenRejectModal(request)}
         />
       </div>
 
@@ -264,7 +265,12 @@ export default function RequestOperatorPage() {
         request={selectedRequest}
         staffUpdate={selectedRequest?.staffUpdate}
         onClose={() => setApproveModalOpen(false)}
-        onReject={handleReject}
+      />
+
+      <ModalRejectRequest
+        open={rejectModalOpen}
+        request={selectedRequest}
+        onClose={() => setRejectModalOpen(false)}
       />
     </div>
   );
