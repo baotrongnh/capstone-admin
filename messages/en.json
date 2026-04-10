@@ -12,5 +12,69 @@
   "Auth": {
     "loginSuccess": "Login successful!",
     "loginError": "Login failed. Please check your credentials and try again."
+  },
+  "StaffSchedule": {
+    "title": "Schedule",
+    "subtitle": "Track and manage your assigned appointments.",
+    "errorTitle": "Failed to load appointments",
+    "errorDescription": "Please try again.",
+    "empty": "No appointments yet.",
+    "pastNotice": "All appointments are in the past. You can still mark them as done.",
+    "calendar": {
+      "pending": "{count} pending",
+      "confirmed": "{count} confirmed",
+      "completed": "{count} completed",
+      "cancelled": "{count} cancelled"
+    },
+    "summary": {
+      "upcomingTotal": "{count} upcoming appointments",
+      "currentFocus": "Next: {date} at {time}",
+      "nextAriaLabel": "Focus next appointment"
+    },
+    "modal": {
+      "title": "Appointments on {date}"
+    },
+    "appointment": {
+      "label": "Appointment {id}"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "noShow": "No show"
+    },
+    "fields": {
+      "apartment": "Apartment",
+      "time": "Time",
+      "minutes": "minutes",
+      "location": "Location",
+      "note": "Note",
+      "guestNotes": "Guest notes",
+      "staffNotes": "Staff notes"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "deny": "Deny",
+      "cancel": "Cancel",
+      "done": "Done"
+    },
+    "reasonModal": {
+      "cancelTitle": "Cancel appointment",
+      "denyTitle": "Deny appointment",
+      "titleLabel": "Title",
+      "detailLabel": "Detail",
+      "titlePlaceholder": "Select a reason",
+      "detailPlaceholder": "Optional details",
+      "titleRequired": "Please select a reason title.",
+      "submitCancel": "Confirm appointment cancellation",
+      "submitDeny": "Deny appointment"
+    },
+    "reasonOptions": {
+      "staffUnavailable": "Staff unavailable",
+      "emergencyMaintenance": "Emergency maintenance",
+      "schedulingConflict": "Scheduling conflict",
+      "other": "Other"
+    }
   }
 }

@@ -1,4 +1,7 @@
-import type { ImagePreview } from "@/hooks/apartment/use-apartment-media-state"
+import {
+     APARTMENT_VIDEO_MAX_SIZE_MB,
+     type ImagePreview,
+} from "@/hooks/apartment/use-apartment-media-state"
 import { SectionCard, SectionTitle } from "@/components/apartment/ui/section-primitives"
 import {
      Dialog,
@@ -24,6 +27,50 @@ type ApartmentMediaSectionProps = {
      onRemoveExistingImage: (index: number) => void
      onRemoveSelectedImage: (index: number) => void
      onRemoveSelectedVideo: () => void
+}
+
+export type ApartmentMediaSectionModel = {
+     editMode: boolean
+     existingImages: string[]
+     selectedImagePreviews: ImagePreview[]
+     selectedVideoFile: File | null
+     selectedVideoPreviewUrl: string
+     videoTourUrl?: string
+}
+
+export type ApartmentMediaSectionActions = {
+     onSelectImages: (event: ChangeEvent<HTMLInputElement>) => void
+     onSelectVideo: (event: ChangeEvent<HTMLInputElement>) => void
+     onRemoveExistingImage: (index: number) => void
+     onRemoveSelectedImage: (index: number) => void
+     onRemoveSelectedVideo: () => void
+}
+
+type ApartmentMediaSectionModelProps = {
+     model: ApartmentMediaSectionModel
+     actions: ApartmentMediaSectionActions
+}
+
+function resolveMediaSectionProps(
+     props: ApartmentMediaSectionProps | ApartmentMediaSectionModelProps,
+) {
+     if ("model" in props) {
+          return {
+               editMode: props.model.editMode,
+               existingImages: props.model.existingImages,
+               selectedImagePreviews: props.model.selectedImagePreviews,
+               selectedVideoFile: props.model.selectedVideoFile,
+               selectedVideoPreviewUrl: props.model.selectedVideoPreviewUrl,
+               videoTourUrl: props.model.videoTourUrl,
+               onSelectImages: props.actions.onSelectImages,
+               onSelectVideo: props.actions.onSelectVideo,
+               onRemoveExistingImage: props.actions.onRemoveExistingImage,
+               onRemoveSelectedImage: props.actions.onRemoveSelectedImage,
+               onRemoveSelectedVideo: props.actions.onRemoveSelectedVideo,
+          }
+     }
+
+     return props
 }
 
 type VideoPreviewCardProps = {
@@ -88,19 +135,21 @@ function MediaImageCard({ src, alt, onRemove, removeAriaLabel }: MediaImageCardP
      )
 }
 
-export function ApartmentMediaSection({
-     editMode,
-     existingImages,
-     selectedImagePreviews,
-     selectedVideoFile,
-     selectedVideoPreviewUrl,
-     videoTourUrl,
-     onSelectImages,
-     onSelectVideo,
-     onRemoveExistingImage,
-     onRemoveSelectedImage,
-     onRemoveSelectedVideo,
-}: ApartmentMediaSectionProps) {
+export function ApartmentMediaSection(props: ApartmentMediaSectionProps | ApartmentMediaSectionModelProps) {
+     const {
+          editMode,
+          existingImages,
+          selectedImagePreviews,
+          selectedVideoFile,
+          selectedVideoPreviewUrl,
+          videoTourUrl,
+          onSelectImages,
+          onSelectVideo,
+          onRemoveExistingImage,
+          onRemoveSelectedImage,
+          onRemoveSelectedVideo,
+     } = resolveMediaSectionProps(props)
+
      const [videoDialog, setVideoDialog] = useState<{
           open: boolean
           url: string | null
@@ -155,6 +204,9 @@ export function ApartmentMediaSection({
                                    Tải video lên
                                    <input type="file" accept="video/*" className="hidden" onChange={onSelectVideo} />
                               </label>
+                              <p className="text-xs text-muted-foreground">
+                                   Video tối đa {APARTMENT_VIDEO_MAX_SIZE_MB}MB.
+                              </p>
 
                               {selectedVideoFile ? (
                                    <div className="space-y-2">

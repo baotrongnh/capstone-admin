@@ -1,8 +1,15 @@
 "use client";
 
+import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section";
+import { ApartmentMediaSection } from "@/components/apartment/sections/apartment-media-section";
+import {
+  ApartmentAmenitySection,
+  ApartmentOwnerSection,
+} from "@/components/apartment/sections/apartment-profile-sections";
 import { Button } from "@/components/ui/button";
 import { useFullAddress } from "@/hooks/query/useAddress";
 import { useAmenities } from "@/hooks/query/useAmenities";
+import { useApartmentGeocoding } from "@/hooks/apartment/use-apartment-geocoding";
 import {
   useApartment,
   useCreateCooperationMedia,
@@ -16,9 +23,14 @@ import {
 import {
   ApartmentForm,
   buildApartmentForm,
-  parseNumber,
 } from "@/types/apartment-form";
-import { formatDateTime, formatStatus, formatVND, parseVNDInput } from "@/utils/format";
+import {
+  formatDateTime,
+  formatStatus,
+  formatVND,
+  parseVNDInput,
+} from "@/utils/format";
+import { parseNumber } from "@/utils/number";
 import { message } from "antd";
 import {
   Bath,
@@ -36,14 +48,8 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
-import {
-  ApartmentDetailsSection,
-  ApartmentAmenitySection,
-  ApartmentOwnerSection,
-  ApartmentMediaSection,
-} from "@/components/apartment";
 import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 
 type RequestDetailContentProps = {
   apartmentId: string | null;
@@ -79,6 +85,7 @@ export function RequestDetailContent({
 
   const [manualEditMode, setManualEditMode] = useState(false);
   const [draftForm, setDraftForm] = useState<ApartmentForm | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
@@ -118,6 +125,31 @@ export function RequestDetailContent({
     detailApartment?.provinceCode || undefined,
     form?.wardCode || detailApartment?.wardCode || undefined,
   );
+
+  const {
+    geocodeStatus,
+    geocodeErrorMessage,
+    markManualCoordinatePick,
+    resetGeocodeTracking,
+  } = useApartmentGeocoding({
+    editMode,
+    form,
+    fullAddress,
+    onAutoCoordinate: ({ latitude, longitude }) => {
+      // So sánh để chặn vòng lặp re-render vô tận
+      if (form?.latitude !== latitude || form?.longitude !== longitude) {
+        setDraftForm((prev) => {
+          const currentForm = prev || initialForm;
+          if (!currentForm) return prev;
+          return {
+            ...currentForm,
+            latitude: latitude,
+            longitude: longitude,
+          };
+        });
+      }
+    },
+  });
 
   const usableAreaInvalid =
     form?.usableArea !== undefined &&
@@ -299,8 +331,11 @@ export function RequestDetailContent({
     (hasFormChanges || hasMediaChanges || hasClientChanges);
 
   const setField = (key: string, value: unknown) => {
-    if (!form) return;
-    setDraftForm({ ...form, [key]: value });
+    setDraftForm((prev) => {
+      const currentForm = prev || initialForm;
+      if (!currentForm) return prev;
+      return { ...currentForm, [key]: value };
+    });
   };
 
   const setNumberField = (key: string, raw: string) => {
@@ -309,6 +344,43 @@ export function RequestDetailContent({
 
   const setCurrencyField = (key: string, raw: string) => {
     setField(key, parseVNDInput(raw));
+  };
+
+  const handleFieldChange = (field: string, value: unknown) => {
+    setField(field, value);
+    clearFieldError(field);
+  };
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleNumberFieldChange = (key: string, raw: string) => {
+    setNumberField(key, raw);
+    clearFieldError(key);
+  };
+
+  const handleCurrencyFieldChange = (key: string, raw: string) => {
+    setCurrencyField(key, raw);
+    clearFieldError(key);
+  };
+
+  const handlePickCoordinate = (value: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    setField("latitude", value.latitude);
+    setField("longitude", value.longitude);
+    markManualCoordinatePick();
+  };
+
+  const handleSelectDepositPreset = () => {
+    // Not needed for request-detail-content-staff
   };
 
   const handleStartEdit = () => {
@@ -326,6 +398,8 @@ export function RequestDetailContent({
     setDraftForm(null);
     setManualEditMode(false);
     resetEditTransientState();
+    resetGeocodeTracking();
+    setFieldErrors({});
   };
 
   const handleSelectImages = (event: ChangeEvent<HTMLInputElement>) => {
@@ -474,16 +548,20 @@ export function RequestDetailContent({
         {detailApartment && form && (
           <div className="space-y-5">
             <ApartmentDetailsSection
-              editMode={editMode}
-              form={form}
-              detailItems={detailItems}
-              fullAddress={fullAddress}
-              availableYears={availableYears}
-              usableAreaInvalid={usableAreaInvalid}
-              initialProvinceCode={detailApartment.provinceCode || undefined}
-              setField={setField}
-              setNumberField={setNumberField}
-              setCurrencyField={setCurrencyField}
+              model={{
+                editMode,
+                form,
+                detailItems,
+                fullAddress,
+                availableYears,
+                usableAreaInvalid,
+                initialProvinceCode: detailApartment.provinceCode || undefined,
+              } satisfies ApartmentDetailsSectionModel}
+              actions={{
+                setField,
+                setNumberField,
+                setCurrencyField,
+              } satisfies ApartmentDetailsSectionActions}
             />
 
             <ApartmentOwnerSection

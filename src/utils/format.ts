@@ -1,3 +1,5 @@
+import { verify } from "crypto"
+
 // Format số thành 70,000 hoặc 70,000 VNĐ
 export const formatVND = (value: number | string, showVND = false) => {
   const num = typeof value === 'string' ? Number(value) : value
@@ -66,6 +68,8 @@ const APARTMENT_STATUS_LABELS: Record<string, string> = {
   maintenance: "Bảo trì",
   reserved: "Đã đặt cọc",
   inactive: "Ngừng hoạt động",
+  pending: "Đang chờ ký",
+  verified: 'Đã xác thực',
 }
 
 export const APARTMENT_FURNITURE_LABELS: Record<string, string> = {

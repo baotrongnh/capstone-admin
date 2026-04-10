@@ -1,6 +1,6 @@
 "use client"
 
-import { ApartmentDetailEditor } from "@/components/apartment"
+import { ApartmentDetailEditor } from "@/components/apartment/apartment-detail-editor"
 import { Button } from "@/components/ui/button"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 
