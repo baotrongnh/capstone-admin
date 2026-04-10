@@ -1,16 +1,7 @@
-import {
-     APARTMENT_VIDEO_MAX_SIZE_MB,
-     type ImagePreview,
-} from "@/hooks/apartment/use-apartment-media-state"
 import { SectionCard, SectionTitle } from "@/components/apartment/ui/section-primitives"
-import {
-     Dialog,
-     DialogContent,
-     DialogDescription,
-     DialogHeader,
-     DialogTitle,
-} from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { APARTMENT_VIDEO_MAX_SIZE_MB, type ImagePreview } from "@/hooks/apartment/use-apartment-media-state"
 import { Image as AntdImage } from "antd"
 import { ImageIcon, PlayCircle, UploadIcon, Video, XIcon } from "lucide-react"
 import { ChangeEvent, useState } from "react"
@@ -181,7 +172,7 @@ export function ApartmentMediaSection(props: ApartmentMediaSectionProps | Apartm
           <SectionCard>
                <SectionTitle
                     title="Media"
-                    description="Ảnh/video bấm vào để xem, upload bằng file thật"
+                    description="Ảnh & video của căn hộ"
                     icon={ImageIcon}
                />
 

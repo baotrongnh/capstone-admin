@@ -12,7 +12,6 @@ export type ApartmentSearchQueryParams = paths["/api/v1/apartments/search"]["get
 export type ApartmentItem = NonNullable<ApartmentListResponse['data']>[number]
 export type ApartmenList = ApartmentItem[]
 export type ApartmentDetailData = NonNullable<ApartmentDetailResponse["data"]>
-export type ApartmentRooms = ApartmentDetailData["rooms"]
 export type ApartmentTenants = ApartmentDetailData["userApartments"]
 
 export type ApartmentQueryParams = NonNullable<ApartmentSearchQueryParams>

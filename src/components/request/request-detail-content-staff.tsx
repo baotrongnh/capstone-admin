@@ -565,25 +565,33 @@ export function RequestDetailContent({
             />
 
             <ApartmentOwnerSection
-              editMode={editMode}
-              ownerSummary={{
-                id: detailApartment.ownerId || form.ownerId || null,
-                fullName: ownerName,
-                companyName: ownerCompany,
+              model={{
+                editMode,
+                ownerSummary: {
+                  id: detailApartment.ownerId || form.ownerId || null,
+                  fullName: ownerName,
+                  companyName: ownerCompany,
+                },
+                ownerId: form.ownerId || undefined,
+                ownerOptions,
+                usersLoading,
               }}
-              ownerId={form.ownerId || undefined}
-              ownerOptions={ownerOptions}
-              usersLoading={usersLoading}
-              onOwnerChange={(value) => setField("ownerId", value)}
+              actions={{
+                onOwnerChange: (value) => setField("ownerId", value),
+              }}
             />
 
             <ApartmentAmenitySection
-              editMode={editMode}
-              description={form.description}
-              amenityIds={form.amenityIds || []}
-              options={amenityPresetOptions}
-              onDescriptionChange={(value) => setField("description", value)}
-              onAmenitiesChange={(value) => setField("amenityIds", value)}
+              model={{
+                editMode,
+                description: form.description,
+                amenityIds: form.amenityIds || [],
+                options: amenityPresetOptions,
+              }}
+              actions={{
+                onDescriptionChange: (value) => setField("description", value),
+                onAmenitiesChange: (value) => setField("amenityIds", value),
+              }}
             />
 
             <ApartmentMediaSection
