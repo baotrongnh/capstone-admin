@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select as AntdSelect } from "antd"
 import { Cpu } from "lucide-react"
-import { useMemo } from "react"
 
 export type IotConnectedDevice = {
      id: string
@@ -17,13 +16,13 @@ export type IotConnectedDevice = {
      boardName: string
 }
 
-type BoardOption = {
+export type BoardOption = {
      id: string
      label: string
      deviceCount: number
 }
 
-type ApartmentIotViewModel = {
+export type ApartmentIotSectionModel = {
      editMode: boolean
      selectedBoardIds: string[]
      boardOptions: BoardOption[]
@@ -36,15 +35,54 @@ type ApartmentIotViewModel = {
      unlinkingBoardId?: string | null
 }
 
-type ApartmentIotActions = {
+export type ApartmentIotSectionActions = {
      onSelectedBoardsChange: (boardIds: string[]) => void
      onUnlinkLinkedBoard?: (boardId: string) => void
      onBulkUnlinkBoards?: () => void
 }
 
 type ApartmentIotSectionProps = {
-     model: ApartmentIotViewModel
-     actions: ApartmentIotActions
+     model: ApartmentIotSectionModel
+     actions: ApartmentIotSectionActions
+}
+
+const groupDevicesByBoard = (devices: IotConnectedDevice[]) => {
+     const groups: Record<string, IotConnectedDevice[]> = {}
+
+     for (const device of devices) {
+          if (!groups[device.boardId]) {
+               groups[device.boardId] = []
+          }
+
+          groups[device.boardId].push(device)
+     }
+
+     return groups
+}
+
+const createBoardLabelMap = (boards: BoardOption[]) => {
+     const map: Record<string, string> = {}
+
+     for (const board of boards) {
+          map[board.id] = board.label
+     }
+
+     return map
+}
+
+function DeviceBadges({ devices }: { devices: IotConnectedDevice[] }) {
+     return (
+          <div className="flex flex-wrap gap-2">
+               {devices.map((device) => (
+                    <Badge key={device.id} variant="outline" className="gap-1">
+                         {device.deviceName}
+                         <span className="text-[10px] text-muted-foreground">
+                              ({device.deviceType})
+                         </span>
+                    </Badge>
+               ))}
+          </div>
+     )
 }
 
 export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps) {
@@ -67,33 +105,10 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
           onBulkUnlinkBoards,
      } = actions
 
-     const boardDeviceGroups = useMemo(() => {
-          return boardDevices.reduce(
-               (groups, device) => {
-                    const existing = groups[device.boardId]
-                    if (existing) {
-                         existing.push(device)
-                         return groups
-                    }
-
-                    groups[device.boardId] = [device]
-                    return groups
-               },
-               {} as Record<string, IotConnectedDevice[]>,
-          )
-     }, [boardDevices])
-
-     const linkedBoardLabelMap = useMemo(
-          () =>
-               linkedBoards.reduce(
-                    (map, board) => {
-                         map[board.id] = board.label
-                         return map
-                    },
-                    {} as Record<string, string>,
-               ),
-          [linkedBoards],
-     )
+     const boardDeviceGroups = groupDevicesByBoard(boardDevices)
+     const linkedBoardLabelMap = createBoardLabelMap(linkedBoards)
+     const groupedBoardDevices = Object.entries(boardDeviceGroups)
+     const hasLinkedBoards = linkedBoards.length > 0
 
      return (
           <SectionCard>
@@ -120,7 +135,7 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
                                    </Button>
                               </div>
 
-                              {linkedBoards.length > 0 ? (
+                              {hasLinkedBoards ? (
                                    <div className="space-y-2">
                                         {linkedBoards.map((board) => {
                                              const devices = boardDeviceGroups[board.id] || []
@@ -145,16 +160,7 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
                                                        </div>
 
                                                        {devices.length > 0 ? (
-                                                            <div className="flex flex-wrap gap-2">
-                                                                 {devices.map((device) => (
-                                                                      <Badge key={device.id} variant="outline" className="gap-1">
-                                                                           {device.deviceName}
-                                                                           <span className="text-[10px] text-muted-foreground">
-                                                                                ({device.deviceType})
-                                                                           </span>
-                                                                      </Badge>
-                                                                 ))}
-                                                            </div>
+                                                            <DeviceBadges devices={devices} />
                                                        ) : (
                                                             <p className="text-xs text-muted-foreground">Mạch này chưa có thiết bị kết nối.</p>
                                                        )}
@@ -194,7 +200,7 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
                               <DetailItem label="Tổng thiết bị IoT" value={totalDeviceCount} icon={Cpu} />
                          </div>
 
-                         {linkedBoards.length > 0 ? (
+                         {hasLinkedBoards ? (
                               <div className="flex flex-wrap gap-2">
                                    {linkedBoards.map((board) => (
                                         <Badge key={board.id} variant="secondary">
@@ -206,23 +212,14 @@ export function ApartmentIotSection({ model, actions }: ApartmentIotSectionProps
                               <p className="text-xs text-muted-foreground">Căn hộ chưa liên kết mạch IoT nào.</p>
                          )}
 
-                         {boardDevices.length > 0 ? (
+                         {groupedBoardDevices.length > 0 ? (
                               <div className="space-y-2">
-                                   {Object.entries(boardDeviceGroups).map(([boardId, devices]) => (
+                                   {groupedBoardDevices.map(([boardId, devices]) => (
                                         <div key={boardId} className="rounded-md border p-2">
                                              <p className="mb-1 text-xs font-medium text-foreground">
                                                   {(linkedBoardLabelMap[boardId] || boardId)} ({devices.length} thiết bị)
                                              </p>
-                                             <div className="flex flex-wrap gap-2">
-                                                  {devices.map((device) => (
-                                                       <Badge key={device.id} variant="outline" className="gap-1">
-                                                            {device.deviceName}
-                                                            <span className="text-[10px] text-muted-foreground">
-                                                                 ({device.deviceType})
-                                                            </span>
-                                                       </Badge>
-                                                  ))}
-                                             </div>
+                                             <DeviceBadges devices={devices} />
                                         </div>
                                    ))}
                               </div>

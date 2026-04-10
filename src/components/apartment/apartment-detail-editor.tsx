@@ -1,34 +1,11 @@
 "use client"
 
-import {
-     AVAILABLE_YEARS,
-     buildApartmentDetailItems,
-     DEFAULT_CREATE_FORM,
-     DEFAULT_SECTION_VISIBILITY,
-     hasApartmentFormChanged,
-} from "@/components/apartment/apartment-detail-editor.helpers"
+import { AVAILABLE_YEARS, buildApartmentDetailItems, DEFAULT_CREATE_FORM, DEFAULT_SECTION_VISIBILITY, hasApartmentFormChanged } from "@/components/apartment/apartment-detail-editor.helpers"
 import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section"
 import { ApartmentIotSection } from "@/components/apartment/sections/apartment-iot-section"
-import {
-     ApartmentMediaSection,
-     type ApartmentMediaSectionActions,
-     type ApartmentMediaSectionModel,
-} from "@/components/apartment/sections/apartment-media-section"
-import {
-     ApartmentRoomsSection,
-     ApartmentTenantSection,
-     type ApartmentRoomsSectionActions,
-     type ApartmentRoomsSectionModel,
-     type ApartmentTenantSectionModel,
-} from "@/components/apartment/sections/apartment-occupancy-sections"
-import {
-     ApartmentAmenitySection,
-     ApartmentOwnerSection,
-     type ApartmentAmenitySectionActions,
-     type ApartmentAmenitySectionModel,
-     type ApartmentOwnerSectionActions,
-     type ApartmentOwnerSectionModel,
-} from "@/components/apartment/sections/apartment-profile-sections"
+import { ApartmentMediaSection, type ApartmentMediaSectionActions, type ApartmentMediaSectionModel } from "@/components/apartment/sections/apartment-media-section"
+import { ApartmentTenantSection, type ApartmentTenantSectionModel } from "@/components/apartment/sections/apartment-occupancy-sections"
+import { ApartmentAmenitySection, ApartmentOwnerSection, type ApartmentAmenitySectionActions, type ApartmentAmenitySectionModel, type ApartmentOwnerSectionActions, type ApartmentOwnerSectionModel } from "@/components/apartment/sections/apartment-profile-sections"
 import { Button } from "@/components/ui/button"
 import { useApartmentDetailEditorController } from "@/hooks/apartment/use-apartment-detail-editor-controller"
 import { useApartmentEditorState } from "@/hooks/apartment/use-apartment-editor-state"
@@ -299,7 +276,7 @@ export function ApartmentDetailEditor({
      const handleConfirmUnlinkAllLinkedBoards = () => {
           Modal.confirm({
                title: "Hủy liên kết toàn bộ mạch",
-               content: "Bạn có chắc chắn muốn gỡ liên kết apartment khỏi tất cả mạch đang gắn không?",
+               content: "Bạn có chắc chắn muốn gỡ liên kết căn hộ khỏi tất cả mạch đang gắn không?",
                okText: "Xác nhận",
                okType: "danger",
                cancelText: "Hủy",
@@ -375,17 +352,6 @@ export function ApartmentDetailEditor({
           onRemoveExistingImage: controller.handleRemoveExistingImage,
           onRemoveSelectedImage: handleRemoveSelectedImage,
           onRemoveSelectedVideo: handleRemoveSelectedVideo,
-     }
-
-     const roomsSectionModel: ApartmentRoomsSectionModel = {
-          editMode,
-          roomTags,
-          roomOptions,
-          rooms: detailApartment?.rooms || [],
-     }
-
-     const roomsSectionActions: ApartmentRoomsSectionActions = {
-          onRoomTagsChange: setRoomTags,
      }
 
      const tenantSectionModel: ApartmentTenantSectionModel = {
@@ -481,13 +447,6 @@ export function ApartmentDetailEditor({
                                              onUnlinkLinkedBoard: handleConfirmUnlinkLinkedBoard,
                                              onBulkUnlinkBoards: handleConfirmUnlinkAllLinkedBoards,
                                         }}
-                                   />
-                              ) : null}
-
-                              {resolvedSectionVisibility.showRoomsSection ? (
-                                   <ApartmentRoomsSection
-                                        model={roomsSectionModel}
-                                        actions={roomsSectionActions}
                                    />
                               ) : null}
 

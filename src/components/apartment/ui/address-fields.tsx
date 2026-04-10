@@ -5,62 +5,33 @@ import { normalizeText } from "@/utils/format"
 import { Select as AntdSelect } from "antd"
 import { useMemo, useState } from "react"
 
-type AddressCodes = {
-     provinceCode?: number
-     wardCode?: number
-}
-
-type AddressChange = {
-     wardCode?: number
-}
-
 type ApartmentAddressFieldsProps = {
-     initialCodes: AddressCodes
-     onChange: (value: AddressChange) => void
+     initialCodes: {
+          provinceCode?: number
+          wardCode?: number
+     }
+     onChange: (value: { wardCode?: number }) => void
 }
 
-export function ApartmentAddressFields({
-     initialCodes,
-     onChange,
-}: ApartmentAddressFieldsProps) {
-     const [provinceCode, setProvinceCode] = useState<number | undefined>(
-          initialCodes.provinceCode,
-     )
-     const [wardCode, setWardCode] = useState<number | undefined>(
-          initialCodes.wardCode,
-     )
+export function ApartmentAddressFields({ initialCodes, onChange }: ApartmentAddressFieldsProps) {
+     const [provinceCode, setProvinceCode] = useState<number | undefined>(initialCodes.provinceCode)
+     const [wardCode, setWardCode] = useState<number | undefined>(initialCodes.wardCode)
 
-     const {
-          data: provinces,
-          isLoading: isProvincesLoading,
-          isFetching: isProvincesFetching,
-     } = useProvinces()
-     const {
-          data: wards,
-          isLoading: isWardsLoading,
-          isFetching: isWardsFetching,
-     } = useWards(provinceCode)
+     const { data: provinces, isLoading: isProvincesLoading, isFetching: isProvincesFetching } = useProvinces()
+     const { data: wards, isLoading: isWardsLoading, isFetching: isWardsFetching } = useWards(provinceCode)
 
      const provincesLoading = isProvincesLoading || isProvincesFetching
      const wardsLoading = isWardsLoading || isWardsFetching
 
-     const provinceOptions = useMemo(
-          () =>
-               provinces?.map((province) => ({
-                    label: province.name,
-                    value: String(province.code),
-               })) || [],
-          [provinces],
-     )
+     const provinceOptions = useMemo(() => provinces?.map((province) => ({
+          label: province.name,
+          value: String(province.code),
+     })) || [], [provinces])
 
-     const wardOptions = useMemo(
-          () =>
-               wards?.map((ward) => ({
-                    label: ward.name,
-                    value: String(ward.code),
-               })) || [],
-          [wards],
-     )
+     const wardOptions = useMemo(() => wards?.map((ward) => ({
+          label: ward.name,
+          value: String(ward.code),
+     })) || [], [wards])
 
      const toOptionalNumber = (value: string) => (value ? Number(value) : undefined)
 

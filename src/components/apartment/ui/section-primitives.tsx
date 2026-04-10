@@ -26,10 +26,8 @@ type EditableTagListProps = {
      emptyText: string
 }
 
-export const SECTION_CLASS = "rounded-xl border bg-card p-4 md:p-5 space-y-3 shadow-sm"
-
 export function SectionCard({ children, className }: SectionCardProps) {
-     return <section className={cn(SECTION_CLASS, className)}>{children}</section>
+     return <section className={cn("rounded-xl border bg-card p-4 md:p-5 space-y-3 shadow-sm", className)}>{children}</section>
 }
 
 export function SectionTitle({ title, description, icon: Icon }: SectionTitleProps) {
