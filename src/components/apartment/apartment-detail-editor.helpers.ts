@@ -19,7 +19,6 @@ export const DEFAULT_SECTION_VISIBILITY = {
      showAmenitySection: true,
      showMediaSection: true,
      showIotSection: true,
-     showRoomsSection: true,
      showTenantSection: true,
 }
 

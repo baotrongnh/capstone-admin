@@ -23,7 +23,6 @@ export type ApartmentItem = NonNullable<
 };
 export type ApartmenList = ApartmentItem[];
 export type ApartmentDetailData = NonNullable<ApartmentDetailResponse["data"]>;
-export type ApartmentRooms = ApartmentDetailData["rooms"];
 export type ApartmentTenants = ApartmentDetailData["userApartments"];
 
 export type ApartmentQueryParams = NonNullable<ApartmentSearchQueryParams>;

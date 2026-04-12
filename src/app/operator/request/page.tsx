@@ -78,10 +78,6 @@ export default function RequestOperatorPage() {
             ? new Date(apt.createdAt).toISOString().split("T")[0]
             : new Date().toISOString().split("T")[0],
         },
-        owner: {
-          fullName: apt.owner?.fullName || "N/A",
-          phone: apt.owner?.phone || "N/A",
-        },
       }))
       .filter((req) => {
         const matchSearch = req.apartmentName

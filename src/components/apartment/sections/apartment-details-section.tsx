@@ -159,12 +159,12 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
     <SectionCard className="bg-muted/20">
       <SectionTitle
         title="Thông tin cơ bản"
-        description="Các trường nền tảng của căn hộ"
+        description="Các thông tin cơ bản của căn hộ"
         icon={Info}
       />
 
                {editMode ? (
-                    <p className="mb-3 text-xs text-muted-foreground">
+                    <p className="mb-3 text-xs text-muted-foreground flex justify-end gap-1">
                          Trường có dấu <span className="text-destructive">*</span> là bắt buộc.
                     </p>
                ) : null}

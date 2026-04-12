@@ -31,34 +31,18 @@ const getNominatimBaseUrl = () => {
      return cachedNominatimBaseUrl
 }
 
-const compactAddress = (value: string) =>
-     value
-          .replace(/\s+/g, " ")
-          .replace(/\s*,\s*/g, ", ")
-          .replace(/,+/g, ",")
-          .replace(/^,|,$/g, "")
-          .trim()
+const compactAddress = (value: string) => value.replace(/\s+/g, " ").replace(/\s*,\s*/g, ", ").replace(/,+/g, ",").replace(/^,|,$/g, "").trim()
 
-const removeVietnamesePrefix = (value: string) =>
-     value
-          .replace(/^(tỉnh|thành phố|tp\.?|quận|huyện|phường|xã|thị trấn|tinh|thanh pho|quan|huyen|phuong|xa|thi tran)\s+/i, "")
-          .trim()
+const removeVietnamesePrefix = (value: string) => value.replace(/^(tỉnh|thành phố|tp\.?|quận|huyện|phường|xã|thị trấn|tinh|thanh pho|quan|huyen|phuong|xa|thi tran)\s+/i, "").trim()
 
 const splitAddressParts = (value: string) => {
-     const parts = compactAddress(value)
-          .split(",")
-          .map((part) => part.trim())
-          .filter(Boolean)
+     const parts = compactAddress(value).split(",").map((part) => part.trim()).filter(Boolean)
 
      const province = parts.length > 0 ? removeVietnamesePrefix(parts[parts.length - 1]) : ""
      const ward = parts.length > 1 ? removeVietnamesePrefix(parts[parts.length - 2]) : ""
      const street = parts.length > 2 ? compactAddress(parts.slice(0, -2).join(", ")) : parts[0] || ""
 
-     return {
-          street,
-          ward,
-          province,
-     }
+     return { street, ward, province }
 }
 
 const dedupeQueries = (queries: string[]) => Array.from(new Set(queries.map(compactAddress).filter(Boolean)))
@@ -79,14 +63,12 @@ const mapSearchItem = (value: NominatimSearchItem): GeocodeResult | null => {
      const latitude = Number(value.lat)
      const longitude = Number(value.lon)
 
-     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-          return null
-     }
+     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
 
      return {
           latitude,
           longitude,
-          displayName: value.display_name,
+          displayName: value.display_name
      }
 }
 
@@ -112,9 +94,7 @@ const requestGeocode = async (query: string) => {
 export const geocodeService = {
      geocodeAddress: async (address: string): Promise<GeocodeResult | null> => {
           const trimmedAddress = address.trim()
-          if (!trimmedAddress) {
-               return null
-          }
+          if (!trimmedAddress) return null
 
           const queries = buildCandidateQueries(trimmedAddress)
           let hasSuccessfulRequest = false
@@ -125,18 +105,14 @@ export const geocodeService = {
                     const result = await requestGeocode(query)
                     hasSuccessfulRequest = true
 
-                    if (result) {
-                         return result
-                    }
+                    if (result) return result
                } catch (error) {
                     lastError = error
                }
           }
 
-          if (!hasSuccessfulRequest && lastError) {
-               throw lastError
-          }
+          if (!hasSuccessfulRequest && lastError) throw lastError
 
           return null
-     },
+     }
 }
