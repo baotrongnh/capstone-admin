@@ -74,7 +74,7 @@ export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sideba
             >
               <a href="#">
                 <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">IntelliServop (Operator)</span>
+                <span className="text-base font-semibold">homeIQ (Operator)</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

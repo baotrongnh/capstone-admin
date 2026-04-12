@@ -112,7 +112,7 @@ export function ApartmentCoordinateMap({
                          draggable: !disabledRef.current,
                          icon: markerIcon,
                     },
-               ).addTo(map)
+               ).addTo(map).bindPopup('Có thể di chuyển vị trí cho chính xác ngoài thực tế.')
 
                marker.on("dragend", () => {
                     const position = marker.getLatLng()
