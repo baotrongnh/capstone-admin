@@ -40,6 +40,8 @@ export default function RequestOperatorPage() {
 
   const { data: apartments } = useApartments(params);
 
+  console.log("DA", apartments);
+
   const allRequests = useMemo(() => apartments?.data || [], [apartments?.data]);
 
   const handleOpenApproveModal = (request: Request) => {
@@ -54,6 +56,7 @@ export default function RequestOperatorPage() {
         apartmentName: `${apt.buildingName} - ${apt.apartmentNumber}`,
         partner: "",
         location: apt.streetAddress || "N/A",
+        wardName: apt.wardName || "N/A",
         bedrooms: apt.numberOfBedrooms || 0,
         area: `${apt.totalArea || 0} m²`,
         price: new Intl.NumberFormat("vi-VN").format(
@@ -74,6 +77,10 @@ export default function RequestOperatorPage() {
           updatedDate: apt.createdAt
             ? new Date(apt.createdAt).toISOString().split("T")[0]
             : new Date().toISOString().split("T")[0],
+        },
+        owner: {
+          fullName: apt.owner?.fullName || "N/A",
+          phone: apt.owner?.phone || "N/A",
         },
       }))
       .filter((req) => {

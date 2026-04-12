@@ -44,7 +44,9 @@ export function TableRequestOperator({
       <Table>
         <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableHead className="font-semibold">Căn hộ</TableHead>
+            <TableHead className="font-semibold">Tên đối tác</TableHead>
+            <TableHead className="font-semibold">Số điện thoại</TableHead>
+
             <TableHead className="font-semibold">Tòa nhà</TableHead>
             <TableHead className="font-semibold">Địa chỉ</TableHead>
             <TableHead className="font-semibold">Tiền cọc</TableHead>
@@ -60,22 +62,20 @@ export function TableRequestOperator({
         <TableBody>
           {filteredRequests.map((request) => (
             <TableRow key={request.id} className="hover:bg-gray-50 transition">
-              <TableCell>
-                <div>
-                  <p className="font-medium text-sm">
-                    {request.apartmentName || "N/A"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {request.bedrooms} phòng • {request.area}
-                  </p>
-                </div>
+              <TableCell className="text-sm">
+                {request?.owner?.fullName || "N/A"}
+              </TableCell>
+              <TableCell className="text-sm">
+                {request?.owner?.phone || "N/A"}
               </TableCell>
 
               <TableCell className="text-sm">
                 {request.apartmentName?.split(" - ")[0] || "N/A"}
               </TableCell>
 
-              <TableCell className="text-sm">{request.location}</TableCell>
+              <TableCell className="text-sm">
+                {request.location}, {request.wardName}
+              </TableCell>
 
               <TableCell className="text-sm">{request.deposit} đ</TableCell>
 
