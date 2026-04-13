@@ -63,7 +63,9 @@ export function TableRequest({
       <Table>
         <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableHead className="font-semibold">Căn hộ</TableHead>
+            <TableHead className="font-semibold">Tên đối tác</TableHead>
+            <TableHead className="font-semibold">Số điện thoại</TableHead>
+
             <TableHead className="font-semibold">Tòa nhà</TableHead>
             <TableHead className="font-semibold">Địa chỉ</TableHead>
             <TableHead className="font-semibold">Tiền cọc</TableHead>
@@ -80,16 +82,11 @@ export function TableRequest({
           {displayData?.length > 0 ? (
             displayData.map((item: ApartmentItem) => (
               <TableRow key={item.id} className="hover:bg-gray-50 transition">
-                <TableCell>
-                  <div>
-                    <p className="font-medium text-sm">
-                      {item.apartmentNumber || "N/A"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item.numberOfBedrooms || 0} phòng •{" "}
-                      {item.numberOfBathrooms || 0} WC
-                    </p>
-                  </div>
+                <TableCell className="text-sm">
+                  {item.owner?.fullName || "N/A"}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {item?.owner?.phone || "N/A"}
                 </TableCell>
 
                 <TableCell className="text-sm">

@@ -37,6 +37,8 @@ export default function RequestStaffPage() {
   const { data: apartments } = useApartments(params);
   const allRequests = useMemo(() => apartments?.data || [], [apartments?.data]);
 
+  console.log("|A", apartments);
+
   const handleViewDetail = (request: ApartmentItem) => {
     router.push(`/staff/request/${request.id}`);
   };

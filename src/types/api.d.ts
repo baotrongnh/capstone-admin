@@ -1228,8 +1228,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Update maintenance request */
-        patch: operations["MaintenanceController_update"];
+        patch?: never;
         trace?: never;
     };
     "/api/v1/maintenance/{id}/accept": {
@@ -9967,49 +9966,6 @@ export interface operations {
                         /** @example Success */
                         message?: string;
                         data?: components["schemas"]["MaintenanceDetailDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            /** @description Request not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MaintenanceController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateMaintenanceDto"];
-            };
-        };
-        responses: {
-            /** @description Request updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["MaintenanceUpdatedDto"];
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
