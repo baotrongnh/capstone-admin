@@ -7,7 +7,7 @@ export type MaintenanceListQuery =
 export type MaintenanceDetailResponse =
      paths["/api/v1/maintenance/{id}"]["get"]["responses"]["200"]["content"]["application/json"];
 export type MaintenanceUpdateRequestBody =
-     paths["/api/v1/maintenance/{id}"]["patch"]["requestBody"]["content"]["application/json"];
+     paths["/api/v1/maintenance/{id}"]["patch"]['requestBody']['content']['application/json']
 export type MaintenanceUpdateResponse =
      paths["/api/v1/maintenance/{id}"]["patch"]["responses"]["200"]["content"]["application/json"];
 export type MaintenanceCompleteResponse =
