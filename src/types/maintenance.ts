@@ -1,23 +1,23 @@
-import type { paths } from "@/types/api";
+import type { paths } from "@/types/api"
 
 export type MaintenanceListResponse =
-     paths["/api/v1/maintenance"]["get"]["responses"]["200"]["content"]["application/json"];
+     paths["/api/v1/maintenance"]["get"]["responses"]["200"]["content"]["application/json"]
 export type MaintenanceListQuery =
-     paths["/api/v1/maintenance"]["get"]["parameters"]["query"];
+     paths["/api/v1/maintenance"]["get"]["parameters"]["query"]
 export type MaintenanceDetailResponse =
-     paths["/api/v1/maintenance/{id}"]["get"]["responses"]["200"]["content"]["application/json"];
+     paths["/api/v1/maintenance/{id}"]["get"]["responses"]["200"]["content"]["application/json"]
 export type MaintenanceUpdateRequestBody =
      paths["/api/v1/maintenance/{id}"]["patch"]['requestBody']['content']['application/json']
 export type MaintenanceUpdateResponse =
-     paths["/api/v1/maintenance/{id}"]["patch"]["responses"]["200"]["content"]["application/json"];
+     paths["/api/v1/maintenance/{id}"]["patch"]["responses"]["200"]["content"]["application/json"]
 export type MaintenanceCompleteResponse =
-     paths["/api/v1/maintenance/{id}/complete"]["patch"]["responses"]["200"]["content"]["application/json"];
+     paths["/api/v1/maintenance/{id}/complete"]["patch"]["responses"]["200"]["content"]["application/json"]
 
-export type MaintenanceItem = NonNullable<MaintenanceListResponse["data"]>[number];
-export type MaintenanceDetailData = NonNullable<MaintenanceDetailResponse["data"]>;
+export type MaintenanceItem = NonNullable<MaintenanceListResponse["data"]>[number]
+export type MaintenanceDetailData = NonNullable<MaintenanceDetailResponse["data"]>
 
-export type MaintenanceStatus = NonNullable<NonNullable<MaintenanceListQuery>["status"]>;
-export type MaintenancePriority = NonNullable<MaintenanceUpdateRequestBody["priority"]>;
+export type MaintenanceStatus = NonNullable<NonNullable<MaintenanceListQuery>["status"]>
+export type MaintenancePriority = NonNullable<MaintenanceUpdateRequestBody["priority"]>
 
 export type MaintenanceOption<T extends string> = {
      value: T;
