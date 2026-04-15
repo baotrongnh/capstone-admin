@@ -1142,6 +1142,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/payments/contract-deposit-payouts/due": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List due contract deposit payouts for users
+         * @description Return expired contracts in a billing month that still need security deposit payout to users.
+         */
+        get: operations["PaymentsController_listDueContractDepositPayouts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/contract-deposit-payouts/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm contract deposit payout with transfer proof */
+        post: operations["PaymentsController_confirmContractDepositPayout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/maintenance": {
         parameters: {
             query?: never;
@@ -1191,7 +1228,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update maintenance request */
+        patch: operations["MaintenanceController_update"];
         trace?: never;
     };
     "/api/v1/maintenance/{id}/accept": {
@@ -5034,6 +5072,124 @@ export interface components {
              */
             transferProof: string;
         };
+        ContractDepositPayoutItemDto: {
+            /**
+             * @description Refund payment record ID if payout was already processed
+             * @example 6c6b2b36-4468-440b-8ba8-53dcd8d2be84
+             */
+            payoutPaymentId?: string | null;
+            /** @example 7f1154da-a4dd-4c0f-b67f-6b01f75fd611 */
+            contractId: string;
+            /** @example CTR-2026-00123 */
+            contractNumber: string;
+            /** @example d32f07dd-6697-4a93-8ee8-ea1190ddfca0 */
+            apartmentId: string;
+            /** @example A1-1203 */
+            apartmentNumber: string;
+            /** @example c8f1ff12-d4bd-4ec8-aec8-d5d1945a860f */
+            recipientUserId: string;
+            /** @example Nguyen Van A */
+            recipientFullName: string;
+            /** @example 0901234567 */
+            recipientPhone?: string | null;
+            /** @example Vietcombank */
+            recipientBankName?: string | null;
+            /** @example 001100223344 */
+            recipientBankAccountNumber?: string | null;
+            /** @example 2026-03 */
+            payoutMonth: string;
+            /**
+             * Format: date-time
+             * @example 2026-03-31T00:00:00.000Z
+             */
+            contractEndDate: string;
+            /**
+             * Format: date-time
+             * @example 2026-03-31T00:00:00.000Z
+             */
+            dueDate: string;
+            /** @example 20000000.00 */
+            depositAmount: string;
+            /** @example 20000000.00 */
+            payoutAmount: string;
+            /** @example VND */
+            currency: string;
+            /** @example pending */
+            status: string;
+            /** @example true */
+            isDue: boolean;
+            /**
+             * @description Transfer proof image URL if payout was confirmed
+             * @example https://cdn.example.com/apartment-cooperation/contract-deposit-payouts/2026-03/contract-id/staff-id-1710000000000.jpg
+             */
+            transferProofUrl?: string | null;
+            /** @example MB-TRX-000999 */
+            transferReference?: string | null;
+            /** @example Hoan coc khi ket thuc hop dong */
+            transferNote?: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-04-01T09:30:00.000Z
+             */
+            confirmedAt?: string | null;
+            /** @example staff-uuid */
+            confirmedByStaffId?: string | null;
+        };
+        ConfirmContractDepositPayoutResultDto: {
+            /** @example Contract deposit payout confirmed successfully */
+            message: string;
+            /** @example 6c6b2b36-4468-440b-8ba8-53dcd8d2be84 */
+            payoutPaymentId: string;
+            /** @example 7f1154da-a4dd-4c0f-b67f-6b01f75fd611 */
+            contractId: string;
+            /** @example CTR-2026-00123 */
+            contractNumber: string;
+            /** @example c8f1ff12-d4bd-4ec8-aec8-d5d1945a860f */
+            recipientUserId: string;
+            /** @example 20000000.00 */
+            payoutAmount: string;
+            /** @example VND */
+            currency: string;
+            /** @example refunded */
+            status: string;
+            /** @example https://cdn.example.com/apartment-cooperation/contract-deposit-payouts/2026-03/contract-id/staff-id-1710000000000.jpg */
+            transferProofUrl: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-01T09:30:00.000Z
+             */
+            confirmedAt: string;
+            /** @example staff-uuid */
+            confirmedByStaffId: string;
+        };
+        ConfirmContractDepositPayoutDto: {
+            /**
+             * Format: uuid
+             * @description Rental contract ID to payout deposit for
+             * @example 7f1154da-a4dd-4c0f-b67f-6b01f75fd611
+             */
+            contractId: string;
+            /**
+             * @description Bank transfer reference or transaction code
+             * @example MB-TRX-000999
+             */
+            transferReference?: string;
+            /**
+             * @description Internal note for payout confirmation
+             * @example Hoan coc khi ket thuc hop dong
+             */
+            transferNote?: string;
+            /**
+             * @description Reason of deposit refund
+             * @example Hop dong het han, hoan tra tien coc
+             */
+            refundReason?: string;
+            /**
+             * Format: binary
+             * @description Transfer proof image (JPG/PNG/WebP)
+             */
+            transferProof: string;
+        };
         MaintenanceApartmentDto: {
             /** @example A101 */
             apartmentNumber: string;
@@ -5189,6 +5345,20 @@ export interface components {
             title: string;
             /** @example in_progress */
             status: string;
+        };
+        UpdateMaintenanceDto: {
+            /** @enum {string} */
+            status?: "submitted" | "acknowledged" | "scheduled" | "in_progress" | "completed" | "cancelled";
+            /** @enum {string} */
+            priority?: "low" | "medium" | "high" | "emergency";
+            /** @description Scheduled date for maintenance */
+            scheduledDate?: string;
+            /** @description Completion date */
+            completedAt?: string;
+            /** @description Resolution notes */
+            resolutionNotes?: string;
+            /** @description Maintenance cost */
+            cost?: number;
         };
         AcceptMaintenanceDto: {
             /**
@@ -9590,6 +9760,74 @@ export interface operations {
             };
         };
     };
+    PaymentsController_listDueContractDepositPayouts: {
+        parameters: {
+            query?: {
+                /** @description Contract end month in YYYY-MM format. Defaults to previous month if omitted. */
+                month?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Due contract deposit payouts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["ContractDepositPayoutItemDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    PaymentsController_confirmContractDepositPayout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Confirm contract deposit payout and upload transfer proof image (required). */
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ConfirmContractDepositPayoutDto"];
+            };
+        };
+        responses: {
+            /** @description Contract deposit payout confirmed */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 201 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["ConfirmContractDepositPayoutResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
     MaintenanceController_findAll: {
         parameters: {
             query?: {
@@ -9729,6 +9967,49 @@ export interface operations {
                         /** @example Success */
                         message?: string;
                         data?: components["schemas"]["MaintenanceDetailDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaintenanceController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMaintenanceDto"];
+            };
+        };
+        responses: {
+            /** @description Request updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["MaintenanceUpdatedDto"];
                         meta?: {
                             /** @example 2026-02-26T10:21:00.000Z */
                             timestamp?: string;
