@@ -1,0 +1,45 @@
+
+> admin@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 31.1s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/22) ...
+  Generating static pages using 11 workers (5/22) 
+  Generating static pages using 11 workers (10/22) 
+  Generating static pages using 11 workers (16/22) 
+✓ Generating static pages using 11 workers (22/22) in 1852.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /admin/dashboard
+├ ƒ /admin/revenues
+├ ƒ /admin/user
+├ ƒ /login
+├ ƒ /operator/amenities
+├ ƒ /operator/apartments
+├ ƒ /operator/apartments/[id]
+├ ƒ /operator/apartments/create
+├ ƒ /operator/iot-manager
+├ ƒ /operator/request
+├ ƒ /operator/staff-manager
+├ ƒ /staff/chat
+├ ƒ /staff/contracts
+├ ƒ /staff/inquiry
+├ ƒ /staff/maintenance
+├ ƒ /staff/payouts
+├ ƒ /staff/request
+├ ƒ /staff/request/[id]
+├ ƒ /staff/schedule
+└ ƒ /staff/verify
+
+
+ƒ  (Dynamic)  server-rendered on demand
+

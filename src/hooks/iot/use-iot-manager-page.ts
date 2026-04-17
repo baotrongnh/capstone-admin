@@ -85,12 +85,12 @@ export function useIotManagerPage() {
 
      const mapBoardToForm = (board: IotBoardItem, appendBlankDevice = false): BoardFormState => {
           const devicesFromBoard: CreateDeviceRow[] = board.devices.map((device) => {
-               const topic = TOPIC_OPTIONS.includes((device.mqttTopic || "") as IotBoardDeviceCreateRequest["topic"])
-                    ? (device.mqttTopic as IotBoardDeviceCreateRequest["topic"])
+               const topic = TOPIC_OPTIONS.includes((device.topic || "") as IotBoardDeviceCreateRequest["topic"])
+                    ? (device.topic as IotBoardDeviceCreateRequest["topic"])
                     : "light"
 
                return {
-                    deviceId: device.mqttDeviceId ? String(device.mqttDeviceId) : "",
+                    deviceId: device.deviceId != null ? String(device.deviceId) : "",
                     deviceName: device.deviceName || "",
                     topic,
                }

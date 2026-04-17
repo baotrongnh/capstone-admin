@@ -89,8 +89,8 @@ export function useApartmentIotAssignment(params: UseApartmentIotAssignmentParam
           return displayBoards.flatMap((board) =>
                board.devices.map((device) => ({
                     id: `${board.id}-${device.id}`,
-                    deviceName: device.deviceName || `Thiết bị ${device.mqttDeviceId || "-"}`,
-                    deviceType: device.deviceType || "unknown",
+                    deviceName: device.deviceName || `Thiết bị ${device.deviceId || "-"}`,
+                    deviceType: device.topic || "unknown",
                     boardId: board.id,
                     boardName: board.name || board.id,
                })),
