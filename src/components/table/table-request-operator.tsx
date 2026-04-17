@@ -33,12 +33,32 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   },
 };
 
+const formatPhoneNumber = (phone?: string | null) => {
+  if (!phone) return "N/A";
+  // Xóa các ký tự không phải số (nếu có)
+  let cleaned = phone.replace(/\D/g, "");
+
+  // Thay thế 84 ở đầu bằng 0
+  if (cleaned.startsWith("84")) {
+    cleaned = "0" + cleaned.slice(2);
+  }
+
+  // Nếu là số điện thoại 10 số chuẩn VN (VD: 0912.345.678)
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
+  }
+
+  // Nếu độ dài khác, tự động chèn dấu chấm sau mỗi 3 số
+  return cleaned.replace(/(\d{3})(?=\d)/g, "$1.");
+};
+
 export function TableRequestOperator({
   filteredRequests,
   onOpenReject,
   onOpenApprove,
   onViewDetail,
 }: TableRequestOperatorProps) {
+  console.log("DA", filteredRequests);
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
@@ -66,7 +86,7 @@ export function TableRequestOperator({
                 {request?.owner?.fullName || "N/A"}
               </TableCell>
               <TableCell className="text-sm">
-                {request?.owner?.phone || "N/A"}
+                {formatPhoneNumber(request?.owner?.phone)}
               </TableCell>
 
               <TableCell className="text-sm">

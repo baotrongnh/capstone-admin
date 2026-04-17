@@ -58,6 +58,26 @@ export function TableRequest({
     return `${Number(value).toLocaleString("vi-VN")} ₫`;
   };
 
+  // Hàm định dạng số điện thoại
+  const formatPhoneNumber = (phone?: string | null) => {
+    if (!phone) return "N/A";
+    // Xóa các ký tự không phải số (nếu có)
+    let cleaned = phone.replace(/\D/g, "");
+
+    // Thay thế 84 ở đầu bằng 0
+    if (cleaned.startsWith("84")) {
+      cleaned = "0" + cleaned.slice(2);
+    }
+
+    // Nếu là số điện thoại 10 số chuẩn VN (VD: 0912.345.678)
+    if (cleaned.length === 10) {
+      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
+    }
+
+    // Nếu độ dài khác, tự động chèn dấu chấm sau mỗi 3 số
+    return cleaned.replace(/(\d{3})(?=\d)/g, "$1.");
+  };
+
   return (
     <div className="border rounded-xl overflow-hidden">
       <Table>
@@ -86,7 +106,8 @@ export function TableRequest({
                   {item.owner?.fullName || "N/A"}
                 </TableCell>
                 <TableCell className="text-sm">
-                  {item?.owner?.phone || "N/A"}
+                  {/* Cập nhật sử dụng hàm formatPhoneNumber tại đây */}
+                  {formatPhoneNumber(item?.owner?.phone)}
                 </TableCell>
 
                 <TableCell className="text-sm">
@@ -151,7 +172,7 @@ export function TableRequest({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-gray-500 py-6">
+              <TableCell colSpan={9} className="text-center text-gray-500 py-6">
                 Không có dữ liệu
               </TableCell>
             </TableRow>

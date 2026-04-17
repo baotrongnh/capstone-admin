@@ -200,7 +200,6 @@ export default function RequestStaffPage() {
         />
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 py-4">
           <Button
