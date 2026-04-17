@@ -91,4 +91,12 @@ export const apartmentService = {
     );
     return data;
   },
+
+  rejectCooperation: async (apartmentId: string | undefined, body: object) => {
+    const { data } = await apiClient.patch(
+      `${endpoints.apartments}/${apartmentId}/reject-cooperation`,
+      body,
+    );
+    return data;
+  },
 };

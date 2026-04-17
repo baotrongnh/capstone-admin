@@ -1,26 +1,10 @@
+import { DetailItem, SectionCard, SectionTitle } from "@/components/apartment/ui/section-primitives"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import {
-     DetailItem,
-     SectionCard,
-     SectionTitle,
-} from "@/components/apartment/ui/section-primitives"
 import type { AmenityOption } from "@/lib/apartment/amenity-mapping"
-import type {
-     ApartmentOwnerOption,
-     ApartmentOwnerSummary,
-} from "@/types/apartment"
+import type { ApartmentOwnerOption, ApartmentOwnerSummary } from "@/types/apartment"
 import { Select as AntdSelect } from "antd"
 import { Building2, Hash, Info, UserCircle2 } from "lucide-react"
-
-type ApartmentOwnerSectionProps = {
-     editMode: boolean
-     ownerSummary: ApartmentOwnerSummary
-     ownerId?: string
-     ownerOptions: ApartmentOwnerOption[]
-     usersLoading: boolean
-     onOwnerChange: (ownerId?: string) => void
-}
 
 export type ApartmentOwnerSectionModel = {
      editMode: boolean
@@ -34,37 +18,21 @@ export type ApartmentOwnerSectionActions = {
      onOwnerChange: (ownerId?: string) => void
 }
 
-type ApartmentOwnerSectionModelProps = {
+type ApartmentOwnerSectionProps = {
      model: ApartmentOwnerSectionModel
      actions: ApartmentOwnerSectionActions
 }
 
-function resolveOwnerSectionProps(
-     props: ApartmentOwnerSectionProps | ApartmentOwnerSectionModelProps,
-) {
-     if ("model" in props) {
-          return {
-               editMode: props.model.editMode,
-               ownerSummary: props.model.ownerSummary,
-               ownerId: props.model.ownerId,
-               ownerOptions: props.model.ownerOptions,
-               usersLoading: props.model.usersLoading,
-               onOwnerChange: props.actions.onOwnerChange,
-          }
-     }
-
-     return props
-}
-
-export function ApartmentOwnerSection(props: ApartmentOwnerSectionProps | ApartmentOwnerSectionModelProps) {
+export function ApartmentOwnerSection({ model, actions }: ApartmentOwnerSectionProps) {
      const {
           editMode,
           ownerSummary,
           ownerId,
           ownerOptions,
           usersLoading,
-          onOwnerChange,
-     } = resolveOwnerSectionProps(props)
+     } = model
+
+     const { onOwnerChange } = actions
 
      const currentOwnerId = ownerId || ownerSummary.id || undefined
 
@@ -72,7 +40,7 @@ export function ApartmentOwnerSection(props: ApartmentOwnerSectionProps | Apartm
           <SectionCard>
                <SectionTitle
                     title="Chủ sở hữu"
-                    description="Thông tin owner và tìm kiếm nhanh"
+                    description="Thông tin chủ sở hữu căn hộ"
                     icon={UserCircle2}
                />
 
@@ -97,30 +65,20 @@ export function ApartmentOwnerSection(props: ApartmentOwnerSectionProps | Apartm
                          </div>
 
                          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                              <DetailItem label="Owner ID" value={currentOwnerId || "-"} icon={Hash} />
-                              <DetailItem label="Họ tên" value={ownerSummary.fullName || "-"} icon={UserCircle2} />
+                              <DetailItem label="ID chủ sở hữu" value={currentOwnerId || "-"} icon={Hash} />
+                              <DetailItem label="Họ & tên" value={ownerSummary.fullName || "-"} icon={UserCircle2} />
                               <DetailItem label="Công ty" value={ownerSummary.companyName || "-"} icon={Building2} />
                          </div>
                     </div>
                ) : (
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                         <DetailItem label="Owner ID" value={ownerSummary.id} icon={Hash} />
-                         <DetailItem label="Họ tên" value={ownerSummary.fullName} icon={UserCircle2} />
+                         <DetailItem label="ID chủ sở hữu" value={ownerSummary.id} icon={Hash} />
+                         <DetailItem label="Họ & tên" value={ownerSummary.fullName} icon={UserCircle2} />
                          <DetailItem label="Công ty" value={ownerSummary.companyName} icon={Building2} />
                     </div>
                )}
           </SectionCard>
      )
-}
-
-type ApartmentAmenitySectionProps = {
-     editMode: boolean
-     description?: string
-     amenityIds: string[]
-     options: AmenityOption[]
-     amenitiesLoading?: boolean
-     onDescriptionChange: (value?: string) => void
-     onAmenitiesChange: (value: string[]) => void
 }
 
 export type ApartmentAmenitySectionModel = {
@@ -136,39 +94,21 @@ export type ApartmentAmenitySectionActions = {
      onAmenitiesChange: (value: string[]) => void
 }
 
-type ApartmentAmenitySectionModelProps = {
+type ApartmentAmenitySectionProps = {
      model: ApartmentAmenitySectionModel
      actions: ApartmentAmenitySectionActions
 }
 
-function resolveAmenitySectionProps(
-     props: ApartmentAmenitySectionProps | ApartmentAmenitySectionModelProps,
-) {
-     if ("model" in props) {
-          return {
-               editMode: props.model.editMode,
-               description: props.model.description,
-               amenityIds: props.model.amenityIds,
-               options: props.model.options,
-               amenitiesLoading: props.model.amenitiesLoading,
-               onDescriptionChange: props.actions.onDescriptionChange,
-               onAmenitiesChange: props.actions.onAmenitiesChange,
-          }
-     }
-
-     return props
-}
-
-export function ApartmentAmenitySection(props: ApartmentAmenitySectionProps | ApartmentAmenitySectionModelProps) {
+export function ApartmentAmenitySection({ model, actions }: ApartmentAmenitySectionProps) {
      const {
           editMode,
           description,
           amenityIds,
           options,
           amenitiesLoading = false,
-          onDescriptionChange,
-          onAmenitiesChange,
-     } = resolveAmenitySectionProps(props)
+     } = model
+
+     const { onDescriptionChange, onAmenitiesChange } = actions
 
      const optionLabelMap = new Map(options.map((item) => [item.value, item.label]))
 
@@ -176,7 +116,7 @@ export function ApartmentAmenitySection(props: ApartmentAmenitySectionProps | Ap
           <SectionCard>
                <SectionTitle
                     title="Mô tả căn hộ và tiện ích"
-                    description="Nhập mô tả và chọn tiện ích có tìm kiếm"
+                    description="Nhập mô tả căn hộ và chọn tiện ích"
                     icon={Info}
                />
 
@@ -215,10 +155,7 @@ export function ApartmentAmenitySection(props: ApartmentAmenitySectionProps | Ap
                                              <Badge key={id} variant="outline">
                                                   {optionLabelMap.get(id) || id}
                                              </Badge>
-                                        ))
-                                   ) : (
-                                        <p className="text-sm text-muted-foreground">-</p>
-                                   )}
+                                        ))) : (<p className="text-sm text-muted-foreground">-</p>)}
                               </div>
                          </div>
                     </div>

@@ -10,6 +10,7 @@ type ApartmentCoordinateMapProps = {
      onPickCoordinate: (value: { latitude: number; longitude: number }) => void
 }
 
+//Trung tâm TP HCM
 const DEFAULT_COORDINATE = {
      latitude: 10.7769,
      longitude: 106.7009,
@@ -111,7 +112,7 @@ export function ApartmentCoordinateMap({
                          draggable: !disabledRef.current,
                          icon: markerIcon,
                     },
-               ).addTo(map)
+               ).addTo(map).bindPopup('Có thể di chuyển vị trí cho chính xác ngoài thực tế.')
 
                marker.on("dragend", () => {
                     const position = marker.getLatLng()

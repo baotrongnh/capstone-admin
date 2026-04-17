@@ -1,6 +1,10 @@
 "use client";
 
-import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section";
+import {
+  ApartmentDetailsSection,
+  type ApartmentDetailsSectionActions,
+  type ApartmentDetailsSectionModel,
+} from "@/components/apartment/sections/apartment-details-section";
 import { ApartmentMediaSection } from "@/components/apartment/sections/apartment-media-section";
 import {
   ApartmentAmenitySection,
@@ -20,10 +24,7 @@ import {
   mergeAmenityOptions,
   withFallbackAmenityOptions,
 } from "@/lib/apartment/amenity-mapping";
-import {
-  ApartmentForm,
-  buildApartmentForm,
-} from "@/types/apartment-form";
+import { ApartmentForm, buildApartmentForm } from "@/types/apartment-form";
 import {
   formatDateTime,
   formatStatus,
@@ -126,12 +127,7 @@ export function RequestDetailContent({
     form?.wardCode || detailApartment?.wardCode || undefined,
   );
 
-  const {
-    geocodeStatus,
-    geocodeErrorMessage,
-    markManualCoordinatePick,
-    resetGeocodeTracking,
-  } = useApartmentGeocoding({
+  const { resetGeocodeTracking } = useApartmentGeocoding({
     editMode,
     form,
     fullAddress,
@@ -346,43 +342,6 @@ export function RequestDetailContent({
     setField(key, parseVNDInput(raw));
   };
 
-  const handleFieldChange = (field: string, value: unknown) => {
-    setField(field, value);
-    clearFieldError(field);
-  };
-
-  const clearFieldError = (field: string) => {
-    setFieldErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-  };
-
-  const handleNumberFieldChange = (key: string, raw: string) => {
-    setNumberField(key, raw);
-    clearFieldError(key);
-  };
-
-  const handleCurrencyFieldChange = (key: string, raw: string) => {
-    setCurrencyField(key, raw);
-    clearFieldError(key);
-  };
-
-  const handlePickCoordinate = (value: {
-    latitude: number;
-    longitude: number;
-  }) => {
-    setField("latitude", value.latitude);
-    setField("longitude", value.longitude);
-    markManualCoordinatePick();
-  };
-
-  const handleSelectDepositPreset = () => {
-    // Not needed for request-detail-content-staff
-  };
-
   const handleStartEdit = () => {
     if (!initialForm || !allowEdit) return;
     setDraftForm(initialForm);
@@ -548,42 +507,55 @@ export function RequestDetailContent({
         {detailApartment && form && (
           <div className="space-y-5">
             <ApartmentDetailsSection
-              model={{
-                editMode,
-                form,
-                detailItems,
-                fullAddress,
-                availableYears,
-                usableAreaInvalid,
-                initialProvinceCode: detailApartment.provinceCode || undefined,
-              } satisfies ApartmentDetailsSectionModel}
-              actions={{
-                setField,
-                setNumberField,
-                setCurrencyField,
-              } satisfies ApartmentDetailsSectionActions}
+              model={
+                {
+                  editMode,
+                  form,
+                  detailItems,
+                  fullAddress,
+                  availableYears,
+                  usableAreaInvalid,
+                  initialProvinceCode:
+                    detailApartment.provinceCode || undefined,
+                } satisfies ApartmentDetailsSectionModel
+              }
+              actions={
+                {
+                  setField,
+                  setNumberField,
+                  setCurrencyField,
+                } satisfies ApartmentDetailsSectionActions
+              }
             />
 
             <ApartmentOwnerSection
-              editMode={editMode}
-              ownerSummary={{
-                id: detailApartment.ownerId || form.ownerId || null,
-                fullName: ownerName,
-                companyName: ownerCompany,
+              model={{
+                editMode,
+                ownerSummary: {
+                  id: detailApartment.ownerId || form.ownerId || null,
+                  fullName: ownerName,
+                  companyName: ownerCompany,
+                },
+                ownerId: form.ownerId || undefined,
+                ownerOptions,
+                usersLoading,
               }}
-              ownerId={form.ownerId || undefined}
-              ownerOptions={ownerOptions}
-              usersLoading={usersLoading}
-              onOwnerChange={(value) => setField("ownerId", value)}
+              actions={{
+                onOwnerChange: (value) => setField("ownerId", value),
+              }}
             />
 
             <ApartmentAmenitySection
-              editMode={editMode}
-              description={form.description}
-              amenityIds={form.amenityIds || []}
-              options={amenityPresetOptions}
-              onDescriptionChange={(value) => setField("description", value)}
-              onAmenitiesChange={(value) => setField("amenityIds", value)}
+              model={{
+                editMode,
+                description: form.description,
+                amenityIds: form.amenityIds || [],
+                options: amenityPresetOptions,
+              }}
+              actions={{
+                onDescriptionChange: (value) => setField("description", value),
+                onAmenitiesChange: (value) => setField("amenityIds", value),
+              }}
             />
 
             <ApartmentMediaSection

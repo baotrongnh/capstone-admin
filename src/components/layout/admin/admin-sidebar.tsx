@@ -49,7 +49,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             >
               <Link href={ROUTE_ADMIN.DASHBOARD}>
                 <IconInnerShadowTop className="size-5!" />
-                <span className="text-base font-semibold">INTELLISERVOPS (Admin)</span>
+                <span className="text-base font-semibold">homeIQ (Admin)</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

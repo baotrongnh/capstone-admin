@@ -35,7 +35,7 @@ export function StaffSidebar({
   const navMain = [
     { title: t("dashboard"), url: "#", icon: IconLayoutDashboard },
     {
-      title: t("schedule"),
+      title: 'Lịch hẹn xem căn hộ',
       url: ROUTE_STAFF.SCHEDULE,
       icon: IconCalendarStats,
     },
@@ -44,21 +44,22 @@ export function StaffSidebar({
 
   const navMain2 = [
     { title: t("messages"), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
-    {
-      title: t("inquiries"),
-      url: ROUTE_STAFF.INQUIRY,
-      icon: IconMessage2Question,
-    },
+    { title: "Yêu cầu bảo trì", url: ROUTE_STAFF.MAINTENANCE, icon: IconHelp },
+    // {
+    //   title: t("inquiries"),
+    //   url: ROUTE_STAFF.INQUIRY,
+    //   icon: IconMessage2Question,
+    // },
   ];
 
   const navMain3 = [
     {
-      title: "Xác thực căn hộ",
+      title: "Xác thực căn hộ hợp tác",
       url: ROUTE_STAFF.REQUEST,
       icon: IconHomeQuestion,
     },
-    { title: "Bảo trì", url: ROUTE_STAFF.MAINTENANCE, icon: IconHelp },
-    { title: "Hợp đồng", url: ROUTE_STAFF.CONTRACT, icon: IconContract },
+    
+    { title: "Hợp đồng thuê", url: ROUTE_STAFF.CONTRACT, icon: IconContract },
   ];
 
   const navSecondary = [{ title: t("help"), url: "#", icon: IconHelp }];
@@ -75,7 +76,7 @@ export function StaffSidebar({
               <a href="#">
                 <IconInnerShadowTop className="size-5!" />
                 <span className="text-base font-semibold">
-                  INTELLISERVOPS (STAFF)
+                  homeIQ (STAFF)
                 </span>
               </a>
             </SidebarMenuButton>

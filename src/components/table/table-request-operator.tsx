@@ -16,14 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Request } from "@/types/request";
 import { MoreHorizontalIcon } from "lucide-react";
-import type { Request } from "../../app/operator/request/types";
-import { ApartmentItem } from "@/types/apartment";
 
 interface TableRequestOperatorProps {
   filteredRequests: Request[];
   onViewDetail: (request: Request) => void;
   onOpenApprove: (request: Request) => void;
+  onOpenReject: (request: Request) => void;
 }
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -33,18 +33,40 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   },
 };
 
+const formatPhoneNumber = (phone?: string | null) => {
+  if (!phone) return "N/A";
+  // Xóa các ký tự không phải số (nếu có)
+  let cleaned = phone.replace(/\D/g, "");
+
+  // Thay thế 84 ở đầu bằng 0
+  if (cleaned.startsWith("84")) {
+    cleaned = "0" + cleaned.slice(2);
+  }
+
+  // Nếu là số điện thoại 10 số chuẩn VN (VD: 0912.345.678)
+  if (cleaned.length === 10) {
+    return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
+  }
+
+  // Nếu độ dài khác, tự động chèn dấu chấm sau mỗi 3 số
+  return cleaned.replace(/(\d{3})(?=\d)/g, "$1.");
+};
+
 export function TableRequestOperator({
   filteredRequests,
-
+  onOpenReject,
   onOpenApprove,
   onViewDetail,
 }: TableRequestOperatorProps) {
+  console.log("DA", filteredRequests);
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
         <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableHead className="font-semibold">Căn hộ</TableHead>
+            <TableHead className="font-semibold">Tên đối tác</TableHead>
+            <TableHead className="font-semibold">Số điện thoại</TableHead>
+
             <TableHead className="font-semibold">Tòa nhà</TableHead>
             <TableHead className="font-semibold">Địa chỉ</TableHead>
             <TableHead className="font-semibold">Tiền cọc</TableHead>
@@ -60,22 +82,20 @@ export function TableRequestOperator({
         <TableBody>
           {filteredRequests.map((request) => (
             <TableRow key={request.id} className="hover:bg-gray-50 transition">
-              <TableCell>
-                <div>
-                  <p className="font-medium text-sm">
-                    {request.apartmentName?.split(" - ")[1] || "N/A"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {request.bedrooms} phòng • {request.area}
-                  </p>
-                </div>
+              <TableCell className="text-sm">
+                {request?.owner?.fullName || "N/A"}
+              </TableCell>
+              <TableCell className="text-sm">
+                {formatPhoneNumber(request?.owner?.phone)}
               </TableCell>
 
               <TableCell className="text-sm">
                 {request.apartmentName?.split(" - ")[0] || "N/A"}
               </TableCell>
 
-              <TableCell className="text-sm">{request.location}</TableCell>
+              <TableCell className="text-sm">
+                {request.location}, {request.wardName}
+              </TableCell>
 
               <TableCell className="text-sm">{request.deposit} đ</TableCell>
 
@@ -112,8 +132,11 @@ export function TableRequestOperator({
                       Duyệt
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      Xóa
+                    <DropdownMenuItem
+                      onClick={() => onOpenReject(request)}
+                      variant="destructive"
+                    >
+                      Từ chối
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

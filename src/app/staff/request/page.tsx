@@ -37,6 +37,8 @@ export default function RequestStaffPage() {
   const { data: apartments } = useApartments(params);
   const allRequests = useMemo(() => apartments?.data || [], [apartments?.data]);
 
+  console.log("|A", apartments);
+
   const handleViewDetail = (request: ApartmentItem) => {
     router.push(`/staff/request/${request.id}`);
   };
@@ -198,7 +200,6 @@ export default function RequestStaffPage() {
         />
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 py-4">
           <Button

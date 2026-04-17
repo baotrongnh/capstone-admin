@@ -20,4 +20,9 @@ export interface Request {
   status: "submitted" | "approved" | "rejected";
   submittedDate: string;
   staffUpdate?: StaffUpdate;
+  owner?: {
+    fullName: string;
+    phone: string;
+  };
+  wardName?: string;
 }

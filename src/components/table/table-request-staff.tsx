@@ -58,12 +58,34 @@ export function TableRequest({
     return `${Number(value).toLocaleString("vi-VN")} ₫`;
   };
 
+  // Hàm định dạng số điện thoại
+  const formatPhoneNumber = (phone?: string | null) => {
+    if (!phone) return "N/A";
+    // Xóa các ký tự không phải số (nếu có)
+    let cleaned = phone.replace(/\D/g, "");
+
+    // Thay thế 84 ở đầu bằng 0
+    if (cleaned.startsWith("84")) {
+      cleaned = "0" + cleaned.slice(2);
+    }
+
+    // Nếu là số điện thoại 10 số chuẩn VN (VD: 0912.345.678)
+    if (cleaned.length === 10) {
+      return `${cleaned.slice(0, 3)}.${cleaned.slice(3, 6)}.${cleaned.slice(6)}`;
+    }
+
+    // Nếu độ dài khác, tự động chèn dấu chấm sau mỗi 3 số
+    return cleaned.replace(/(\d{3})(?=\d)/g, "$1.");
+  };
+
   return (
     <div className="border rounded-xl overflow-hidden">
       <Table>
         <TableHeader className="bg-gray-50">
           <TableRow>
-            <TableHead className="font-semibold">Căn hộ</TableHead>
+            <TableHead className="font-semibold">Tên đối tác</TableHead>
+            <TableHead className="font-semibold">Số điện thoại</TableHead>
+
             <TableHead className="font-semibold">Tòa nhà</TableHead>
             <TableHead className="font-semibold">Địa chỉ</TableHead>
             <TableHead className="font-semibold">Tiền cọc</TableHead>
@@ -80,16 +102,12 @@ export function TableRequest({
           {displayData?.length > 0 ? (
             displayData.map((item: ApartmentItem) => (
               <TableRow key={item.id} className="hover:bg-gray-50 transition">
-                <TableCell>
-                  <div>
-                    <p className="font-medium text-sm">
-                      {item.apartmentNumber || "N/A"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item.numberOfBedrooms || 0} phòng •{" "}
-                      {item.numberOfBathrooms || 0} WC
-                    </p>
-                  </div>
+                <TableCell className="text-sm">
+                  {item.owner?.fullName || "N/A"}
+                </TableCell>
+                <TableCell className="text-sm">
+                  {/* Cập nhật sử dụng hàm formatPhoneNumber tại đây */}
+                  {formatPhoneNumber(item?.owner?.phone)}
                 </TableCell>
 
                 <TableCell className="text-sm">
@@ -154,7 +172,7 @@ export function TableRequest({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-gray-500 py-6">
+              <TableCell colSpan={9} className="text-center text-gray-500 py-6">
                 Không có dữ liệu
               </TableCell>
             </TableRow>
