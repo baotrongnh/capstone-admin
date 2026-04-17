@@ -14,6 +14,10 @@ const EMPTY_REVENUE_OVERVIEW: RevenueOverviewData = {
      totalSystemRevenue: 0,
      totalPartnerGrossRevenue: 0,
      totalPartnerNetPayout: 0,
+     invoices: [],
+     page: 1,
+     limit: 20,
+     totalPages: 0,
 }
 
 const EMPTY_STAFF_PARTNER_PAYOUT_LIST: StaffPartnerPayoutListData = {

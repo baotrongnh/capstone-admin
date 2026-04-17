@@ -8,7 +8,7 @@ import {
      DialogHeader,
      DialogTitle,
 } from "@/components/ui/dialog"
-import type { IotBoardDeviceCreateRequest, IotBoardItem } from "@/types/iot"
+import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { PencilIcon, PlusIcon } from "lucide-react"
 
@@ -18,6 +18,14 @@ type IotBoardDetailModalProps = {
      onOpenChange: (open: boolean) => void
      onEditBoard: (board: IotBoardItem) => void
      onAddDevice: (boardId: string) => void
+}
+
+const getTopicLabel = (topic?: string | null) => {
+     if (!topic) {
+          return "-"
+     }
+
+     return TOPIC_LABEL_MAP[topic as keyof typeof TOPIC_LABEL_MAP] || topic
 }
 
 export function IotBoardDetailModal({
@@ -104,10 +112,10 @@ export function IotBoardDetailModal({
                                              >
                                                   <div className="min-w-0">
                                                        <p className="truncate text-sm font-medium">
-                                                            {device.deviceName || `Thiết bị ${device.mqttDeviceId || "-"}`}
+                                                            {device.deviceName || `Thiết bị ${device.deviceId || "-"}`}
                                                        </p>
                                                        <p className="truncate text-xs text-muted-foreground">
-                                                            ID: {device.mqttDeviceId || "-"} | Topic: {device.mqttTopic ? TOPIC_LABEL_MAP[device.mqttTopic as IotBoardDeviceCreateRequest["topic"]] || device.mqttTopic : "-"}
+                                                            ID: {device.deviceId || "-"} | Topic: {getTopicLabel(device.topic)}
                                                        </p>
                                                   </div>
 
