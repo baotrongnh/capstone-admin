@@ -38,56 +38,56 @@ export function IotBoardTable({
      onDeleteBoard,
 }: IotBoardTableProps) {
      return (
-          <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+          <div className="relative overflow-x-auto rounded-xl border bg-white shadow-sm">
                <Table>
                     <TableHeader className="bg-muted/40">
                          <TableRow>
-                              <TableHead>Mã mạch</TableHead>
-                              <TableHead>Tên mạch</TableHead>
+                              <TableHead className="min-w-52">Mạch IoT</TableHead>
                               <TableHead>Căn hộ</TableHead>
-                              <TableHead>Số thiết bị</TableHead>
                               <TableHead>Trạng thái</TableHead>
-                              <TableHead>Cập nhật</TableHead>
-                              <TableHead className="min-w-55">Thiết bị</TableHead>
-                              <TableHead className="text-right">Thao tác</TableHead>
+                              <TableHead className="min-w-48">Thiết bị</TableHead>
+                              <TableHead className="hidden xl:table-cell">Cập nhật</TableHead>
+                              <TableHead className="sticky right-0 z-20 bg-muted/40 text-right">Thao tác</TableHead>
                          </TableRow>
                     </TableHeader>
 
                     <TableBody>
                          {isLoading ? (
                               <TableRow>
-                                   <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                                   <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                                         Đang tải danh sách mạch IoT...
                                    </TableCell>
                               </TableRow>
                          ) : boards.length === 0 ? (
                               <TableRow>
-                                   <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                                   <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                                         Chưa có mạch IoT nào.
                                    </TableCell>
                               </TableRow>
                          ) : (
                               boards.map((board) => (
                                    <TableRow key={board.id}>
-                                        <TableCell className="font-medium">{board.id}</TableCell>
-                                        <TableCell>{board.name || "-"}</TableCell>
+                                        <TableCell>
+                                             <div className="min-w-0">
+                                                  <p className="font-medium">{board.id}</p>
+                                                  <p className="truncate text-xs text-muted-foreground">{board.name || "-"}</p>
+                                             </div>
+                                        </TableCell>
                                         <TableCell>{board.apartment?.apartmentNumber || "Chưa liên kết"}</TableCell>
-                                        <TableCell>{board.deviceCount}</TableCell>
                                         <TableCell>
                                              <Badge className={`border ${STATUS_STYLE_MAP[board.status]}`}>
                                                   {STATUS_LABEL_MAP[board.status]}
                                              </Badge>
                                         </TableCell>
-                                        <TableCell>{formatDateTime(board.updatedAt)}</TableCell>
                                         <TableCell>
-                                             <div className="flex flex-wrap gap-1.5">
+                                             <div className="flex flex-wrap items-center gap-1.5">
                                                   {board.devices.length === 0 ? (
                                                        <span className="text-xs text-muted-foreground">Chưa có thiết bị</span>
                                                   ) : (
                                                        <>
                                                             {board.devices.slice(0, 3).map((device) => (
-                                                                 <Badge key={device.id} variant="outline" className="max-w-45 truncate">
-                                                                      {device.deviceName || `Thiết bị ${device.mqttDeviceId || "-"}`}
+                                                                 <Badge key={device.id} variant="outline" className="max-w-36 truncate">
+                                                                      {device.deviceName || `Thiết bị ${device.deviceId || "-"}`}
                                                                  </Badge>
                                                             ))}
                                                             {board.devices.length > 3 ? (
@@ -95,9 +95,13 @@ export function IotBoardTable({
                                                             ) : null}
                                                        </>
                                                   )}
+                                                  <span className="text-xs text-muted-foreground">({board.deviceCount} thiết bị)</span>
                                              </div>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="hidden xl:table-cell whitespace-nowrap">
+                                             {formatDateTime(board.updatedAt)}
+                                        </TableCell>
+                                        <TableCell className="sticky right-0 z-10 bg-white text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.18)]">
                                              <DropdownMenu>
                                                   <DropdownMenuTrigger asChild>
                                                        <Button variant="ghost" size="icon" className="size-8">
