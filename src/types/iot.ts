@@ -22,10 +22,9 @@ export type IotBoardCreateResponse =
 
 export type IotBoardUpdateRequest = Omit<
      paths["/api/v1/iot/boards/{boardId}"]["patch"]["requestBody"]["content"]["application/json"],
-     "apartmentId" | "devices"
+     "apartmentId"
 > & {
      apartmentId?: string | null
-     devices?: IotBoardDeviceCreateLiteRequest[]
      status?: NonNullable<IotBoardListQuery["status"]>
 }
 
