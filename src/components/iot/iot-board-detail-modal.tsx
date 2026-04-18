@@ -11,13 +11,16 @@ import {
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { PencilIcon, PlusIcon } from "lucide-react"
+import { memo } from "react"
 
 type IotBoardDetailModalProps = {
-     open: boolean
-     board: IotBoardItem | null
-     onOpenChange: (open: boolean) => void
-     onEditBoard: (board: IotBoardItem) => void
-     onAddDevice: (boardId: string) => void
+     data: {
+          open: boolean
+          board: IotBoardItem | null
+          onOpenChange: (open: boolean) => void
+          onEditBoard: (board: IotBoardItem) => void
+          onAddDevice: (boardId: string) => void
+     }
 }
 
 const getTopicLabel = (topic?: string | null) => {
@@ -28,13 +31,15 @@ const getTopicLabel = (topic?: string | null) => {
      return TOPIC_LABEL_MAP[topic as keyof typeof TOPIC_LABEL_MAP] || topic
 }
 
-export function IotBoardDetailModal({
-     open,
-     board,
-     onOpenChange,
-     onEditBoard,
-     onAddDevice,
-}: IotBoardDetailModalProps) {
+export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: IotBoardDetailModalProps) {
+     const {
+          open,
+          board,
+          onOpenChange,
+          onEditBoard,
+          onAddDevice,
+     } = data
+
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>
                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
@@ -132,4 +137,4 @@ export function IotBoardDetailModal({
                </DialogContent>
           </Dialog>
      )
-}
+})

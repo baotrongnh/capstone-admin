@@ -9,10 +9,12 @@ import {
 import { useApartments } from "@/hooks/query/useApartments"
 import {
      useCreateIotBoard,
+     useCreateIotBoardDevice,
      useDeleteIotBoard,
      useIotBoards,
      useUnlinkBoardApartment,
      useUpdateIotBoard,
+     useUpdateIotBoardDevice,
 } from "@/hooks/query/useIotDevices"
 import type {
      IotBoardDeviceCreateRequest,
@@ -20,10 +22,42 @@ import type {
      IotBoardListQuery,
 } from "@/types/iot"
 import { message } from "antd"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
+
+type NormalizedBoardDevice = {
+     id?: string
+     deviceId: number
+     deviceName: string
+     topic: IotBoardDeviceCreateRequest["topic"]
+     state: "OFF"
+}
+
+const createEmptyDeviceRow = (): CreateDeviceRow => ({
+     deviceId: "",
+     deviceName: "",
+     topic: "light",
+})
+
+const mapBoardDevicesToRows = (board: IotBoardItem): CreateDeviceRow[] => {
+     const rows = board.devices.map((device) => {
+          const rawTopic = (device.topic || "") as IotBoardDeviceCreateRequest["topic"]
+          const topic = TOPIC_OPTIONS.includes(rawTopic) ? rawTopic : "light"
+
+          return {
+               id: device.id,
+               deviceId: device.deviceId != null ? String(device.deviceId) : "",
+               deviceName: device.deviceName || "",
+               topic,
+          }
+     })
+
+     return rows.length > 0 ? rows : [createEmptyDeviceRow()]
+}
+
+type StatusFilterValue = "__all__" | NonNullable<IotBoardListQuery["status"]>
 
 export function useIotManagerPage() {
-     const [statusFilter, setStatusFilter] = useState<"__all__" | NonNullable<IotBoardListQuery["status"]>>("__all__")
+     const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("__all__")
      const [searchText, setSearchText] = useState("")
 
      const [isBoardDialogOpen, setIsBoardDialogOpen] = useState(false)
@@ -48,6 +82,8 @@ export function useIotManagerPage() {
 
      const createBoard = useCreateIotBoard()
      const updateBoard = useUpdateIotBoard()
+     const createBoardDevice = useCreateIotBoardDevice()
+     const updateBoardDevice = useUpdateIotBoardDevice()
      const deleteBoard = useDeleteIotBoard()
      const unlinkBoardApartment = useUnlinkBoardApartment()
 
@@ -81,100 +117,81 @@ export function useIotManagerPage() {
           [boards, detailBoardId],
      )
 
-     const isBoardSaving = createBoard.isPending || updateBoard.isPending || unlinkBoardApartment.isPending
+     const boardById = useMemo(
+          () => new Map(boards.map((board) => [board.id, board])),
+          [boards],
+     )
 
-     const mapBoardToForm = (board: IotBoardItem, appendBlankDevice = false): BoardFormState => {
-          const devicesFromBoard: CreateDeviceRow[] = board.devices.map((device) => {
-               const topic = TOPIC_OPTIONS.includes((device.topic || "") as IotBoardDeviceCreateRequest["topic"])
-                    ? (device.topic as IotBoardDeviceCreateRequest["topic"])
-                    : "light"
+     const isBoardSaving =
+          createBoard.isPending ||
+          updateBoard.isPending ||
+          createBoardDevice.isPending ||
+          updateBoardDevice.isPending ||
+          unlinkBoardApartment.isPending
 
-               return {
-                    deviceId: device.deviceId != null ? String(device.deviceId) : "",
-                    deviceName: device.deviceName || "",
-                    topic,
-               }
-          })
-
-          const devices: CreateDeviceRow[] = devicesFromBoard.length
-               ? devicesFromBoard
-               : [{ deviceId: "", deviceName: "", topic: "light" }]
-
-          if (appendBlankDevice) {
-               devices.push({ deviceId: "", deviceName: "", topic: "light" })
-          }
-
-          return {
-               id: board.id,
-               apartmentId: board.apartment?.id || "",
-               status: board.status,
-               devices,
-          }
-     }
-
-     const resetBoardDialog = () => {
+     const resetBoardDialog = useCallback(() => {
           setIsBoardDialogOpen(false)
           setEditingBoardId(null)
           setInitialEditApartmentId(null)
           setCanSelectApartment(true)
           setBoardForm(createDefaultBoardForm())
-     }
+     }, [])
 
-     const openCreateBoardDialog = () => {
+     const openCreateBoardDialog = useCallback(() => {
           setEditingBoardId(null)
           setInitialEditApartmentId(null)
           setCanSelectApartment(true)
           setBoardForm(createDefaultBoardForm())
           setIsBoardDialogOpen(true)
-     }
+     }, [])
 
-     const openBoardDetailDialog = (board: IotBoardItem) => {
+     const openBoardDetailDialog = useCallback((board: IotBoardItem) => {
           setDetailBoardId(board.id)
           setIsBoardDetailDialogOpen(true)
-     }
+     }, [])
 
-     const closeBoardDetailDialog = () => {
+     const closeBoardDetailDialog = useCallback(() => {
           setIsBoardDetailDialogOpen(false)
           setDetailBoardId(null)
-     }
+     }, [])
 
-     const onBoardDetailDialogOpenChange = (open: boolean) => {
+     const onBoardDetailDialogOpenChange = useCallback((open: boolean) => {
           if (!open) {
                closeBoardDetailDialog()
                return
           }
           setIsBoardDetailDialogOpen(true)
-     }
+     }, [closeBoardDetailDialog])
 
-     const openEditBoardDialog = (board: IotBoardItem) => {
+     const openEditBoardDialog = useCallback((board: IotBoardItem) => {
           closeBoardDetailDialog()
           setEditingBoardId(board.id)
           setInitialEditApartmentId(board.apartment?.id || null)
           setCanSelectApartment(!board.apartment?.id)
-          setBoardForm(mapBoardToForm(board))
+          setBoardForm({
+               id: board.id,
+               apartmentId: board.apartment?.id || "",
+               status: board.status,
+               devices: mapBoardDevicesToRows(board),
+          })
           setIsBoardDialogOpen(true)
-     }
+     }, [closeBoardDetailDialog])
 
-     const openEditBoardForAddDevice = (boardId: string) => {
-          const board = boards.find((item) => item.id === boardId)
+     const openEditBoardForAddDevice = useCallback((boardId: string) => {
+          const board = boardById.get(boardId)
           if (!board) return
 
-          closeBoardDetailDialog()
-          setEditingBoardId(board.id)
-          setInitialEditApartmentId(board.apartment?.id || null)
-          setCanSelectApartment(!board.apartment?.id)
-          setBoardForm(mapBoardToForm(board, true))
-          setIsBoardDialogOpen(true)
-     }
+          openEditBoardDialog(board)
+     }, [boardById, openEditBoardDialog])
 
-     const onBoardDialogOpenChange = (open: boolean) => {
+     const onBoardDialogOpenChange = useCallback((open: boolean) => {
           if (!open && isBoardSaving) return
           if (!open) {
                resetBoardDialog()
                return
           }
           setIsBoardDialogOpen(true)
-     }
+     }, [isBoardSaving, resetBoardDialog])
 
      const onBoardFieldChange = (field: "id" | "apartmentId" | "status", value: string) => {
           setBoardForm((prev) => ({
@@ -186,7 +203,7 @@ export function useIotManagerPage() {
      const addCreateDeviceRow = () => {
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices, { deviceId: "", deviceName: "", topic: "light" }],
+               devices: [...prev.devices, createEmptyDeviceRow()],
           }))
      }
 
@@ -195,7 +212,7 @@ export function useIotManagerPage() {
                const next = prev.devices.filter((_, i) => i !== index)
                return {
                     ...prev,
-                    devices: next.length ? next : [{ deviceId: "", deviceName: "", topic: "light" }],
+                    devices: next.length ? next : [createEmptyDeviceRow()],
                }
           })
      }
@@ -215,12 +232,7 @@ export function useIotManagerPage() {
      }
 
      const normalizeBoardDevices = (rows: BoardFormState["devices"]) => {
-          const normalized: Array<{
-               deviceId: number
-               deviceName: string
-               topic: IotBoardDeviceCreateRequest["topic"]
-               state: "OFF"
-          }> = []
+          const normalized: NormalizedBoardDevice[] = []
           let hasInvalidRow = false
 
           rows.forEach((item) => {
@@ -239,6 +251,7 @@ export function useIotManagerPage() {
                }
 
                normalized.push({
+                    id: item.id,
                     deviceId: parsedDeviceId,
                     deviceName: normalizedDeviceName,
                     topic: item.topic,
@@ -252,6 +265,61 @@ export function useIotManagerPage() {
           }
      }
 
+     const getValidNormalizedDevices = (rows: BoardFormState["devices"]) => {
+          const { normalized, hasInvalidRow } = normalizeBoardDevices(rows)
+
+          if (hasInvalidRow) {
+               message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
+               return null
+          }
+
+          return normalized
+     }
+
+     const persistDevicesToBoard = async (boardId: string, normalizedDevices: NormalizedBoardDevice[]) => {
+          const existingDevices = editingBoardId ? boardById.get(editingBoardId)?.devices || [] : []
+          const existingById = new Map(existingDevices.map((device) => [device.id, device]))
+
+          for (const device of normalizedDevices) {
+               if (!device.id) {
+                    await createBoardDevice.mutateAsync({
+                         boardId,
+                         payload: {
+                              deviceId: device.deviceId,
+                              deviceName: device.deviceName,
+                              topic: device.topic,
+                              state: device.state,
+                         },
+                    })
+                    continue
+               }
+
+               const current = existingById.get(device.id)
+               if (!current) {
+                    continue
+               }
+
+               const hasChanged =
+                    current.deviceId !== device.deviceId ||
+                    (current.deviceName || "") !== device.deviceName ||
+                    (current.topic || undefined) !== device.topic
+
+               if (!hasChanged) {
+                    continue
+               }
+
+               await updateBoardDevice.mutateAsync({
+                    boardId,
+                    deviceId: device.id,
+                    payload: {
+                         deviceId: device.deviceId,
+                         deviceName: device.deviceName,
+                         topic: device.topic,
+                    },
+               })
+          }
+     }
+
      const handleSaveBoard = async () => {
           const boardId = boardForm.id.trim()
           if (!boardId) {
@@ -259,40 +327,38 @@ export function useIotManagerPage() {
                return
           }
 
+          const normalizedDevices = getValidNormalizedDevices(boardForm.devices)
+          if (!normalizedDevices) {
+               return
+          }
+
           try {
                if (editingBoardId) {
-                    const { normalized, hasInvalidRow } = normalizeBoardDevices(boardForm.devices)
-
-                    if (hasInvalidRow) {
-                         message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
-                         return
-                    }
-
                     const apartmentId = canSelectApartment
                          ? boardForm.apartmentId || undefined
                          : undefined
 
-                    await updateBoard.mutateAsync({
+                    const updatedBoardResponse = await updateBoard.mutateAsync({
                          boardId: editingBoardId,
                          payload: {
                               id: boardId,
                               apartmentId,
                               status: boardForm.status,
-                              devices: normalized,
                          },
                     })
+
+                    const savedBoardId = updatedBoardResponse?.data?.id || boardId
+                    await persistDevicesToBoard(savedBoardId, normalizedDevices)
                } else {
-                    const { normalized: normalizedDevices, hasInvalidRow } = normalizeBoardDevices(boardForm.devices)
-
-                    if (hasInvalidRow) {
-                         message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
-                         return
-                    }
-
                     await createBoard.mutateAsync({
                          id: boardId,
                          apartmentId: boardForm.apartmentId || undefined,
-                         devices: normalizedDevices,
+                         devices: normalizedDevices.map((device) => ({
+                              deviceId: device.deviceId,
+                              deviceName: device.deviceName,
+                              topic: device.topic,
+                              state: device.state,
+                         })),
                     })
                }
 
@@ -321,21 +387,21 @@ export function useIotManagerPage() {
           }
      }
 
-     const handleDeleteBoard = (boardId: string, boardName: string) => {
+     const handleDeleteBoard = useCallback((boardId: string, boardName: string) => {
           setDeleteBoardTarget({ id: boardId, name: boardName })
-     }
+     }, [])
 
-     const closeDeleteBoardDialog = () => {
+     const closeDeleteBoardDialog = useCallback(() => {
           if (deleteBoard.isPending) return
           setDeleteBoardTarget(null)
-     }
+     }, [deleteBoard.isPending])
 
-     const onDeleteBoardDialogOpenChange = (open: boolean) => {
+     const onDeleteBoardDialogOpenChange = useCallback((open: boolean) => {
           if (!open) {
                closeDeleteBoardDialog()
                return
           }
-     }
+     }, [closeDeleteBoardDialog])
 
      const confirmDeleteBoard = async () => {
           if (!deleteBoardTarget) return
@@ -348,47 +414,151 @@ export function useIotManagerPage() {
           }
      }
 
-     return {
-          statusFilter,
-          setStatusFilter,
-          searchText,
-          setSearchText,
-          boards,
-          filteredBoards,
-          apartmentOptions,
-          isBoardListLoading,
-          isBoardListFetching,
-          refetchBoards,
-          isDeletingBoard: deleteBoard.isPending,
-          isDeleteBoardDialogOpen: !!deleteBoardTarget,
-          deleteBoardTargetName: deleteBoardTarget?.name || "",
+     const onStatusFilterChange = useCallback((value: string) => {
+          setStatusFilter(value as StatusFilterValue)
+     }, [])
 
-          isBoardDialogOpen,
-          editingBoardId,
-          apartmentSelectDisabled: !!editingBoardId && !canSelectApartment,
-          showUnlinkCurrentApartment: !!editingBoardId && !!initialEditApartmentId && !canSelectApartment,
-          isUnlinkingCurrentApartment: unlinkBoardApartment.isPending,
-          boardForm,
-          isBoardSaving,
-          isBoardDetailDialogOpen,
-          detailBoard,
-          openCreateBoardDialog,
-          openBoardDetailDialog,
-          onBoardDetailDialogOpenChange,
-          closeBoardDetailDialog,
-          openEditBoardDialog,
-          onBoardDialogOpenChange,
-          resetBoardDialog,
-          handleSaveBoard,
-          onBoardFieldChange,
-          handleUnlinkCurrentApartmentBeforeRelink,
-          addCreateDeviceRow,
-          removeCreateDeviceRow,
-          setCreateDeviceField,
-          handleDeleteBoard,
-          closeDeleteBoardDialog,
-          onDeleteBoardDialogOpenChange,
-          confirmDeleteBoard,
-          openEditBoardForAddDevice,
+     const onSearchTextChange = useCallback((value: string) => {
+          setSearchText(value)
+     }, [])
+
+     const onRefresh = useCallback(() => {
+          void refetchBoards()
+     }, [refetchBoards])
+
+     const header = useMemo(
+          () => ({
+               onCreateBoard: openCreateBoardDialog,
+          }),
+          [openCreateBoardDialog],
+     )
+
+     const filters = useMemo(
+          () => ({
+               statusFilter,
+               onStatusFilterChange,
+               searchText,
+               onSearchTextChange,
+               totalBoards: boards.length,
+               filteredBoards: filteredBoards.length,
+               isRefreshing: isBoardListFetching,
+               onRefresh,
+          }),
+          [
+               statusFilter,
+               onStatusFilterChange,
+               searchText,
+               onSearchTextChange,
+               boards.length,
+               filteredBoards.length,
+               isBoardListFetching,
+               onRefresh,
+          ],
+     )
+
+     const table = useMemo(
+          () => ({
+               boards: filteredBoards,
+               isLoading: isBoardListLoading,
+               isDeletingBoard: deleteBoard.isPending,
+               onEditBoard: openEditBoardDialog,
+               onViewBoardDetails: openBoardDetailDialog,
+               onDeleteBoard: handleDeleteBoard,
+          }),
+          [
+               filteredBoards,
+               isBoardListLoading,
+               deleteBoard.isPending,
+               openEditBoardDialog,
+               openBoardDetailDialog,
+               handleDeleteBoard,
+          ],
+     )
+
+     const detailModal = useMemo(
+          () => ({
+               open: isBoardDetailDialogOpen,
+               board: detailBoard,
+               onOpenChange: onBoardDetailDialogOpenChange,
+               onEditBoard: openEditBoardDialog,
+               onAddDevice: openEditBoardForAddDevice,
+          }),
+          [
+               isBoardDetailDialogOpen,
+               detailBoard,
+               onBoardDetailDialogOpenChange,
+               openEditBoardDialog,
+               openEditBoardForAddDevice,
+          ],
+     )
+
+     const boardModal = useMemo(
+          () => ({
+               open: isBoardDialogOpen,
+               isEdit: !!editingBoardId,
+               isSaving: isBoardSaving,
+               form: boardForm,
+               apartmentOptions,
+               apartmentSelectDisabled: !!editingBoardId && !canSelectApartment,
+               showUnlinkCurrentApartment: !!editingBoardId && !!initialEditApartmentId && !canSelectApartment,
+               isUnlinkingCurrentApartment: unlinkBoardApartment.isPending,
+               onOpenChange: onBoardDialogOpenChange,
+               onCancel: resetBoardDialog,
+               onSubmit: handleSaveBoard,
+               onFieldChange: onBoardFieldChange,
+               onUnlinkCurrentApartment: () => void handleUnlinkCurrentApartmentBeforeRelink(),
+               onAddDevice: addCreateDeviceRow,
+               onRemoveDevice: removeCreateDeviceRow,
+               onDeviceChange: setCreateDeviceField,
+          }),
+          [
+               isBoardDialogOpen,
+               editingBoardId,
+               isBoardSaving,
+               boardForm,
+               apartmentOptions,
+               canSelectApartment,
+               initialEditApartmentId,
+               unlinkBoardApartment.isPending,
+               onBoardDialogOpenChange,
+               resetBoardDialog,
+               handleSaveBoard,
+               onBoardFieldChange,
+               handleUnlinkCurrentApartmentBeforeRelink,
+               addCreateDeviceRow,
+               removeCreateDeviceRow,
+               setCreateDeviceField,
+          ],
+     )
+
+     const deleteDialog = useMemo(
+          () => ({
+               open: !!deleteBoardTarget,
+               isSubmitting: deleteBoard.isPending,
+               title: "Khóa mạch IoT",
+               description: `Bạn có chắc chắn muốn khóa mạch ${deleteBoardTarget?.name || ""}? Mạch và thiết bị con sẽ bị vô hiệu hóa.`,
+               confirmText: "Khóa mạch",
+               submittingText: "Đang khóa...",
+               confirmVariant: "destructive" as const,
+               onOpenChange: onDeleteBoardDialogOpenChange,
+               onCancel: closeDeleteBoardDialog,
+               onConfirm: () => void confirmDeleteBoard(),
+          }),
+          [
+               deleteBoardTarget,
+               deleteBoard.isPending,
+               onDeleteBoardDialogOpenChange,
+               closeDeleteBoardDialog,
+               confirmDeleteBoard,
+          ],
+     )
+
+     return {
+          header,
+          filters,
+          table,
+          detailModal,
+          boardModal,
+          deleteDialog,
      }
 }

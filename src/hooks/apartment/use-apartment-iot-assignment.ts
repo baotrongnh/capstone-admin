@@ -22,12 +22,27 @@ type SyncIotBoardAssignmentParams = {
      nextBoardIds: string[]
 }
 
+const getBoardApartmentId = (board: IotBoardItem) => board.apartment?.id
+
+const isBoardLinkedToApartment = (board: IotBoardItem, apartmentId?: string | null) => {
+     if (!apartmentId) {
+          return false
+     }
+
+     return getBoardApartmentId(board) === apartmentId
+}
+
+const isBoardAvailableForApartmentSelection = (board: IotBoardItem, apartmentId?: string | null) => {
+     const boardApartmentId = getBoardApartmentId(board)
+     return !boardApartmentId || boardApartmentId === apartmentId
+}
+
 const findInitialIotBoardIds = (boards: IotBoardItem[], apartmentId?: string | null) => {
      if (!apartmentId) {
           return []
      }
 
-     return boards.filter((board) => board.apartment?.id === apartmentId).map((board) => board.id)
+     return boards.filter((board) => isBoardLinkedToApartment(board, apartmentId)).map((board) => board.id)
 }
 
 export function useApartmentIotAssignment(params: UseApartmentIotAssignmentParams) {
@@ -69,7 +84,7 @@ export function useApartmentIotAssignment(params: UseApartmentIotAssignmentParam
      const boardOptions = useMemo(
           () =>
                iotBoards
-                    .filter((board) => !board.apartment?.id || board.apartment.id === apartmentId)
+                    .filter((board) => isBoardAvailableForApartmentSelection(board, apartmentId))
                     .map((board) => ({
                          id: board.id,
                          label: `${board.id}`,
@@ -79,14 +94,12 @@ export function useApartmentIotAssignment(params: UseApartmentIotAssignmentParam
      )
 
      const linkedBoards = useMemo(
-          () => iotBoards.filter((board) => board.apartment?.id === apartmentId),
+          () => iotBoards.filter((board) => isBoardLinkedToApartment(board, apartmentId)),
           [apartmentId, iotBoards],
      )
 
-     const displayBoards = linkedBoards
-
      const boardDevices = useMemo<IotConnectedDevice[]>(() => {
-          return displayBoards.flatMap((board) =>
+          return linkedBoards.flatMap((board) =>
                board.devices.map((device) => ({
                     id: `${board.id}-${device.id}`,
                     deviceName: device.deviceName || `Thiết bị ${device.deviceId || "-"}`,
@@ -95,7 +108,7 @@ export function useApartmentIotAssignment(params: UseApartmentIotAssignmentParam
                     boardName: board.name || board.id,
                })),
           )
-     }, [displayBoards])
+     }, [linkedBoards])
 
      const totalLinkedDeviceCount = useMemo(
           () => linkedBoards.reduce((sum, board) => sum + (board.deviceCount || board.devices.length), 0),

@@ -5,6 +5,7 @@ import {
 import type { ApartmentTenants } from "@/types/apartment"
 import { formatDateTime } from "@/utils/format"
 import { Users } from "lucide-react"
+import { memo } from "react"
 
 type ApartmentTenantSectionProps = {
      tenants: ApartmentTenants
@@ -18,7 +19,7 @@ type ApartmentTenantSectionModelProps = {
      model: ApartmentTenantSectionModel
 }
 
-export function ApartmentTenantSection(props: ApartmentTenantSectionProps | ApartmentTenantSectionModelProps) {
+export const ApartmentTenantSection = memo(function ApartmentTenantSection(props: ApartmentTenantSectionProps | ApartmentTenantSectionModelProps) {
      const tenants = "model" in props ? props.model.tenants : props.tenants
 
      return (
@@ -49,5 +50,5 @@ export function ApartmentTenantSection(props: ApartmentTenantSectionProps | Apar
                )}
           </SectionCard>
      )
-}
+})
 

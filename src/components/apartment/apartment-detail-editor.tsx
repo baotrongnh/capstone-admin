@@ -2,7 +2,7 @@
 
 import { AVAILABLE_YEARS, buildApartmentDetailItems, DEFAULT_CREATE_FORM, DEFAULT_SECTION_VISIBILITY, hasApartmentFormChanged } from "@/components/apartment/apartment-detail-editor.helpers"
 import { ApartmentDetailsSection, type ApartmentDetailsSectionActions, type ApartmentDetailsSectionModel } from "@/components/apartment/sections/apartment-details-section"
-import { ApartmentIotSection } from "@/components/apartment/sections/apartment-iot-section"
+import { ApartmentIotSection, type ApartmentIotSectionActions, type ApartmentIotSectionModel } from "@/components/apartment/sections/apartment-iot-section"
 import { ApartmentMediaSection, type ApartmentMediaSectionActions, type ApartmentMediaSectionModel } from "@/components/apartment/sections/apartment-media-section"
 import { ApartmentTenantSection, type ApartmentTenantSectionModel } from "@/components/apartment/sections/apartment-occupancy-sections"
 import { ApartmentAmenitySection, ApartmentOwnerSection, type ApartmentAmenitySectionActions, type ApartmentAmenitySectionModel, type ApartmentOwnerSectionActions, type ApartmentOwnerSectionModel } from "@/components/apartment/sections/apartment-profile-sections"
@@ -22,7 +22,7 @@ import type { ApartmentDetailEditorProps, ApartmentStatus } from "@/types/apartm
 import { buildApartmentForm } from "@/types/apartment-form"
 import { Modal } from "antd"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 export function ApartmentDetailEditor({
      apartmentId,
@@ -126,14 +126,17 @@ export function ApartmentDetailEditor({
 
      const { data: usersResponse, isLoading: usersLoading } = useUsers({ page: 1, limit: 100 })
 
-     const ownerOptions = usersResponse?.data || []
+     const ownerOptions = useMemo(() => usersResponse?.data || [], [usersResponse?.data])
      const selectedOwnerId = form?.ownerId || detailApartment?.ownerId || undefined
      const { data: selectedOwnerResponse } = useUser(selectedOwnerId || undefined)
 
-     const selectedOwnerFromList = ownerOptions.find((item) => item.id === selectedOwnerId)
+     const selectedOwnerFromList = useMemo(
+          () => ownerOptions.find((item) => item.id === selectedOwnerId),
+          [ownerOptions, selectedOwnerId],
+     )
      const selectedOwner = selectedOwnerResponse?.data
 
-     const ownerSummary = {
+     const ownerSummary = useMemo(() => ({
           id: detailApartment?.ownerId || form?.ownerId || null,
           fullName:
                selectedOwner?.fullName ||
@@ -142,7 +145,15 @@ export function ApartmentDetailEditor({
                "-",
           companyName:
                selectedOwner?.companyName || detailApartment?.owner?.companyName || "-",
-     }
+     }), [
+          detailApartment?.ownerId,
+          detailApartment?.owner?.fullName,
+          detailApartment?.owner?.companyName,
+          form?.ownerId,
+          selectedOwner?.fullName,
+          selectedOwner?.companyName,
+          selectedOwnerFromList?.fullName,
+     ])
 
      const fullAddress = useFullAddress(
           form?.streetAddress || detailApartment?.streetAddress || undefined,
@@ -173,7 +184,6 @@ export function ApartmentDetailEditor({
 
      const amenitiesLoading = isAmenitiesLoading || isAmenitiesFetching
 
-     const roomOptions = detailApartment?.rooms.map((room) => room.roomNumber).filter(Boolean) || []
      const amenityPresetOptions = withFallbackAmenityOptions(
           form?.amenityIds,
           mergeAmenityOptions(
@@ -181,7 +191,10 @@ export function ApartmentDetailEditor({
                mapAmenitiesToOptions(detailApartment?.amenities),
           ),
      )
-     const detailItems = detailApartment ? buildApartmentDetailItems(detailApartment, fullAddress) : []
+     const detailItems = useMemo(
+          () => (detailApartment ? buildApartmentDetailItems(detailApartment, fullAddress) : []),
+          [detailApartment, fullAddress],
+     )
      const availableYears = AVAILABLE_YEARS
 
      const isSaving =
@@ -199,9 +212,17 @@ export function ApartmentDetailEditor({
 
      const hasFormChanges = hasApartmentFormChanged(initialForm, form)
 
+     const hasRoomTagChanges = useMemo(() => {
+          if (roomTags.length !== initialRoomTags.length) {
+               return true
+          }
+
+          return roomTags.some((tag, index) => tag !== initialRoomTags[index])
+     }, [roomTags, initialRoomTags])
+
      const hasClientChanges =
           !isCreateMode &&
-          (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags) ||
+          (hasRoomTagChanges ||
                (resolvedSectionVisibility.showIotSection && iotAssignment.hasSelectionChanges))
 
      const canSaveChanges =
@@ -254,7 +275,19 @@ export function ApartmentDetailEditor({
           router,
      })
 
-     const handleConfirmUnlinkLinkedBoard = (boardId: string) => {
+     const {
+          handleFieldChange,
+          handleNumberFieldChange,
+          handleCurrencyFieldChange,
+          handlePickCoordinate,
+          handleStartEdit,
+          handleCancelEdit,
+          handleRemoveExistingImage,
+          handleSelectDepositPreset,
+          handleSave,
+     } = controller
+
+     const handleConfirmUnlinkLinkedBoard = useCallback((boardId: string) => {
           const board = iotAssignment.linkedBoards.find((item) => item.id === boardId)
           const boardLabel = board?.name || boardId
 
@@ -271,9 +304,9 @@ export function ApartmentDetailEditor({
                     }
                },
           })
-     }
+     }, [iotAssignment, refetchApartmentDetail])
 
-     const handleConfirmUnlinkAllLinkedBoards = () => {
+     const handleConfirmUnlinkAllLinkedBoards = useCallback(() => {
           Modal.confirm({
                title: "Hủy liên kết toàn bộ mạch",
                content: "Bạn có chắc chắn muốn gỡ liên kết căn hộ khỏi tất cả mạch đang gắn không?",
@@ -287,9 +320,9 @@ export function ApartmentDetailEditor({
                     }
                },
           })
-     }
+     }, [iotAssignment, refetchApartmentDetail])
 
-     const detailsSectionModel: ApartmentDetailsSectionModel = {
+     const detailsSectionModel = useMemo<ApartmentDetailsSectionModel>(() => ({
           editMode,
           form: form || DEFAULT_CREATE_FORM,
           fieldErrors: formValidation.fieldErrors,
@@ -299,64 +332,127 @@ export function ApartmentDetailEditor({
           usableAreaInvalid,
           initialStatus: initialApartmentStatus,
           initialProvinceCode: detailApartment?.provinceCode || undefined,
+          addressResetKey: detailApartment?.id || apartmentId || (isCreateMode ? "create" : "apartment-details"),
           selectedDepositPreset,
           geocodeStatus,
           geocodeErrorMessage,
-     }
+     }), [
+          editMode,
+          form,
+          formValidation.fieldErrors,
+          detailItems,
+          fullAddress,
+          availableYears,
+          usableAreaInvalid,
+          initialApartmentStatus,
+          detailApartment?.id,
+          apartmentId,
+          isCreateMode,
+          detailApartment?.provinceCode,
+          selectedDepositPreset,
+          geocodeStatus,
+          geocodeErrorMessage,
+     ])
 
-     const detailsSectionActions: ApartmentDetailsSectionActions = {
-          setField: controller.handleFieldChange,
-          setNumberField: controller.handleNumberFieldChange,
-          setCurrencyField: controller.handleCurrencyFieldChange,
-          onSelectDepositPreset: controller.handleSelectDepositPreset,
-          onPickCoordinate: controller.handlePickCoordinate,
-     }
+     const detailsSectionActions = useMemo<ApartmentDetailsSectionActions>(() => ({
+          setField: handleFieldChange,
+          setNumberField: handleNumberFieldChange,
+          setCurrencyField: handleCurrencyFieldChange,
+          onSelectDepositPreset: handleSelectDepositPreset,
+          onPickCoordinate: handlePickCoordinate,
+     }), [
+          handleFieldChange,
+          handleNumberFieldChange,
+          handleCurrencyFieldChange,
+          handleSelectDepositPreset,
+          handlePickCoordinate,
+     ])
 
-     const ownerSectionModel: ApartmentOwnerSectionModel = {
+     const ownerSectionModel = useMemo<ApartmentOwnerSectionModel>(() => ({
           editMode,
           ownerSummary,
           ownerId: form?.ownerId || undefined,
           ownerOptions,
           usersLoading,
-     }
+     }), [editMode, ownerSummary, form?.ownerId, ownerOptions, usersLoading])
 
-     const ownerSectionActions: ApartmentOwnerSectionActions = {
-          onOwnerChange: (value) => controller.handleFieldChange("ownerId", value),
-     }
+     const ownerSectionActions = useMemo<ApartmentOwnerSectionActions>(() => ({
+          onOwnerChange: (value) => handleFieldChange("ownerId", value),
+     }), [handleFieldChange])
 
-     const amenitySectionModel: ApartmentAmenitySectionModel = {
+     const amenitySectionModel = useMemo<ApartmentAmenitySectionModel>(() => ({
           editMode,
           description: form?.description,
           amenityIds: form?.amenityIds || [],
           options: amenityPresetOptions,
           amenitiesLoading,
-     }
+     }), [editMode, form?.description, form?.amenityIds, amenityPresetOptions, amenitiesLoading])
 
-     const amenitySectionActions: ApartmentAmenitySectionActions = {
-          onDescriptionChange: (value) => controller.handleFieldChange("description", value),
-          onAmenitiesChange: (value) => controller.handleFieldChange("amenityIds", value),
-     }
+     const amenitySectionActions = useMemo<ApartmentAmenitySectionActions>(() => ({
+          onDescriptionChange: (value) => handleFieldChange("description", value),
+          onAmenitiesChange: (value) => handleFieldChange("amenityIds", value),
+     }), [handleFieldChange])
 
-     const mediaSectionModel: ApartmentMediaSectionModel = {
+     const mediaSectionModel = useMemo<ApartmentMediaSectionModel>(() => ({
           editMode,
           existingImages: form?.images || [],
           selectedImagePreviews: imagePreviews,
           selectedVideoFile,
           selectedVideoPreviewUrl,
           videoTourUrl: form?.videoTourUrl,
-     }
+     }), [
+          editMode,
+          form?.images,
+          imagePreviews,
+          selectedVideoFile,
+          selectedVideoPreviewUrl,
+          form?.videoTourUrl,
+     ])
 
-     const mediaSectionActions: ApartmentMediaSectionActions = {
+     const mediaSectionActions = useMemo<ApartmentMediaSectionActions>(() => ({
           onSelectImages: handleSelectImages,
           onSelectVideo: handleSelectVideo,
-          onRemoveExistingImage: controller.handleRemoveExistingImage,
+          onRemoveExistingImage: handleRemoveExistingImage,
           onRemoveSelectedImage: handleRemoveSelectedImage,
           onRemoveSelectedVideo: handleRemoveSelectedVideo,
-     }
+     }), [
+          handleSelectImages,
+          handleSelectVideo,
+          handleRemoveExistingImage,
+          handleRemoveSelectedImage,
+          handleRemoveSelectedVideo,
+     ])
 
-     const tenantSectionModel: ApartmentTenantSectionModel = {
+     const iotSectionModel = useMemo<ApartmentIotSectionModel>(() => ({
+          editMode,
+          selectedBoardIds: iotAssignment.selectedBoardIds,
+          boardOptions: iotAssignment.boardOptions,
+          linkedBoards: iotAssignment.linkedBoards.map((board) => ({
+               id: board.id,
+               label: `${board.id}`,
+               deviceCount: board.deviceCount,
+          })),
+          boardsLoading: iotAssignment.iotBoardsLoading,
+          boardDevices: iotAssignment.boardDevices,
+          totalDeviceCount: iotAssignment.totalLinkedDeviceCount,
+          canBulkUnlinkBoards: iotAssignment.hasLinkedBoardsForApartment,
+          isBulkUnlinkingBoards: iotAssignment.isBulkUnlinkingBoards,
+          unlinkingBoardId: iotAssignment.unlinkingBoardId,
+     }), [editMode, iotAssignment])
+
+     const iotSectionActions = useMemo<ApartmentIotSectionActions>(() => ({
+          onSelectedBoardsChange: iotAssignment.handleSelectedBoardsChange,
+          onUnlinkLinkedBoard: handleConfirmUnlinkLinkedBoard,
+          onBulkUnlinkBoards: handleConfirmUnlinkAllLinkedBoards,
+     }), [
+          iotAssignment,
+          handleConfirmUnlinkLinkedBoard,
+          handleConfirmUnlinkAllLinkedBoards,
+     ])
+
+     const tenantSectionModel = useMemo<ApartmentTenantSectionModel>(() => ({
           tenants: detailApartment?.userApartments || [],
-     }
+     }), [detailApartment?.userApartments])
 
      const canRenderForm = isCreateMode ? !!form : !!detailApartment && !!form
 
@@ -426,27 +522,8 @@ export function ApartmentDetailEditor({
 
                               {resolvedSectionVisibility.showIotSection ? (
                                    <ApartmentIotSection
-                                        model={{
-                                             editMode,
-                                             selectedBoardIds: iotAssignment.selectedBoardIds,
-                                             boardOptions: iotAssignment.boardOptions,
-                                             linkedBoards: iotAssignment.linkedBoards.map((board) => ({
-                                                  id: board.id,
-                                                  label: `${board.id}`,
-                                                  deviceCount: board.deviceCount,
-                                             })),
-                                             boardsLoading: iotAssignment.iotBoardsLoading,
-                                             boardDevices: iotAssignment.boardDevices,
-                                             totalDeviceCount: iotAssignment.totalLinkedDeviceCount,
-                                             canBulkUnlinkBoards: iotAssignment.hasLinkedBoardsForApartment,
-                                             isBulkUnlinkingBoards: iotAssignment.isBulkUnlinkingBoards,
-                                             unlinkingBoardId: iotAssignment.unlinkingBoardId,
-                                        }}
-                                        actions={{
-                                             onSelectedBoardsChange: iotAssignment.handleSelectedBoardsChange,
-                                             onUnlinkLinkedBoard: handleConfirmUnlinkLinkedBoard,
-                                             onBulkUnlinkBoards: handleConfirmUnlinkAllLinkedBoards,
-                                        }}
+                                        model={iotSectionModel}
+                                        actions={iotSectionActions}
                                    />
                               ) : null}
 
@@ -473,10 +550,10 @@ export function ApartmentDetailEditor({
                                    <div className="flex justify-end gap-2">
                                         {editMode ? (
                                              <>
-                                                  <Button variant="outline" onClick={controller.handleCancelEdit}>
+                                                  <Button variant="outline" onClick={handleCancelEdit}>
                                                        {cancelButtonLabel}
                                                   </Button>
-                                                  <Button onClick={controller.handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
+                                                  <Button onClick={handleSave} disabled={isSaving || (!isCreateMode && !canSaveChanges)}>
                                                        {isCreateMode
                                                             ? isSaving
                                                                  ? createLoadingButtonLabel
@@ -487,7 +564,7 @@ export function ApartmentDetailEditor({
                                                   </Button>
                                              </>
                                         ) : allowEdit && !isCreateMode ? (
-                                             <Button onClick={controller.handleStartEdit}>{editButtonLabel}</Button>
+                                             <Button onClick={handleStartEdit}>{editButtonLabel}</Button>
                                         ) : null}
                                    </div>
                               </div>

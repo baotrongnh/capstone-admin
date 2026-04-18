@@ -1,7 +1,7 @@
 import { ApartmentForm } from "@/types/apartment-form"
 import { parseVNDInput } from "@/utils/format"
 import { parseNumber } from "@/utils/number"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 export type DepositPreset = 1 | 2
 
@@ -73,7 +73,7 @@ export function useApartmentEditorState({
 
      const form = useMemo(() => draftForm || initialForm, [draftForm, initialForm])
 
-     const updateField = (key: keyof ApartmentForm, rawValue: unknown): ApartmentFormPatch => {
+     const updateField = useCallback((key: keyof ApartmentForm, rawValue: unknown): ApartmentFormPatch => {
           let patch: ApartmentFormPatch = {}
 
           if (CURRENCY_FIELDS.has(key)) {
@@ -97,28 +97,40 @@ export function useApartmentEditorState({
                patch = { [key]: rawValue }
           }
 
-          setDraftForm((prev) => ({
-               ...(prev || initialForm || defaultCreateForm),
-               ...patch,
-          } as ApartmentForm))
+          setDraftForm((prev) => {
+               const baseForm = prev || initialForm || defaultCreateForm
+               const changed = Object.keys(patch).some((patchKey) => {
+                    const field = patchKey as keyof ApartmentForm
+                    return !Object.is(baseForm[field], patch[field])
+               })
+
+               if (!changed) {
+                    return baseForm
+               }
+
+               return {
+                    ...baseForm,
+                    ...patch,
+               } as ApartmentForm
+          })
 
           return patch
-     }
+     }, [defaultCreateForm, initialForm, selectedDepositPreset])
 
      // Compatibility wrappers for existing call sites during migration.
-     const setField = (key: string, value: unknown) => {
+     const setField = useCallback((key: string, value: unknown) => {
           updateField(key as keyof ApartmentForm, value)
-     }
+     }, [updateField])
 
-     const setNumberField = (key: string, raw: string) => {
+     const setNumberField = useCallback((key: string, raw: string) => {
           updateField(key as keyof ApartmentForm, raw)
-     }
+     }, [updateField])
 
-     const setCurrencyField = (key: string, raw: string) => {
+     const setCurrencyField = useCallback((key: string, raw: string) => {
           updateField(key as keyof ApartmentForm, raw)
-     }
+     }, [updateField])
 
-     const applyDepositPreset = (value: DepositPreset) => {
+     const applyDepositPreset = useCallback((value: DepositPreset) => {
           if (!form?.baseRentPrice || form.baseRentPrice <= 0) {
                return false
           }
@@ -126,22 +138,22 @@ export function useApartmentEditorState({
           setSelectedDepositPreset(value)
           setField("depositAmount", (form.baseRentPrice * value) as ApartmentForm["depositAmount"])
           return true
-     }
+     }, [form?.baseRentPrice, setField])
 
-     const resetTransientState = () => {
+     const resetTransientState = useCallback(() => {
           setSelectedDepositPreset(null)
           setRoomTags(initialRoomTags)
-     }
+     }, [initialRoomTags])
 
-     const startEditDraft = () => {
+     const startEditDraft = useCallback(() => {
           if (!initialForm) return false
           setDraftForm(initialForm)
           return true
-     }
+     }, [initialForm])
 
-     const resetCreateDraft = () => {
+     const resetCreateDraft = useCallback(() => {
           setDraftForm(defaultCreateForm)
-     }
+     }, [defaultCreateForm])
 
      return {
           manualEditMode,

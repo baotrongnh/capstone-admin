@@ -26,42 +26,46 @@ type ApartmentOption = {
 }
 
 type IotBoardModalProps = {
-     open: boolean
-     isEdit: boolean
-     isSaving: boolean
-     form: BoardFormState
-     apartmentOptions: ApartmentOption[]
-     apartmentSelectDisabled?: boolean
-     showUnlinkCurrentApartment?: boolean
-     isUnlinkingCurrentApartment?: boolean
-     onOpenChange: (open: boolean) => void
-     onCancel: () => void
-     onSubmit: () => void
-     onFieldChange: (field: "id" | "apartmentId" | "status", value: string) => void
-     onUnlinkCurrentApartment?: () => void
-     onAddDevice: () => void
-     onRemoveDevice: (index: number) => void
-     onDeviceChange: (index: number, field: keyof CreateDeviceRow, value: string) => void
+     data: {
+          open: boolean
+          isEdit: boolean
+          isSaving: boolean
+          form: BoardFormState
+          apartmentOptions: ApartmentOption[]
+          apartmentSelectDisabled?: boolean
+          showUnlinkCurrentApartment?: boolean
+          isUnlinkingCurrentApartment?: boolean
+          onOpenChange: (open: boolean) => void
+          onCancel: () => void
+          onSubmit: () => void
+          onFieldChange: (field: "id" | "apartmentId" | "status", value: string) => void
+          onUnlinkCurrentApartment?: () => void
+          onAddDevice: () => void
+          onRemoveDevice: (index: number) => void
+          onDeviceChange: (index: number, field: Exclude<keyof CreateDeviceRow, "id">, value: string) => void
+     }
 }
 
-export function IotBoardModal({
-     open,
-     isEdit,
-     isSaving,
-     form,
-     apartmentOptions,
-     apartmentSelectDisabled = false,
-     showUnlinkCurrentApartment = false,
-     isUnlinkingCurrentApartment = false,
-     onOpenChange,
-     onCancel,
-     onSubmit,
-     onFieldChange,
-     onUnlinkCurrentApartment,
-     onAddDevice,
-     onRemoveDevice,
-     onDeviceChange,
-}: IotBoardModalProps) {
+export function IotBoardModal({ data }: IotBoardModalProps) {
+     const {
+          open,
+          isEdit,
+          isSaving,
+          form,
+          apartmentOptions,
+          apartmentSelectDisabled = false,
+          showUnlinkCurrentApartment = false,
+          isUnlinkingCurrentApartment = false,
+          onOpenChange,
+          onCancel,
+          onSubmit,
+          onFieldChange,
+          onUnlinkCurrentApartment,
+          onAddDevice,
+          onRemoveDevice,
+          onDeviceChange,
+     } = data
+
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>
                <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
@@ -69,7 +73,7 @@ export function IotBoardModal({
                          <DialogTitle>{isEdit ? "Cập nhật mạch" : "Tạo mạch"}</DialogTitle>
                          <DialogDescription>
                               {isEdit
-                                   ? "Chỉnh sửa thông tin mạch."
+                                   ? "Chỉnh sửa thông tin mạch và thêm thiết bị mới vào mạch hiện có."
                                    : "Tạo mạch và nhập thiết bị."}
                          </DialogDescription>
                     </DialogHeader>
@@ -174,7 +178,7 @@ export function IotBoardModal({
 
                          <div className="rounded-lg border bg-muted/15 p-2 text-xs text-muted-foreground">
                               {isEdit
-                                   ? "Bạn có thể thêm/xóa/chỉnh sửa danh sách thiết bị trực tiếp trong modal này."
+                                   ? "Trong chế độ cập nhật: thiết bị cũ nếu đổi tên/ID/topic sẽ được cập nhật, thiết bị mới sẽ được thêm vào mạch."
                                    : "Thiết bị là tùy chọn khi tạo mạch. Có thể để trống và thêm sau."}
                          </div>
 

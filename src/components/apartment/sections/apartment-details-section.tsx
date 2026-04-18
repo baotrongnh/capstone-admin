@@ -10,9 +10,9 @@ import {
 import { ApartmentAddressFields } from "@/components/apartment/ui/address-fields"
 import { ApartmentCoordinateMap } from "@/components/apartment/sections/apartment-coordinate-map"
 import {
-  DetailItem,
-  SectionCard,
-  SectionTitle,
+     DetailItem,
+     SectionCard,
+     SectionTitle,
 } from "@/components/apartment/ui/section-primitives";
 import type { DepositPreset } from "@/hooks/apartment/use-apartment-editor-state";
 import type {
@@ -43,6 +43,7 @@ export type ApartmentDetailsSectionModel = {
      usableAreaInvalid: boolean
      initialStatus?: ApartmentStatus | null
      initialProvinceCode?: number
+     addressResetKey?: string
      selectedDepositPreset?: DepositPreset | null
      geocodeStatus?: GeocodeStatus
      geocodeErrorMessage?: string | null
@@ -66,22 +67,22 @@ const getGeocodeStatusText = (status: GeocodeStatus, errorMessage?: string | nul
           return "Đang tự động lấy tọa độ từ địa chỉ..."
      }
 
-  if (status === "success") {
-    return "Đã cập nhật tọa độ tự động theo địa chỉ.";
-  }
+     if (status === "success") {
+          return "Đã cập nhật tọa độ tự động theo địa chỉ.";
+     }
 
-  if (status === "not_found") {
-    return "Không tìm thấy tọa độ từ địa chỉ hiện tại. Bạn có thể chọn trực tiếp trên bản đồ.";
-  }
+     if (status === "not_found") {
+          return "Không tìm thấy tọa độ từ địa chỉ hiện tại. Bạn có thể chọn trực tiếp trên bản đồ.";
+     }
 
-  if (status === "error") {
-    return (
-      errorMessage ||
-      "Không thể tự động lấy tọa độ. Vui lòng thử lại hoặc chọn trên bản đồ."
-    );
-  }
+     if (status === "error") {
+          return (
+               errorMessage ||
+               "Không thể tự động lấy tọa độ. Vui lòng thử lại hoặc chọn trên bản đồ."
+          );
+     }
 
-  return null;
+     return null;
 };
 
 function FieldLabel({ label, required = false }: { label: string; required?: boolean }) {
@@ -126,6 +127,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
           usableAreaInvalid,
           initialStatus,
           initialProvinceCode,
+          addressResetKey,
           selectedDepositPreset,
           geocodeStatus = "idle",
           geocodeErrorMessage,
@@ -144,24 +146,22 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
      const cannotSwitchToAvailable =
           editMode && (initialStatus === "occupied" || initialStatus === "reserved")
 
-  const getFieldError = (field: ApartmentValidationField) =>
-    fieldErrors?.[field];
+     const getFieldError = (field: ApartmentValidationField) =>
+          fieldErrors?.[field];
 
-  const geocodeStatusText = getGeocodeStatusText(
-    geocodeStatus,
-    geocodeErrorMessage,
-  );
-  const isGeocodeErrorStatus =
-    geocodeStatus === "error" || geocodeStatus === "not_found";
-
-  console.log("Vĩ độ:", form.latitude, "Kinh độ:", form.longitude);
-  return (
-    <SectionCard className="bg-muted/20">
-      <SectionTitle
-        title="Thông tin cơ bản"
-        description="Các thông tin cơ bản của căn hộ"
-        icon={Info}
-      />
+     const geocodeStatusText = getGeocodeStatusText(
+          geocodeStatus,
+          geocodeErrorMessage,
+     );
+     const isGeocodeErrorStatus =
+          geocodeStatus === "error" || geocodeStatus === "not_found";
+     return (
+          <SectionCard className="bg-muted/20">
+               <SectionTitle
+                    title="Thông tin cơ bản"
+                    description="Các thông tin cơ bản của căn hộ"
+                    icon={Info}
+               />
 
                {editMode ? (
                     <p className="mb-3 text-xs text-muted-foreground flex justify-end gap-1">
@@ -322,6 +322,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
 
                               <FieldBlock label="Địa chỉ hành chính" required error={getFieldError("wardCode")} className="md:col-span-2 xl:col-span-3">
                                    <ApartmentAddressFields
+                                        key={addressResetKey || "address-fields"}
                                         initialCodes={{ provinceCode: initialProvinceCode, wardCode: form.wardCode }}
                                         onChange={({ wardCode }: { wardCode?: number }) => setField("wardCode", wardCode)}
                                    />

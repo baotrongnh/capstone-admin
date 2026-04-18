@@ -19,24 +19,29 @@ import {
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { MoreHorizontalIcon } from "lucide-react"
+import { memo } from "react"
 
 type IotBoardTableProps = {
-     boards: IotBoardItem[]
-     isLoading: boolean
-     isDeletingBoard: boolean
-     onEditBoard: (board: IotBoardItem) => void
-     onViewBoardDetails: (board: IotBoardItem) => void
-     onDeleteBoard: (boardId: string, boardName: string) => void
+     data: {
+          boards: IotBoardItem[]
+          isLoading: boolean
+          isDeletingBoard: boolean
+          onEditBoard: (board: IotBoardItem) => void
+          onViewBoardDetails: (board: IotBoardItem) => void
+          onDeleteBoard: (boardId: string, boardName: string) => void
+     }
 }
 
-export function IotBoardTable({
-     boards,
-     isLoading,
-     isDeletingBoard,
-     onEditBoard,
-     onViewBoardDetails,
-     onDeleteBoard,
-}: IotBoardTableProps) {
+export const IotBoardTable = memo(function IotBoardTable({ data }: IotBoardTableProps) {
+     const {
+          boards,
+          isLoading,
+          isDeletingBoard,
+          onEditBoard,
+          onViewBoardDetails,
+          onDeleteBoard,
+     } = data
+
      return (
           <div className="relative overflow-x-auto rounded-xl border bg-white shadow-sm">
                <Table>
@@ -134,4 +139,4 @@ export function IotBoardTable({
                </Table>
           </div>
      )
-}
+})

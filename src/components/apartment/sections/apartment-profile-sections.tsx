@@ -5,6 +5,7 @@ import type { AmenityOption } from "@/lib/apartment/amenity-mapping"
 import type { ApartmentOwnerOption, ApartmentOwnerSummary } from "@/types/apartment"
 import { Select as AntdSelect } from "antd"
 import { Building2, Hash, Info, UserCircle2 } from "lucide-react"
+import { memo, useMemo } from "react"
 
 export type ApartmentOwnerSectionModel = {
      editMode: boolean
@@ -23,7 +24,7 @@ type ApartmentOwnerSectionProps = {
      actions: ApartmentOwnerSectionActions
 }
 
-export function ApartmentOwnerSection({ model, actions }: ApartmentOwnerSectionProps) {
+export const ApartmentOwnerSection = memo(function ApartmentOwnerSection({ model, actions }: ApartmentOwnerSectionProps) {
      const {
           editMode,
           ownerSummary,
@@ -79,7 +80,7 @@ export function ApartmentOwnerSection({ model, actions }: ApartmentOwnerSectionP
                )}
           </SectionCard>
      )
-}
+})
 
 export type ApartmentAmenitySectionModel = {
      editMode: boolean
@@ -99,7 +100,7 @@ type ApartmentAmenitySectionProps = {
      actions: ApartmentAmenitySectionActions
 }
 
-export function ApartmentAmenitySection({ model, actions }: ApartmentAmenitySectionProps) {
+export const ApartmentAmenitySection = memo(function ApartmentAmenitySection({ model, actions }: ApartmentAmenitySectionProps) {
      const {
           editMode,
           description,
@@ -110,7 +111,10 @@ export function ApartmentAmenitySection({ model, actions }: ApartmentAmenitySect
 
      const { onDescriptionChange, onAmenitiesChange } = actions
 
-     const optionLabelMap = new Map(options.map((item) => [item.value, item.label]))
+     const optionLabelMap = useMemo(
+          () => new Map(options.map((item) => [item.value, item.label])),
+          [options],
+     )
 
      return (
           <SectionCard>
@@ -162,4 +166,4 @@ export function ApartmentAmenitySection({ model, actions }: ApartmentAmenitySect
                )}
           </SectionCard>
      )
-}
+})

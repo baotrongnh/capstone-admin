@@ -1,6 +1,7 @@
 import type { IotBoardDeviceCreateRequest, IotBoardListQuery } from "@/types/iot"
 
 export type CreateDeviceRow = {
+     id?: string
      deviceId: string
      deviceName: string
      topic: IotBoardDeviceCreateRequest["topic"]

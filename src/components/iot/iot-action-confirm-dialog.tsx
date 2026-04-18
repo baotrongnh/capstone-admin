@@ -7,34 +7,39 @@ import {
      DialogHeader,
      DialogTitle,
 } from "@/components/ui/dialog"
+import { memo } from "react"
 
 type IotActionConfirmDialogProps = {
-     open: boolean
-     isSubmitting: boolean
-     title: string
-     description: string
-     confirmText: string
-     submittingText: string
-     cancelText?: string
-     confirmVariant?: "default" | "destructive"
-     onOpenChange: (open: boolean) => void
-     onCancel: () => void
-     onConfirm: () => void
+     data: {
+          open: boolean
+          isSubmitting: boolean
+          title: string
+          description: string
+          confirmText: string
+          submittingText: string
+          cancelText?: string
+          confirmVariant?: "default" | "destructive"
+          onOpenChange: (open: boolean) => void
+          onCancel: () => void
+          onConfirm: () => void
+     }
 }
 
-export function IotActionConfirmDialog({
-     open,
-     isSubmitting,
-     title,
-     description,
-     confirmText,
-     submittingText,
-     cancelText = "Hủy",
-     confirmVariant = "default",
-     onOpenChange,
-     onCancel,
-     onConfirm,
-}: IotActionConfirmDialogProps) {
+export const IotActionConfirmDialog = memo(function IotActionConfirmDialog({ data }: IotActionConfirmDialogProps) {
+     const {
+          open,
+          isSubmitting,
+          title,
+          description,
+          confirmText,
+          submittingText,
+          cancelText = "Hủy",
+          confirmVariant = "default",
+          onOpenChange,
+          onCancel,
+          onConfirm,
+     } = data
+
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>
                <DialogContent showCloseButton={!isSubmitting} className="sm:max-w-md">
@@ -54,4 +59,4 @@ export function IotActionConfirmDialog({
                </DialogContent>
           </Dialog>
      )
-}
+})
