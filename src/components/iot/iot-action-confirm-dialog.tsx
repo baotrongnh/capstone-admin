@@ -7,6 +7,7 @@ import {
      DialogHeader,
      DialogTitle,
 } from "@/components/ui/dialog"
+import { memo } from "react"
 
 type IotActionConfirmDialogProps = {
      data: {
@@ -24,7 +25,7 @@ type IotActionConfirmDialogProps = {
      }
 }
 
-export function IotActionConfirmDialog({ data }: IotActionConfirmDialogProps) {
+export const IotActionConfirmDialog = memo(function IotActionConfirmDialog({ data }: IotActionConfirmDialogProps) {
      const {
           open,
           isSubmitting,
@@ -58,4 +59,4 @@ export function IotActionConfirmDialog({ data }: IotActionConfirmDialogProps) {
                </DialogContent>
           </Dialog>
      )
-}
+})

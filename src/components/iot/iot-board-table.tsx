@@ -19,6 +19,7 @@ import {
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { MoreHorizontalIcon } from "lucide-react"
+import { memo } from "react"
 
 type IotBoardTableProps = {
      data: {
@@ -31,7 +32,7 @@ type IotBoardTableProps = {
      }
 }
 
-export function IotBoardTable({ data }: IotBoardTableProps) {
+export const IotBoardTable = memo(function IotBoardTable({ data }: IotBoardTableProps) {
      const {
           boards,
           isLoading,
@@ -138,4 +139,4 @@ export function IotBoardTable({ data }: IotBoardTableProps) {
                </Table>
           </div>
      )
-}
+})

@@ -13,7 +13,7 @@ import {
      SelectTrigger,
      SelectValue,
 } from "@/components/ui/select"
-import { useIotManagerPage } from "@/hooks/iot/use-iot-manager-page"
+import { useIotManagerPage } from "../../../hooks/iot/use-iot-manager-page"
 import { RefreshCcwIcon, SearchIcon } from "lucide-react"
 
 export default function IotManagerPage() {
@@ -24,9 +24,6 @@ export default function IotManagerPage() {
                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                          <h1 className="text-2xl font-bold text-foreground">Quản lý mạch và thiết bị IoT</h1>
-                         <p className="text-sm text-muted-foreground">
-                              Giao diện tối ưu cho thao tác nhanh: lọc, tìm kiếm, sửa mạch và quản lý thiết bị tại một nơi.
-                         </p>
                     </div>
 
                     <Button onClick={data.header.onCreateBoard}>+ Tạo mạch mới</Button>
@@ -55,8 +52,8 @@ export default function IotManagerPage() {
                                    <SelectItem value="__all__">Tất cả trạng thái</SelectItem>
                                    <SelectItem value="active">Hoạt động</SelectItem>
                                    <SelectItem value="inactive">Không hoạt động</SelectItem>
-                                   <SelectItem value="maintenance">Bảo trì</SelectItem>
-                                   <SelectItem value="error">Lỗi</SelectItem>
+                                   {/* <SelectItem value="maintenance">Bảo trì</SelectItem>
+                                   <SelectItem value="error">Lỗi</SelectItem> */}
                               </SelectContent>
                          </Select>
 

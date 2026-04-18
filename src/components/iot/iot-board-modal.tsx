@@ -42,7 +42,7 @@ type IotBoardModalProps = {
           onUnlinkCurrentApartment?: () => void
           onAddDevice: () => void
           onRemoveDevice: (index: number) => void
-          onDeviceChange: (index: number, field: keyof CreateDeviceRow, value: string) => void
+          onDeviceChange: (index: number, field: Exclude<keyof CreateDeviceRow, "id">, value: string) => void
      }
 }
 

@@ -86,7 +86,6 @@ export function RequestDetailContent({
 
   const [manualEditMode, setManualEditMode] = useState(false);
   const [draftForm, setDraftForm] = useState<ApartmentForm | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
@@ -358,7 +357,6 @@ export function RequestDetailContent({
     setManualEditMode(false);
     resetEditTransientState();
     resetGeocodeTracking();
-    setFieldErrors({});
   };
 
   const handleSelectImages = (event: ChangeEvent<HTMLInputElement>) => {
@@ -515,6 +513,8 @@ export function RequestDetailContent({
                   fullAddress,
                   availableYears,
                   usableAreaInvalid,
+                  addressResetKey:
+                    detailApartment.id || apartmentId || "request-apartment-details",
                   initialProvinceCode:
                     detailApartment.provinceCode || undefined,
                 } satisfies ApartmentDetailsSectionModel
