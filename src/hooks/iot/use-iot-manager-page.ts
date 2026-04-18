@@ -234,8 +234,6 @@ export function useIotManagerPage() {
      const normalizeBoardDevices = (rows: BoardFormState["devices"]) => {
           const normalized: NormalizedBoardDevice[] = []
           let hasInvalidRow = false
-          let hasDuplicateDeviceId = false
-          const usedDeviceIds = new Set<number>()
 
           rows.forEach((item) => {
                const rawDeviceId = item.deviceId.trim()
@@ -252,13 +250,6 @@ export function useIotManagerPage() {
                     return
                }
 
-               if (usedDeviceIds.has(parsedDeviceId)) {
-                    hasDuplicateDeviceId = true
-                    return
-               }
-
-               usedDeviceIds.add(parsedDeviceId)
-
                normalized.push({
                     id: item.id,
                     deviceId: parsedDeviceId,
@@ -271,20 +262,14 @@ export function useIotManagerPage() {
           return {
                normalized,
                hasInvalidRow,
-               hasDuplicateDeviceId,
           }
      }
 
      const getValidNormalizedDevices = (rows: BoardFormState["devices"]) => {
-          const { normalized, hasInvalidRow, hasDuplicateDeviceId } = normalizeBoardDevices(rows)
+          const { normalized, hasInvalidRow } = normalizeBoardDevices(rows)
 
           if (hasInvalidRow) {
                message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
-               return null
-          }
-
-          if (hasDuplicateDeviceId) {
-               message.error("Device ID không được trùng nhau trong cùng một mạch.")
                return null
           }
 
@@ -365,14 +350,16 @@ export function useIotManagerPage() {
                     const savedBoardId = updatedBoardResponse?.data?.id || boardId
                     await persistDevicesToBoard(savedBoardId, normalizedDevices)
                } else {
-                    const createdBoardResponse = await createBoard.mutateAsync({
+                    await createBoard.mutateAsync({
                          id: boardId,
                          apartmentId: boardForm.apartmentId || undefined,
-                         devices: [],
+                         devices: normalizedDevices.map((device) => ({
+                              deviceId: device.deviceId,
+                              deviceName: device.deviceName,
+                              topic: device.topic,
+                              state: device.state,
+                         })),
                     })
-
-                    const createdBoardId = createdBoardResponse?.data?.id || boardId
-                    await persistDevicesToBoard(createdBoardId, normalizedDevices)
                }
 
                resetBoardDialog()
