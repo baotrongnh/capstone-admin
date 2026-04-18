@@ -11,6 +11,7 @@ import {
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { PencilIcon, PlusIcon } from "lucide-react"
+import { memo } from "react"
 
 type IotBoardDetailModalProps = {
      data: {
@@ -30,7 +31,7 @@ const getTopicLabel = (topic?: string | null) => {
      return TOPIC_LABEL_MAP[topic as keyof typeof TOPIC_LABEL_MAP] || topic
 }
 
-export function IotBoardDetailModal({ data }: IotBoardDetailModalProps) {
+export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: IotBoardDetailModalProps) {
      const {
           open,
           board,
@@ -136,4 +137,4 @@ export function IotBoardDetailModal({ data }: IotBoardDetailModalProps) {
                </DialogContent>
           </Dialog>
      )
-}
+})

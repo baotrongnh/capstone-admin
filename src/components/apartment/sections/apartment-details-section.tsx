@@ -43,6 +43,7 @@ export type ApartmentDetailsSectionModel = {
      usableAreaInvalid: boolean
      initialStatus?: ApartmentStatus | null
      initialProvinceCode?: number
+     addressResetKey?: string
      selectedDepositPreset?: DepositPreset | null
      geocodeStatus?: GeocodeStatus
      geocodeErrorMessage?: string | null
@@ -126,6 +127,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
           usableAreaInvalid,
           initialStatus,
           initialProvinceCode,
+          addressResetKey,
           selectedDepositPreset,
           geocodeStatus = "idle",
           geocodeErrorMessage,
@@ -320,6 +322,7 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
 
                               <FieldBlock label="Địa chỉ hành chính" required error={getFieldError("wardCode")} className="md:col-span-2 xl:col-span-3">
                                    <ApartmentAddressFields
+                                        key={addressResetKey || "address-fields"}
                                         initialCodes={{ provinceCode: initialProvinceCode, wardCode: form.wardCode }}
                                         onChange={({ wardCode }: { wardCode?: number }) => setField("wardCode", wardCode)}
                                    />

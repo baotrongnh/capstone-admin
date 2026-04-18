@@ -3,7 +3,7 @@
 import { useProvinces, useWards } from "@/hooks/query/useAddress"
 import { normalizeText } from "@/utils/format"
 import { Select as AntdSelect } from "antd"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 type ApartmentAddressFieldsProps = {
      initialCodes: {
@@ -16,15 +16,6 @@ type ApartmentAddressFieldsProps = {
 export function ApartmentAddressFields({ initialCodes, onChange }: ApartmentAddressFieldsProps) {
      const [provinceCode, setProvinceCode] = useState<number | undefined>(initialCodes.provinceCode)
      const [wardCode, setWardCode] = useState<number | undefined>(initialCodes.wardCode)
-
-     useEffect(() => {
-          if (initialCodes.provinceCode === undefined) {
-               return
-          }
-
-          setProvinceCode(initialCodes.provinceCode)
-          setWardCode(initialCodes.wardCode)
-     }, [initialCodes.provinceCode, initialCodes.wardCode])
 
      const { data: provinces, isLoading: isProvincesLoading, isFetching: isProvincesFetching } = useProvinces()
      const { data: wards, isLoading: isWardsLoading, isFetching: isWardsFetching } = useWards(provinceCode)

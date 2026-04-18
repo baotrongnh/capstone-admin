@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { APARTMENT_VIDEO_MAX_SIZE_MB, type ImagePreview } from "@/hooks/apartment/use-apartment-media-state"
 import { Image as AntdImage } from "antd"
 import { ImageIcon, PlayCircle, UploadIcon, Video, XIcon } from "lucide-react"
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, memo, useState } from "react"
 
 type ApartmentMediaSectionProps = {
      editMode: boolean
@@ -126,7 +126,7 @@ function MediaImageCard({ src, alt, onRemove, removeAriaLabel }: MediaImageCardP
      )
 }
 
-export function ApartmentMediaSection(props: ApartmentMediaSectionProps | ApartmentMediaSectionModelProps) {
+export const ApartmentMediaSection = memo(function ApartmentMediaSection(props: ApartmentMediaSectionProps | ApartmentMediaSectionModelProps) {
      const {
           editMode,
           existingImages,
@@ -326,4 +326,4 @@ export function ApartmentMediaSection(props: ApartmentMediaSectionProps | Apartm
                </Dialog>
           </SectionCard>
      )
-}
+})

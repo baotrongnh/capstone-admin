@@ -22,7 +22,7 @@ import type {
      IotBoardListQuery,
 } from "@/types/iot"
 import { message } from "antd"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 type NormalizedBoardDevice = {
      id?: string
@@ -129,41 +129,41 @@ export function useIotManagerPage() {
           updateBoardDevice.isPending ||
           unlinkBoardApartment.isPending
 
-     const resetBoardDialog = () => {
+     const resetBoardDialog = useCallback(() => {
           setIsBoardDialogOpen(false)
           setEditingBoardId(null)
           setInitialEditApartmentId(null)
           setCanSelectApartment(true)
           setBoardForm(createDefaultBoardForm())
-     }
+     }, [])
 
-     const openCreateBoardDialog = () => {
+     const openCreateBoardDialog = useCallback(() => {
           setEditingBoardId(null)
           setInitialEditApartmentId(null)
           setCanSelectApartment(true)
           setBoardForm(createDefaultBoardForm())
           setIsBoardDialogOpen(true)
-     }
+     }, [])
 
-     const openBoardDetailDialog = (board: IotBoardItem) => {
+     const openBoardDetailDialog = useCallback((board: IotBoardItem) => {
           setDetailBoardId(board.id)
           setIsBoardDetailDialogOpen(true)
-     }
+     }, [])
 
-     const closeBoardDetailDialog = () => {
+     const closeBoardDetailDialog = useCallback(() => {
           setIsBoardDetailDialogOpen(false)
           setDetailBoardId(null)
-     }
+     }, [])
 
-     const onBoardDetailDialogOpenChange = (open: boolean) => {
+     const onBoardDetailDialogOpenChange = useCallback((open: boolean) => {
           if (!open) {
                closeBoardDetailDialog()
                return
           }
           setIsBoardDetailDialogOpen(true)
-     }
+     }, [closeBoardDetailDialog])
 
-     const openEditBoardDialog = (board: IotBoardItem) => {
+     const openEditBoardDialog = useCallback((board: IotBoardItem) => {
           closeBoardDetailDialog()
           setEditingBoardId(board.id)
           setInitialEditApartmentId(board.apartment?.id || null)
@@ -175,23 +175,23 @@ export function useIotManagerPage() {
                devices: mapBoardDevicesToRows(board),
           })
           setIsBoardDialogOpen(true)
-     }
+     }, [closeBoardDetailDialog])
 
-     const openEditBoardForAddDevice = (boardId: string) => {
+     const openEditBoardForAddDevice = useCallback((boardId: string) => {
           const board = boardById.get(boardId)
           if (!board) return
 
           openEditBoardDialog(board)
-     }
+     }, [boardById, openEditBoardDialog])
 
-     const onBoardDialogOpenChange = (open: boolean) => {
+     const onBoardDialogOpenChange = useCallback((open: boolean) => {
           if (!open && isBoardSaving) return
           if (!open) {
                resetBoardDialog()
                return
           }
           setIsBoardDialogOpen(true)
-     }
+     }, [isBoardSaving, resetBoardDialog])
 
      const onBoardFieldChange = (field: "id" | "apartmentId" | "status", value: string) => {
           setBoardForm((prev) => ({
@@ -400,21 +400,21 @@ export function useIotManagerPage() {
           }
      }
 
-     const handleDeleteBoard = (boardId: string, boardName: string) => {
+     const handleDeleteBoard = useCallback((boardId: string, boardName: string) => {
           setDeleteBoardTarget({ id: boardId, name: boardName })
-     }
+     }, [])
 
-     const closeDeleteBoardDialog = () => {
+     const closeDeleteBoardDialog = useCallback(() => {
           if (deleteBoard.isPending) return
           setDeleteBoardTarget(null)
-     }
+     }, [deleteBoard.isPending])
 
-     const onDeleteBoardDialogOpenChange = (open: boolean) => {
+     const onDeleteBoardDialogOpenChange = useCallback((open: boolean) => {
           if (!open) {
                closeDeleteBoardDialog()
                return
           }
-     }
+     }, [closeDeleteBoardDialog])
 
      const confirmDeleteBoard = async () => {
           if (!deleteBoardTarget) return
@@ -427,36 +427,86 @@ export function useIotManagerPage() {
           }
      }
 
-     return {
-          header: {
+     const onStatusFilterChange = useCallback((value: string) => {
+          setStatusFilter(value as StatusFilterValue)
+     }, [])
+
+     const onSearchTextChange = useCallback((value: string) => {
+          setSearchText(value)
+     }, [])
+
+     const onRefresh = useCallback(() => {
+          void refetchBoards()
+     }, [refetchBoards])
+
+     const header = useMemo(
+          () => ({
                onCreateBoard: openCreateBoardDialog,
-          },
-          filters: {
+          }),
+          [openCreateBoardDialog],
+     )
+
+     const filters = useMemo(
+          () => ({
                statusFilter,
-               onStatusFilterChange: setStatusFilter,
+               onStatusFilterChange,
                searchText,
-               onSearchTextChange: setSearchText,
+               onSearchTextChange,
                totalBoards: boards.length,
                filteredBoards: filteredBoards.length,
                isRefreshing: isBoardListFetching,
-               onRefresh: () => refetchBoards(),
-          },
-          table: {
+               onRefresh,
+          }),
+          [
+               statusFilter,
+               onStatusFilterChange,
+               searchText,
+               onSearchTextChange,
+               boards.length,
+               filteredBoards.length,
+               isBoardListFetching,
+               onRefresh,
+          ],
+     )
+
+     const table = useMemo(
+          () => ({
                boards: filteredBoards,
                isLoading: isBoardListLoading,
                isDeletingBoard: deleteBoard.isPending,
                onEditBoard: openEditBoardDialog,
                onViewBoardDetails: openBoardDetailDialog,
                onDeleteBoard: handleDeleteBoard,
-          },
-          detailModal: {
+          }),
+          [
+               filteredBoards,
+               isBoardListLoading,
+               deleteBoard.isPending,
+               openEditBoardDialog,
+               openBoardDetailDialog,
+               handleDeleteBoard,
+          ],
+     )
+
+     const detailModal = useMemo(
+          () => ({
                open: isBoardDetailDialogOpen,
                board: detailBoard,
                onOpenChange: onBoardDetailDialogOpenChange,
                onEditBoard: openEditBoardDialog,
                onAddDevice: openEditBoardForAddDevice,
-          },
-          boardModal: {
+          }),
+          [
+               isBoardDetailDialogOpen,
+               detailBoard,
+               onBoardDetailDialogOpenChange,
+               openEditBoardDialog,
+               openEditBoardForAddDevice,
+          ],
+     )
+
+     const boardModal = useMemo(
+          () => ({
                open: isBoardDialogOpen,
                isEdit: !!editingBoardId,
                isSaving: isBoardSaving,
@@ -473,8 +523,29 @@ export function useIotManagerPage() {
                onAddDevice: addCreateDeviceRow,
                onRemoveDevice: removeCreateDeviceRow,
                onDeviceChange: setCreateDeviceField,
-          },
-          deleteDialog: {
+          }),
+          [
+               isBoardDialogOpen,
+               editingBoardId,
+               isBoardSaving,
+               boardForm,
+               apartmentOptions,
+               canSelectApartment,
+               initialEditApartmentId,
+               unlinkBoardApartment.isPending,
+               onBoardDialogOpenChange,
+               resetBoardDialog,
+               handleSaveBoard,
+               onBoardFieldChange,
+               handleUnlinkCurrentApartmentBeforeRelink,
+               addCreateDeviceRow,
+               removeCreateDeviceRow,
+               setCreateDeviceField,
+          ],
+     )
+
+     const deleteDialog = useMemo(
+          () => ({
                open: !!deleteBoardTarget,
                isSubmitting: deleteBoard.isPending,
                title: "Khóa mạch IoT",
@@ -485,6 +556,22 @@ export function useIotManagerPage() {
                onOpenChange: onDeleteBoardDialogOpenChange,
                onCancel: closeDeleteBoardDialog,
                onConfirm: () => void confirmDeleteBoard(),
-          },
+          }),
+          [
+               deleteBoardTarget,
+               deleteBoard.isPending,
+               onDeleteBoardDialogOpenChange,
+               closeDeleteBoardDialog,
+               confirmDeleteBoard,
+          ],
+     )
+
+     return {
+          header,
+          filters,
+          table,
+          detailModal,
+          boardModal,
+          deleteDialog,
      }
 }
