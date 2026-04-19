@@ -46,7 +46,7 @@ export function useApartmentGeocoding({ editMode, form, fullAddress, onAutoCoord
           return "idle"
      })()
 
-     const geocodeErrorMessage = geocodeStatus === "error" && "Không thể gọi dịch vụ định vị tự động. Vui lòng thử lại."
+     const geocodeErrorMessage = (geocodeStatus === "error") ? 'Không thể gọi dịch vụ định vị tự động. Vui lòng thử lại.' : ''
 
      // Auto-apply geocode result to form
      useEffect(() => {
