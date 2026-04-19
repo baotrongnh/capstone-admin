@@ -155,6 +155,8 @@ export function ApartmentDetailsSection({ model, actions }: ApartmentDetailsSect
      );
      const isGeocodeErrorStatus =
           geocodeStatus === "error" || geocodeStatus === "not_found";
+     
+     console.log(form);
      return (
           <SectionCard className="bg-muted/20">
                <SectionTitle

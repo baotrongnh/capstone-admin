@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useRef } from "react"
 import type { Map as LeafletMap, Marker as LeafletMarker } from "leaflet"
+import { useEffect, useRef } from "react"
 
 type ApartmentCoordinateMapProps = {
      latitude?: number
@@ -10,18 +10,9 @@ type ApartmentCoordinateMapProps = {
      onPickCoordinate: (value: { latitude: number; longitude: number }) => void
 }
 
-//Trung tâm TP HCM
-const DEFAULT_COORDINATE = {
-     latitude: 10.7769,
-     longitude: 106.7009,
-}
-
-const normalizeCoordinate = (value: number | undefined, fallback: number) => {
-     if (typeof value !== "number" || !Number.isFinite(value)) {
-          return fallback
-     }
-     return value
-}
+// Trung tâm TP HCM
+const DEFAULT_LAT = 10.7769
+const DEFAULT_LNG = 106.7009
 
 const roundCoordinate = (value: number) => Number(value.toFixed(6))
 
@@ -43,6 +34,8 @@ const normalizeLeafletLayering = (map: LeafletMap) => {
      })
 }
 
+const MAP_INTERACTIONS = ["dragging", "scrollWheelZoom", "doubleClickZoom", "boxZoom", "keyboard", "touchZoom"] as const
+
 export function ApartmentCoordinateMap({
      latitude,
      longitude,
@@ -53,51 +46,35 @@ export function ApartmentCoordinateMap({
      const mapRef = useRef<LeafletMap | null>(null)
      const markerRef = useRef<LeafletMarker | null>(null)
      const onPickRef = useRef(onPickCoordinate)
-     const initialCoordinateRef = useRef(DEFAULT_COORDINATE)
      const disabledRef = useRef(disabled)
-
-     onPickRef.current = onPickCoordinate
-     disabledRef.current = disabled
-
-     const activeCoordinate = useMemo(
-          () => ({
-               latitude: normalizeCoordinate(latitude, DEFAULT_COORDINATE.latitude),
-               longitude: normalizeCoordinate(longitude, DEFAULT_COORDINATE.longitude),
-          }),
-          [latitude, longitude],
-     )
-
-     initialCoordinateRef.current = activeCoordinate
-
      useEffect(() => {
-          let isDisposed = false
+          onPickRef.current = onPickCoordinate
+          disabledRef.current = disabled
+     }, [onPickCoordinate, disabled])
 
-          const initializeMap = async () => {
-               if (!mapContainerRef.current || mapRef.current) {
-                    return
-               }
+     const lat = latitude || DEFAULT_LAT
+     const lng = longitude || DEFAULT_LNG
+
+     // Track latest coords for async init to read
+     const coordRef = useRef({ lat, lng })
+     useEffect(() => {
+          coordRef.current = { lat, lng }
+     }, [lat, lng])
+
+     // Initialize map once
+     useEffect(() => {
+          let disposed = false
+
+          const init = async () => {
+               if (!mapContainerRef.current || mapRef.current) return
 
                const L = await import("leaflet")
-
-               if (isDisposed || !mapContainerRef.current || mapRef.current) {
-                    return
-               }
-
-               const markerIcon = L.icon({
-                    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-                    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-                    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-               })
+               if (disposed || !mapContainerRef.current || mapRef.current) return
 
                const map = L.map(mapContainerRef.current, {
                     zoomControl: true,
                     attributionControl: true,
-               }).setView(
-                    [initialCoordinateRef.current.latitude, initialCoordinateRef.current.longitude],
-                    15,
-               )
+               }).setView([coordRef.current.lat, coordRef.current.lng], 15)
 
                normalizeLeafletLayering(map)
 
@@ -106,71 +83,75 @@ export function ApartmentCoordinateMap({
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                }).addTo(map)
 
-               const marker = L.marker(
-                    [initialCoordinateRef.current.latitude, initialCoordinateRef.current.longitude],
-                    {
-                         draggable: !disabledRef.current,
-                         icon: markerIcon,
-                    },
-               ).addTo(map).bindPopup('Có thể di chuyển vị trí cho chính xác ngoài thực tế.')
+               const marker = L.marker([coordRef.current.lat, coordRef.current.lng], {
+                    draggable: !disabledRef.current,
+                    icon: L.icon({
+                         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                         iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+                         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+                         iconSize: [25, 41],
+                         iconAnchor: [12, 41],
+                    }),
+               }).addTo(map).bindPopup("Có thể di chuyển vị trí cho chính xác ngoài thực tế.")
 
-               marker.on("dragend", () => {
-                    const position = marker.getLatLng()
+               const handlePick = (latlng: { lat: number; lng: number }) => {
                     onPickRef.current({
-                         latitude: roundCoordinate(position.lat),
-                         longitude: roundCoordinate(position.lng),
+                         latitude: roundCoordinate(latlng.lat),
+                         longitude: roundCoordinate(latlng.lng),
                     })
-               })
+               }
 
-               map.on("click", (event) => {
+               marker.on("dragend", () => handlePick(marker.getLatLng()))
+               map.on("click", (e) => {
                     if (disabledRef.current) return
-
-                    marker.setLatLng(event.latlng)
-                    onPickRef.current({
-                         latitude: roundCoordinate(event.latlng.lat),
-                         longitude: roundCoordinate(event.latlng.lng),
-                    })
+                    marker.setLatLng(e.latlng)
+                    handlePick(e.latlng)
                })
 
                mapRef.current = map
                markerRef.current = marker
 
-               // Ensure map tiles are laid out correctly after first render.
-               requestAnimationFrame(() => {
-                    map.invalidateSize()
-               })
-               setTimeout(() => {
-                    map.invalidateSize()
-               }, 250)
+               // Ensure tiles render correctly
+               setTimeout(() => map.invalidateSize(), 250)
+
+               // Auto-resize when container changes
+               const observer = new ResizeObserver(() => map.invalidateSize())
+               observer.observe(mapContainerRef.current!)
+
+               // Extend cleanup to include observer
+               const originalCleanup = () => observer.disconnect()
+               ;(map as unknown as { _resizeCleanup: () => void })._resizeCleanup = originalCleanup
           }
 
-          void initializeMap()
+          void init()
 
           return () => {
-               isDisposed = true
-               markerRef.current = null
-               mapRef.current?.remove()
+               disposed = true
+               const map = mapRef.current
+               if (map) {
+                    ;(map as unknown as { _resizeCleanup?: () => void })._resizeCleanup?.()
+                    map.remove()
+               }
                mapRef.current = null
+               markerRef.current = null
           }
      }, [])
 
+     // Sync marker + view when coordinates change
      useEffect(() => {
           const marker = markerRef.current
           const map = mapRef.current
           if (!marker || !map) return
 
-          const nextCoordinate: [number, number] = [
-               activeCoordinate.latitude,
-               activeCoordinate.longitude,
-          ]
+          const next: [number, number] = [lat, lng]
+          marker.setLatLng(next)
 
-          marker.setLatLng(nextCoordinate)
-
-          if (!map.getBounds().pad(-0.25).contains(nextCoordinate)) {
-               map.panTo(nextCoordinate)
+          if (!map.getBounds().pad(-0.25).contains(next)) {
+               map.panTo(next)
           }
-     }, [activeCoordinate.latitude, activeCoordinate.longitude])
+     }, [lat, lng])
 
+     // Toggle map interactions when disabled changes
      useEffect(() => {
           const marker = markerRef.current
           const map = mapRef.current
@@ -178,38 +159,11 @@ export function ApartmentCoordinateMap({
 
           marker.dragging?.[disabled ? "disable" : "enable"]()
 
-          if (disabled) {
-               map.dragging.disable()
-               map.scrollWheelZoom.disable()
-               map.doubleClickZoom.disable()
-               map.boxZoom.disable()
-               map.keyboard.disable()
-               map.touchZoom.disable()
-          } else {
-               map.dragging.enable()
-               map.scrollWheelZoom.enable()
-               map.doubleClickZoom.enable()
-               map.boxZoom.enable()
-               map.keyboard.enable()
-               map.touchZoom.enable()
+          const method = disabled ? "disable" : "enable"
+          for (const interaction of MAP_INTERACTIONS) {
+               map[interaction]?.[method]()
           }
      }, [disabled])
-
-     useEffect(() => {
-          const map = mapRef.current
-          const container = mapContainerRef.current
-          if (!map || !container || typeof ResizeObserver === "undefined") return
-
-          const observer = new ResizeObserver(() => {
-               map.invalidateSize()
-          })
-
-          observer.observe(container)
-
-          return () => {
-               observer.disconnect()
-          }
-     }, [activeCoordinate.latitude, activeCoordinate.longitude])
 
      return (
           <div className="relative z-0 isolate overflow-hidden rounded-lg border">
