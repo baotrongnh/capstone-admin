@@ -184,7 +184,7 @@ export function useIotManagerPage() {
      const addCreateDeviceRow = useCallback(() => {
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices, createEmptyDeviceRow()],
+               devices: [...prev.devices],
           }))
      }, [])
 
