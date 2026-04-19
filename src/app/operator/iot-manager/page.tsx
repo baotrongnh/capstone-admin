@@ -6,15 +6,9 @@ import { IotBoardModal } from "@/components/iot/iot-board-modal"
 import { IotBoardTable } from "@/components/iot/iot-board-table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-     Select,
-     SelectContent,
-     SelectItem,
-     SelectTrigger,
-     SelectValue,
-} from "@/components/ui/select"
-import { useIotManagerPage } from "../../../hooks/iot/use-iot-manager-page"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RefreshCcwIcon, SearchIcon } from "lucide-react"
+import { useIotManagerPage } from "../../../hooks/iot/use-iot-manager-page"
 
 export default function IotManagerPage() {
      const data = useIotManagerPage()
