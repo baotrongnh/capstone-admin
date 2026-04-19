@@ -1,7 +1,7 @@
 import { useGeocodeAddress } from "@/hooks/query/useAddress"
 import type { GeocodeStatus } from "@/types/apartment"
 import type { ApartmentForm } from "@/types/apartment-form"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 type UseApartmentGeocodingParams = {
      editMode: boolean
@@ -10,111 +10,75 @@ type UseApartmentGeocodingParams = {
      onAutoCoordinate: (value: { latitude: number; longitude: number }) => void
 }
 
-export function useApartmentGeocoding({
-     editMode,
-     form,
-     fullAddress,
-     onAutoCoordinate,
-}: UseApartmentGeocodingParams) {
-     const [debouncedGeocodeAddress, setDebouncedGeocodeAddress] = useState("")
-
-     const lastAutoAddressRef = useRef<string | null>(null)
-     const manualPickAddressRef = useRef<string | null>(null)
+export function useApartmentGeocoding({ editMode, form, fullAddress, onAutoCoordinate }: UseApartmentGeocodingParams) {
+     const [debouncedAddress, setDebouncedAddress] = useState("")
+     const lastAppliedAddressRef = useRef<string | null>(null)
+     const hasSkippedInitialRef = useRef(false)
      const onAutoCoordinateRef = useRef(onAutoCoordinate)
-
      useEffect(() => {
           onAutoCoordinateRef.current = onAutoCoordinate
      }, [onAutoCoordinate])
-
-     const geocodeAddress = useMemo(() => fullAddress.trim(), [fullAddress])
 
      const geocodeEnabled =
           editMode &&
           !!form &&
           !!form.streetAddress?.trim() &&
-          !!form.wardCode &&
-          geocodeAddress.length >= 10
+          !!form.wardCode
 
-     const geocodeQuery = useGeocodeAddress(debouncedGeocodeAddress || undefined, geocodeEnabled)
+     const trimmedAddress = fullAddress.trim()
 
+     // Debounce address 2s
      useEffect(() => {
-          const timerId = window.setTimeout(() => {
-               setDebouncedGeocodeAddress(geocodeEnabled ? geocodeAddress : "")
-          }, 700)
+          const timerId = setTimeout(() => {
+               setDebouncedAddress(geocodeEnabled ? trimmedAddress : "")
+          }, 2000)
+          return () => clearTimeout(timerId)
+     }, [trimmedAddress, geocodeEnabled])
 
-          return () => {
-               window.clearTimeout(timerId)
-          }
-     }, [geocodeAddress, geocodeEnabled])
+     const geocodeQuery = useGeocodeAddress(debouncedAddress || undefined, geocodeEnabled)
 
-     const geocodeStatus: GeocodeStatus = useMemo(() => {
-          if (!geocodeEnabled || !debouncedGeocodeAddress) {
-               return "idle"
-          }
-
-          if (geocodeQuery.isFetching) {
-               return "loading"
-          }
-
-          if (geocodeQuery.isError) {
-               return "error"
-          }
-
-          if (geocodeQuery.data) {
-               return "success"
-          }
-
-          if (geocodeQuery.isSuccess) {
-               return "not_found"
-          }
-
+     const geocodeStatus: GeocodeStatus = (() => {
+          if (!geocodeEnabled || !debouncedAddress) return "idle"
+          if (geocodeQuery.isFetching) return "loading"
+          if (geocodeQuery.isError) return "error"
+          if (geocodeQuery.data) return "success"
+          if (geocodeQuery.isSuccess) return "not_found"
           return "idle"
-     }, [
-          debouncedGeocodeAddress,
-          geocodeEnabled,
-          geocodeQuery.data,
-          geocodeQuery.isError,
-          geocodeQuery.isFetching,
-          geocodeQuery.isSuccess,
-     ])
+     })()
 
-     const geocodeErrorMessage =
-          geocodeStatus === "error"
-               ? "Không thể gọi dịch vụ định vị tự động. Vui lòng thử lại."
-               : null
+     const geocodeErrorMessage = geocodeStatus === "error" && "Không thể gọi dịch vụ định vị tự động. Vui lòng thử lại."
 
+     // Auto-apply geocode result to form
      useEffect(() => {
-          if (!form || !geocodeEnabled || !debouncedGeocodeAddress) {
-               return
-          }
+          if (!form || !geocodeEnabled || !debouncedAddress) return
 
           const geocodeData = geocodeQuery.data
-          if (!geocodeData) {
-               return
-          }
+          if (!geocodeData) return
 
-          if (manualPickAddressRef.current === debouncedGeocodeAddress) {
+          // Skip first time if form already has coordinates (edit mode)
+          if (!hasSkippedInitialRef.current && form.latitude && form.longitude) {
+               hasSkippedInitialRef.current = true
+               lastAppliedAddressRef.current = debouncedAddress
                return
           }
+          hasSkippedInitialRef.current = true
 
-          if (lastAutoAddressRef.current === debouncedGeocodeAddress) {
-               return
-          }
+          // Don't re-apply for the same address
+          if (lastAppliedAddressRef.current === debouncedAddress) return
 
           onAutoCoordinateRef.current({
                latitude: geocodeData.latitude,
                longitude: geocodeData.longitude,
           })
-          lastAutoAddressRef.current = debouncedGeocodeAddress
-     }, [debouncedGeocodeAddress, form, geocodeEnabled, geocodeQuery.data])
+          lastAppliedAddressRef.current = debouncedAddress
+     }, [debouncedAddress, form, geocodeEnabled, geocodeQuery.data])
 
      const markManualCoordinatePick = () => {
-          manualPickAddressRef.current = debouncedGeocodeAddress || geocodeAddress || null
+          lastAppliedAddressRef.current = debouncedAddress || trimmedAddress || null
      }
 
      const resetGeocodeTracking = () => {
-          lastAutoAddressRef.current = null
-          manualPickAddressRef.current = null
+          lastAppliedAddressRef.current = null
      }
 
      return {

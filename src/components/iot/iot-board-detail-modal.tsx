@@ -1,13 +1,7 @@
 import { STATUS_LABEL_MAP, STATUS_STYLE_MAP, TOPIC_LABEL_MAP } from "@/components/iot/iot-shared"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-     Dialog,
-     DialogContent,
-     DialogDescription,
-     DialogHeader,
-     DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { PencilIcon, PlusIcon } from "lucide-react"
@@ -32,13 +26,7 @@ const getTopicLabel = (topic?: string | null) => {
 }
 
 export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: IotBoardDetailModalProps) {
-     const {
-          open,
-          board,
-          onOpenChange,
-          onEditBoard,
-          onAddDevice,
-     } = data
+     const { open, board, onOpenChange, onEditBoard, onAddDevice } = data
 
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>

@@ -6,7 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { MoreHorizontalIcon } from "lucide-react"
-import { memo } from "react"
 
 type IotBoardTableProps = {
      data: {
@@ -19,15 +18,9 @@ type IotBoardTableProps = {
      }
 }
 
-export const IotBoardTable = memo(function IotBoardTable({ data }: IotBoardTableProps) {
-     const {
-          boards,
-          isLoading,
-          isDeletingBoard,
-          onEditBoard,
-          onViewBoardDetails,
-          onDeleteBoard,
-     } = data
+export const IotBoardTable = ({ data }: IotBoardTableProps) => {
+     const { boards, isLoading, isDeletingBoard, onEditBoard, onViewBoardDetails, onDeleteBoard } = data
+     console.log(boards);
 
      return (
           <div className="relative overflow-x-auto rounded-xl border bg-white shadow-sm">
@@ -111,7 +104,7 @@ export const IotBoardTable = memo(function IotBoardTable({ data }: IotBoardTable
                                                        <DropdownMenuSeparator />
                                                        <DropdownMenuItem
                                                             variant="destructive"
-                                                            disabled={isDeletingBoard}
+                                                            disabled={isDeletingBoard || board.status !== 'active'}
                                                             onClick={() => onDeleteBoard(board.id, board.name || board.id)}
                                                        >
                                                             Vô hiệu hóa
@@ -126,4 +119,4 @@ export const IotBoardTable = memo(function IotBoardTable({ data }: IotBoardTable
                </Table>
           </div>
      )
-})
+}
