@@ -1,6 +1,6 @@
 "use client"
 
-import { createDefaultBoardForm, TOPIC_OPTIONS, type BoardFormState, type CreateDeviceRow } from "@/components/iot/iot-shared"
+import { createDefaultBoardForm, type BoardFormState, type CreateDeviceRow } from "@/components/iot/iot-shared"
 import { useApartments } from "@/hooks/query/useApartments"
 import { useCreateIotBoard, useCreateIotBoardDevice, useDeleteIotBoard, useIotBoards, useUnlinkBoardApartment, useUpdateIotBoard, useUpdateIotBoardDevice } from "@/hooks/query/useIotDevices"
 import type { IotBoardDeviceCreateRequest, IotBoardItem, IotBoardListQuery } from "@/types/iot"
@@ -27,7 +27,7 @@ const mapBoardDevicesToRows = (board: IotBoardItem): CreateDeviceRow[] => {
           }
      })
 
-     return rows 
+     return rows
 }
 
 type StatusFilterValue = "__all__" | NonNullable<IotBoardListQuery["status"]>
@@ -68,10 +68,14 @@ export function useIotManagerPage() {
           return apartmentResponse?.data || []
      }, [apartmentResponse])
 
-     const normalizedSearchText = searchText.trim().toLowerCase()
+     const createEmptyDeviceRow = (): CreateDeviceRow => ({
+          deviceId: "",
+          deviceName: "",
+          topic: "light",
+     })
 
      const filteredBoards = useMemo(() => {
-          if (!normalizedSearchText) {
+          if (!searchText) {
                return boards
           }
 
@@ -86,9 +90,9 @@ export function useIotManagerPage() {
                     .join(" ")
                     .toLowerCase()
 
-               return searchable.includes(normalizedSearchText)
+               return searchable.includes(searchText.trim().toLowerCase())
           })
-     }, [boards, normalizedSearchText])
+     }, [boards, searchText])
 
      const detailBoard = useMemo(
           () => boards.find((item) => item.id === detailBoardId) || null,
@@ -100,12 +104,11 @@ export function useIotManagerPage() {
           [boards],
      )
 
-     const isBoardSaving =
-          createBoard.isPending ||
-          updateBoard.isPending ||
-          createBoardDevice.isPending ||
-          updateBoardDevice.isPending ||
-          unlinkBoardApartment.isPending
+     const isBoardSaving = createBoard.isPending
+          || updateBoard.isPending
+          || createBoardDevice.isPending
+          || updateBoardDevice.isPending
+          || unlinkBoardApartment.isPending
 
      const resetBoardDialog = useCallback(() => {
           setIsBoardDialogOpen(false)
@@ -181,7 +184,7 @@ export function useIotManagerPage() {
      const addCreateDeviceRow = useCallback(() => {
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices],
+               devices: [...prev.devices, createEmptyDeviceRow()],
           }))
      }, [])
 
