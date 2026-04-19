@@ -1,21 +1,8 @@
 import { STATUS_LABEL_MAP, STATUS_STYLE_MAP } from "@/components/iot/iot-shared"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-     DropdownMenu,
-     DropdownMenuContent,
-     DropdownMenuItem,
-     DropdownMenuSeparator,
-     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-     Table,
-     TableBody,
-     TableCell,
-     TableHead,
-     TableHeader,
-     TableRow,
-} from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
 import { MoreHorizontalIcon } from "lucide-react"

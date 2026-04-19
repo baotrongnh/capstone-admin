@@ -1,26 +1,9 @@
 "use client"
 
-import {
-     createDefaultBoardForm,
-     TOPIC_OPTIONS,
-     type BoardFormState,
-     type CreateDeviceRow,
-} from "@/components/iot/iot-shared"
+import { createDefaultBoardForm, TOPIC_OPTIONS, type BoardFormState, type CreateDeviceRow } from "@/components/iot/iot-shared"
 import { useApartments } from "@/hooks/query/useApartments"
-import {
-     useCreateIotBoard,
-     useCreateIotBoardDevice,
-     useDeleteIotBoard,
-     useIotBoards,
-     useUnlinkBoardApartment,
-     useUpdateIotBoard,
-     useUpdateIotBoardDevice,
-} from "@/hooks/query/useIotDevices"
-import type {
-     IotBoardDeviceCreateRequest,
-     IotBoardItem,
-     IotBoardListQuery,
-} from "@/types/iot"
+import { useCreateIotBoard, useCreateIotBoardDevice, useDeleteIotBoard, useIotBoards, useUnlinkBoardApartment, useUpdateIotBoard, useUpdateIotBoardDevice } from "@/hooks/query/useIotDevices"
+import type { IotBoardDeviceCreateRequest, IotBoardItem, IotBoardListQuery } from "@/types/iot"
 import { message } from "antd"
 import { useCallback, useMemo, useState } from "react"
 
@@ -32,26 +15,19 @@ type NormalizedBoardDevice = {
      state: "OFF"
 }
 
-const createEmptyDeviceRow = (): CreateDeviceRow => ({
-     deviceId: "",
-     deviceName: "",
-     topic: "light",
-})
-
 const mapBoardDevicesToRows = (board: IotBoardItem): CreateDeviceRow[] => {
      const rows = board.devices.map((device) => {
           const rawTopic = (device.topic || "") as IotBoardDeviceCreateRequest["topic"]
-          const topic = TOPIC_OPTIONS.includes(rawTopic) ? rawTopic : "light"
 
           return {
                id: device.id,
-               deviceId: device.deviceId != null ? String(device.deviceId) : "",
+               deviceId: String(device.deviceId) || "",
                deviceName: device.deviceName || "",
-               topic,
+               topic: rawTopic || 'light',
           }
      })
 
-     return rows.length > 0 ? rows : [createEmptyDeviceRow()]
+     return rows 
 }
 
 type StatusFilterValue = "__all__" | NonNullable<IotBoardListQuery["status"]>
@@ -88,7 +64,9 @@ export function useIotManagerPage() {
      const unlinkBoardApartment = useUnlinkBoardApartment()
 
      const boards = useMemo(() => boardsResponse?.data ?? [], [boardsResponse?.data])
-     const apartmentOptions = apartmentResponse?.data || []
+     const apartmentOptions = useMemo(() => {
+          return apartmentResponse?.data || []
+     }, [apartmentResponse])
 
      const normalizedSearchText = searchText.trim().toLowerCase()
 
@@ -193,31 +171,31 @@ export function useIotManagerPage() {
           setIsBoardDialogOpen(true)
      }, [isBoardSaving, resetBoardDialog])
 
-     const onBoardFieldChange = (field: "id" | "apartmentId" | "status", value: string) => {
+     const onBoardFieldChange = useCallback((field: "id" | "apartmentId" | "status", value: string) => {
           setBoardForm((prev) => ({
                ...prev,
                [field]: value,
           }))
-     }
+     }, [])
 
-     const addCreateDeviceRow = () => {
+     const addCreateDeviceRow = useCallback(() => {
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices, createEmptyDeviceRow()],
+               devices: [...prev.devices],
           }))
-     }
+     }, [])
 
-     const removeCreateDeviceRow = (index: number) => {
+     const removeCreateDeviceRow = useCallback((index: number) => {
           setBoardForm((prev) => {
                const next = prev.devices.filter((_, i) => i !== index)
                return {
                     ...prev,
-                    devices: next.length ? next : [createEmptyDeviceRow()],
+                    devices: next
                }
           })
-     }
+     }, [])
 
-     const setCreateDeviceField = (index: number, field: "deviceId" | "deviceName" | "topic", value: string) => {
+     const setCreateDeviceField = useCallback((index: number, field: "deviceId" | "deviceName" | "topic", value: string) => {
           setBoardForm((prev) => ({
                ...prev,
                devices: prev.devices.map((item, i) =>
@@ -229,7 +207,7 @@ export function useIotManagerPage() {
                          : item,
                ),
           }))
-     }
+     }, [])
 
      const normalizeBoardDevices = (rows: BoardFormState["devices"]) => {
           const normalized: NormalizedBoardDevice[] = []
@@ -265,7 +243,7 @@ export function useIotManagerPage() {
           }
      }
 
-     const getValidNormalizedDevices = (rows: BoardFormState["devices"]) => {
+     const getValidNormalizedDevices = useCallback((rows: BoardFormState["devices"]) => {
           const { normalized, hasInvalidRow } = normalizeBoardDevices(rows)
 
           if (hasInvalidRow) {
@@ -274,9 +252,9 @@ export function useIotManagerPage() {
           }
 
           return normalized
-     }
+     }, [])
 
-     const persistDevicesToBoard = async (boardId: string, normalizedDevices: NormalizedBoardDevice[]) => {
+     const persistDevicesToBoard = useCallback(async (boardId: string, normalizedDevices: NormalizedBoardDevice[]) => {
           const existingDevices = editingBoardId ? boardById.get(editingBoardId)?.devices || [] : []
           const existingById = new Map(existingDevices.map((device) => [device.id, device]))
 
@@ -318,9 +296,9 @@ export function useIotManagerPage() {
                     },
                })
           }
-     }
+     }, [boardById, createBoardDevice, editingBoardId, updateBoardDevice])
 
-     const handleSaveBoard = async () => {
+     const handleSaveBoard = useCallback(async () => {
           const boardId = boardForm.id.trim()
           if (!boardId) {
                message.error("Vui lòng nhập mã mạch.")
@@ -366,9 +344,9 @@ export function useIotManagerPage() {
           } catch {
                // Error toast handled in hooks.
           }
-     }
+     }, [boardForm, createBoard, canSelectApartment, editingBoardId, getValidNormalizedDevices, persistDevicesToBoard, resetBoardDialog, updateBoard])
 
-     const handleUnlinkCurrentApartmentBeforeRelink = async () => {
+     const handleUnlinkCurrentApartmentBeforeRelink = useCallback(async () => {
           if (!editingBoardId || !initialEditApartmentId) {
                return
           }
@@ -385,7 +363,7 @@ export function useIotManagerPage() {
           } catch {
                // Error toast handled in hooks.
           }
-     }
+     }, [unlinkBoardApartment, editingBoardId, initialEditApartmentId])
 
      const handleDeleteBoard = useCallback((boardId: string, boardName: string) => {
           setDeleteBoardTarget({ id: boardId, name: boardName })
@@ -403,7 +381,7 @@ export function useIotManagerPage() {
           }
      }, [closeDeleteBoardDialog])
 
-     const confirmDeleteBoard = async () => {
+     const confirmDeleteBoard = useCallback(async () => {
           if (!deleteBoardTarget) return
 
           try {
@@ -412,7 +390,7 @@ export function useIotManagerPage() {
           } catch {
                // Error toast handled in hooks.
           }
-     }
+     }, [deleteBoardTarget, deleteBoard])
 
      const onStatusFilterChange = useCallback((value: string) => {
           setStatusFilter(value as StatusFilterValue)
