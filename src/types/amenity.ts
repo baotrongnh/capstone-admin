@@ -10,3 +10,19 @@ export type AmenityDeactivateResponse = paths["/api/v1/amenities/{id}"]["delete"
 
 export type AmenityItem = NonNullable<AmenityListResponse["data"]>[number]
 export type AmenityDetailData = NonNullable<AmenityDetailResponse["data"]>
+
+export type AmenityFormState = {
+     code: string
+     name: string
+     description: string
+     icon: string
+     isActive: boolean
+}
+
+export const DEFAULT_FORM: AmenityFormState = {
+     code: "",
+     name: "",
+     description: "",
+     icon: "",
+     isActive: true,
+}
