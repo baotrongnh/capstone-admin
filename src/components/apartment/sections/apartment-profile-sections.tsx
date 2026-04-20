@@ -149,7 +149,7 @@ export const ApartmentAmenitySection = memo(function ApartmentAmenitySection({ m
                     <div className="space-y-3">
                          <div>
                               <p className="text-xs text-muted-foreground mb-1">Mô tả</p>
-                              <p className="text-sm">{description || "-"}</p>
+                              <p className="text-sm whitespace-pre-wrap wrap-break-word">{description || "-"}</p>
                          </div>
                          <div>
                               <p className="text-xs text-muted-foreground mb-1">Tiện ích</p>
