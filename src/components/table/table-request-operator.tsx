@@ -52,6 +52,32 @@ const formatPhoneNumber = (phone?: string | null) => {
   return cleaned.replace(/(\d{3})(?=\d)/g, "$1.");
 };
 
+const formatDateVN = (dateString?: string | null) => {
+  if (!dateString) return "N/A";
+  try {
+    // Parse ISO string và convert sang Vietnam timezone (UTC+7)
+    const date = new Date(dateString);
+
+    // Tạo formatter cho Vietnam timezone
+    const vnFormatter = new Intl.DateTimeFormat("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "Asia/Ho_Chi_Minh",
+    });
+
+    // Format theo pattern DD/MM/YYYY
+    const parts = vnFormatter.formatToParts(date);
+    const dayPart = parts.find((p) => p.type === "day")?.value || "";
+    const monthPart = parts.find((p) => p.type === "month")?.value || "";
+    const yearPart = parts.find((p) => p.type === "year")?.value || "";
+
+    return `${dayPart}/${monthPart}/${yearPart}`;
+  } catch {
+    return "N/A";
+  }
+};
+
 export function TableRequestOperator({
   filteredRequests,
   onOpenReject,
@@ -101,7 +127,9 @@ export function TableRequestOperator({
 
               <TableCell className="text-sm">{request.price} đ</TableCell>
 
-              <TableCell className="text-sm">{request.submittedDate}</TableCell>
+              <TableCell className="text-sm">
+                {formatDateVN(request.createdAt)}
+              </TableCell>
 
               <TableCell>
                 <span
