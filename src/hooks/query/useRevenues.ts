@@ -2,7 +2,9 @@
 
 import { revenueService } from "@/lib/services/revenue.service"
 import type {
+     RevenueDashboardApiData,
      RevenueDashboardData,
+     RevenueDashboardQuery,
      RevenueDateFilter,
      RevenueDateRange,
      RevenueOverviewData,
@@ -217,6 +219,17 @@ const buildRevenueDashboardData = async (
 export const useRevenueOverview = (params?: RevenueOverviewQuery) => useQuery<RevenueOverviewData>({
      queryKey: ["revenues", "overview", params?.from ?? null, params?.to ?? null],
      queryFn: () => revenueService.getOverview(params),
+})
+
+export const useRevenueAdminDashboard = (params?: RevenueDashboardQuery) => useQuery<RevenueDashboardApiData>({
+     queryKey: [
+          "revenues",
+          "dashboard-api",
+          params?.from ?? null,
+          params?.to ?? null,
+          params?.topLimit ?? null,
+     ],
+     queryFn: () => revenueService.getDashboard(params),
 })
 
 export const useRevenueDashboard = (period: RevenuePeriod = "month", filter?: RevenueDateFilter) => useQuery<RevenueDashboardData>({

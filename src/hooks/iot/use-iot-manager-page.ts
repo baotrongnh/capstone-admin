@@ -68,12 +68,6 @@ export function useIotManagerPage() {
           return apartmentResponse?.data || []
      }, [apartmentResponse])
 
-     const createEmptyDeviceRow = (): CreateDeviceRow => ({
-          deviceId: "",
-          deviceName: "",
-          topic: "light",
-     })
-
      const filteredBoards = useMemo(() => {
           if (!searchText) {
                return boards
@@ -163,6 +157,10 @@ export function useIotManagerPage() {
           if (!board) return
 
           openEditBoardDialog(board)
+          setBoardForm((prev) => ({
+               ...prev,
+               devices: [...prev.devices, { deviceId: "", deviceName: "", topic: "light" }],
+          }))
      }, [boardById, openEditBoardDialog])
 
      const onBoardDialogOpenChange = useCallback((open: boolean) => {
@@ -184,7 +182,7 @@ export function useIotManagerPage() {
      const addCreateDeviceRow = useCallback(() => {
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices],
+               devices: [...prev.devices, { deviceId: "", deviceName: "", topic: "light" }],
           }))
      }, [])
 

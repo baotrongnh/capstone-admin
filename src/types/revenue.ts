@@ -46,6 +46,14 @@ export type RevenueDashboardData = {
      piePoint: RevenuePoint | null
 }
 
+export type RevenueDashboardQuery = paths["/api/v1/revenues/dashboard"]["get"]["parameters"]["query"]
+
+export type RevenueDashboardResponse = paths["/api/v1/revenues/dashboard"]["get"]["responses"]["200"]["content"]["application/json"]
+
+export type RevenueDashboardApiData = NonNullable<RevenueDashboardResponse["data"]>
+
+export type RevenueDashboardRankingItem = RevenueDashboardApiData["apartmentRevenueStats"]["topApartments"][number]
+
 export type StaffPartnerPayoutListQuery = paths["/api/v1/revenues/staff/partner-payouts"]["get"]["parameters"]["query"]
 
 export type StaffPartnerPayoutListResponse = paths["/api/v1/revenues/staff/partner-payouts"]["get"]["responses"]["200"]["content"]["application/json"]
