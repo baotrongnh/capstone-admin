@@ -52,7 +52,9 @@ export type IotBoardDeviceCreateResponse =
      paths["/api/v1/iot/boards/{boardId}/devices"]["post"]["responses"]["201"]["content"]["application/json"]
 
 export type IotBoardDeviceUpdateRequest =
-     paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["patch"]["requestBody"]["content"]["application/json"]
+     paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["patch"]["requestBody"]["content"]["application/json"] & {
+          status?: NonNullable<IotBoardListQuery["status"]>
+     }
 
 export type IotBoardDeviceUpdateResponse =
      paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["patch"]["responses"]["200"]["content"]["application/json"]
