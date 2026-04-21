@@ -20,7 +20,6 @@ type IotBoardTableProps = {
 
 export const IotBoardTable = ({ data }: IotBoardTableProps) => {
      const { boards, isLoading, isDeletingBoard, onEditBoard, onViewBoardDetails, onDeleteBoard } = data
-     console.log(boards);
 
      return (
           <div className="relative overflow-x-auto rounded-xl border bg-white shadow-sm">
