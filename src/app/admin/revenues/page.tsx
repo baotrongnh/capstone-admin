@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react"
 import { AlertCircle } from "lucide-react"
 
-import { toInputDate } from "@/utils/date-utils"
-import { useRevenueDashboard } from "../../../hooks/query/useRevenues"
+import { RevenueDashboardInsights } from "@/components/revenue/revenue-dashboard-insights"
+import { toEndOfDayIso, toInputDate, toStartOfDayIso } from "@/utils/date-utils"
+import { useRevenueAdminDashboard, useRevenueDashboard } from "../../../hooks/query/useRevenues"
 import type { RevenueDateFilter, RevenuePeriod } from "@/types/revenue"
 import {
      RevenueDateRangePicker,
@@ -25,8 +26,17 @@ export default function RevenueManagementPage() {
      const [selectedPeriod, setSelectedPeriod] = useState<RevenuePeriod>("month")
 
      const filter = useMemo<RevenueDateFilter>(() => ({ from: appliedFrom, to: appliedTo }), [appliedFrom, appliedTo])
+     const dashboardFilter = useMemo(
+          () => ({
+               from: toStartOfDayIso(appliedFrom),
+               to: toEndOfDayIso(appliedTo),
+               topLimit: 5,
+          }),
+          [appliedFrom, appliedTo],
+     )
 
      const { data, isLoading, isError } = useRevenueDashboard(selectedPeriod, filter)
+     const { data: dashboardData, isLoading: isDashboardLoading } = useRevenueAdminDashboard(dashboardFilter)
 
      const applyRange = (next: RevenueDateRangeValue) => {
           setAppliedFrom(next.from)
@@ -76,6 +86,14 @@ export default function RevenueManagementPage() {
                          period={selectedPeriod}
                          onPeriodChange={setSelectedPeriod}
                          isLoading={isLoading}
+                    />
+
+                    <RevenueDashboardInsights
+                         data={dashboardData}
+                         isLoading={isDashboardLoading}
+                         className="px-4 lg:px-6"
+                         title="Số liệu Dashboard API trong khoảng đã chọn"
+                         description="Dữ liệu /api/v1/revenues/dashboard đồng bộ với bộ lọc ngày tháng phía trên."
                     />
                </div>
           </div>
