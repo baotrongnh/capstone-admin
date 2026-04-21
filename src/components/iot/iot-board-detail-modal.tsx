@@ -2,18 +2,21 @@ import { STATUS_LABEL_MAP, STATUS_STYLE_MAP, TOPIC_LABEL_MAP } from "@/component
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import type { IotBoardItem } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
-import { PencilIcon, PlusIcon } from "lucide-react"
+import { MoreHorizontalIcon, PencilIcon, PlusIcon } from "lucide-react"
 import { memo } from "react"
 
 type IotBoardDetailModalProps = {
      data: {
           open: boolean
           board: IotBoardItem | null
+          reactivatingDeviceKey: string | null
           onOpenChange: (open: boolean) => void
           onEditBoard: (board: IotBoardItem) => void
           onAddDevice: (boardId: string) => void
+          onReactivateDevice: (boardId: string, device: IotBoardItem["devices"][number]) => void
      }
 }
 
@@ -26,7 +29,7 @@ const getTopicLabel = (topic?: string | null) => {
 }
 
 export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: IotBoardDetailModalProps) {
-     const { open, board, onOpenChange, onEditBoard, onAddDevice } = data
+     const { open, board, reactivatingDeviceKey, onOpenChange, onEditBoard, onAddDevice, onReactivateDevice } = data
 
      return (
           <Dialog open={open} onOpenChange={onOpenChange}>
@@ -75,6 +78,7 @@ export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: I
                                              variant="ghost"
                                              className="size-8"
                                              title="Sửa mạch"
+                                             aria-label="Sửa mạch"
                                              onClick={() => onEditBoard(board)}
                                         >
                                              <PencilIcon className="size-4" />
@@ -85,6 +89,7 @@ export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: I
                                              variant="ghost"
                                              className="size-8"
                                              title="Thêm thiết bị"
+                                             aria-label="Thêm thiết bị"
                                              onClick={() => onAddDevice(board.id)}
                                         >
                                              <PlusIcon className="size-4" />
@@ -98,22 +103,49 @@ export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: I
                                    </div>
                               ) : (
                                    <div className="space-y-2">
-                                        {board.devices.map((device) => (
-                                             <div
-                                                  key={device.id}
-                                                  className="flex items-center justify-between gap-3 rounded-lg border p-3"
-                                             >
-                                                  <div className="min-w-0">
-                                                       <p className="truncate text-sm font-medium">
-                                                            {device.deviceName || `Thiết bị ${device.deviceId || "-"}`}
-                                                       </p>
-                                                       <p className="truncate text-xs text-muted-foreground">
-                                                            ID: {device.deviceId || "-"} | Topic: {getTopicLabel(device.topic)}
-                                                       </p>
-                                                  </div>
+                                        {board.devices.map((device) => {
+                                             const isInactive = device.status === "inactive"
+                                             const deviceKey = `${board.id}:${device.id}`
+                                             const isReactivating = reactivatingDeviceKey === deviceKey
 
-                                             </div>
-                                        ))}
+                                             return (
+                                                  <div
+                                                       key={device.id}
+                                                       className={`flex items-center justify-between gap-3 rounded-lg border p-3 ${isInactive ? "border-amber-300/60 bg-amber-50/30" : ""}`}
+                                                  >
+                                                       <div className="min-w-0">
+                                                            <p className="truncate text-sm font-medium">
+                                                                 {device.deviceName || `Thiết bị ${device.deviceId || "-"}`}
+                                                            </p>
+                                                            <p className="truncate text-xs text-muted-foreground">
+                                                                 ID: {device.deviceId || "-"} | Topic: {getTopicLabel(device.topic)}
+                                                            </p>
+                                                       </div>
+
+                                                       <div className="flex items-center gap-2">
+                                                            <Badge className={`border ${STATUS_STYLE_MAP[device.status]}`}>
+                                                                 {STATUS_LABEL_MAP[device.status]}
+                                                            </Badge>
+
+                                                            <DropdownMenu>
+                                                                 <DropdownMenuTrigger asChild>
+                                                                      <Button type="button" size="icon" variant="ghost" className="size-8" aria-label="Mở thao tác thiết bị">
+                                                                           <MoreHorizontalIcon className="size-4" />
+                                                                      </Button>
+                                                                 </DropdownMenuTrigger>
+                                                                 <DropdownMenuContent align="end" className="w-40">
+                                                                      <DropdownMenuItem
+                                                                           disabled={!isInactive || isReactivating}
+                                                                           onClick={() => onReactivateDevice(board.id, device)}
+                                                                      >
+                                                                           {isReactivating ? "Đang kích hoạt..." : "Kích hoạt lại"}
+                                                                      </DropdownMenuItem>
+                                                                 </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                       </div>
+                                                  </div>
+                                             )
+                                        })}
                                    </div>
                               )}
                          </div>

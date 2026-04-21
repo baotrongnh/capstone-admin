@@ -1,7 +1,7 @@
 'use client'
 
-import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
+import { useRouter } from "next/navigation"
 
 const LOCALE_COOKIE = 'SEP_ADMIN_LOCALE'
 
