@@ -90,12 +90,22 @@ export const buildApartmentFormData = (
                .forEach((item) => formData.append("amenityIds", item));
      }
 
-     if (Array.isArray(payload.images)) {
-          payload.images.forEach((imageUrl) => {
-               if (typeof imageUrl === "string" && imageUrl.trim()) {
-                    formData.append("images", imageUrl.trim());
-               }
-          });
+     const existingImages = Array.isArray(payload.images)
+          ? payload.images
+               .filter((imageUrl): imageUrl is string => typeof imageUrl === "string")
+               .map((imageUrl) => imageUrl.trim())
+               .filter(Boolean)
+          : null
+
+     if (existingImages) {
+          if (options.mode === "update" && existingImages.length === 0) {
+               // Send an explicit empty images field so the backend clears old images instead of keeping them.
+               formData.append("images", "")
+          } else {
+               existingImages.forEach((imageUrl) => {
+                    formData.append("images", imageUrl);
+               });
+          }
      }
 
      if (Array.isArray(options.imageFiles)) {
