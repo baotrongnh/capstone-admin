@@ -21,8 +21,6 @@ type UseApartmentDetailEditorControllerParams = {
           allowEdit: boolean
           apartmentId: string | null
           initialStatus?: ApartmentStatus | null
-          roomTags: string[]
-          initialRoomTags: string[]
           canSaveChanges: boolean
           usableAreaInvalid: boolean
           showIotSection: boolean
@@ -30,7 +28,6 @@ type UseApartmentDetailEditorControllerParams = {
      editorState: {
           form: ApartmentForm | null
           updateField: (key: keyof ApartmentForm, rawValue: unknown) => Partial<Record<keyof ApartmentForm, unknown>>
-          setRoomTags: (tags: string[]) => void
           resetTransientState: () => void
           startEditDraft: () => boolean
           resetCreateDraft: () => void
@@ -83,8 +80,6 @@ export function useApartmentDetailEditorController({
           allowEdit,
           apartmentId,
           initialStatus,
-          roomTags,
-          initialRoomTags,
           canSaveChanges,
           usableAreaInvalid,
           showIotSection,
@@ -93,7 +88,6 @@ export function useApartmentDetailEditorController({
      const {
           form,
           updateField,
-          setRoomTags,
           resetTransientState,
           startEditDraft,
           resetCreateDraft,
@@ -189,11 +183,7 @@ export function useApartmentDetailEditorController({
                const createdApartmentResponse = await createApartmentMutate(payloadData)
                const createdApartmentId = createdApartmentResponse?.data?.id
 
-               if (
-                    createdApartmentId &&
-                    showIotSection &&
-                    iotAssignment.selectedBoardIds.length > 0
-               ) {
+               if (createdApartmentId && showIotSection && iotAssignment.selectedBoardIds.length > 0) {
                     try {
                          await iotAssignment.syncIotBoardAssignment({
                               apartmentTargetId: createdApartmentId,
@@ -237,10 +227,6 @@ export function useApartmentDetailEditorController({
                     })
                }
 
-               if (JSON.stringify(roomTags) !== JSON.stringify(initialRoomTags)) {
-                    message.info("Danh sách phòng đã cập nhật trên UI và sẵn sàng nối BE.")
-               }
-
                await refetchApartmentDetail()
                handleCancelEdit()
           } catch {
@@ -281,9 +267,9 @@ export function useApartmentDetailEditorController({
                     images: payloadImages,
                },
                {
-               mode: isCreateMode ? "create" : "update",
-               imageFiles: isCreateMode ? selectedImageFiles : [],
-               videoFile: selectedVideoFile,
+                    mode: isCreateMode ? "create" : "update",
+                    imageFiles: isCreateMode ? selectedImageFiles : [],
+                    videoFile: selectedVideoFile,
                },
           )
 
@@ -302,12 +288,10 @@ export function useApartmentDetailEditorController({
      }
 
      const handleStartEdit = () => {
-          if (isCreateMode) return
-          if (!allowEdit) return
+          if (isCreateMode || !allowEdit || !startEditDraft()) {
+               return
+          }
 
-          if (!startEditDraft()) return
-
-          setRoomTags(initialRoomTags)
           iotAssignment.resetSelectionToInitial()
           formValidation.clearAllErrors()
           geocoding.resetGeocodeTracking()

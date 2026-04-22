@@ -71,18 +71,11 @@ export function ApartmentDetailEditor({
           return buildApartmentForm(detailApartment)
      }, [detailApartment, isCreateMode])
 
-     const initialRoomTags = useMemo(
-          () => detailApartment?.rooms.map((room) => room.roomNumber).filter(Boolean) || [],
-          [detailApartment?.rooms],
-     )
-
      const {
           manualEditMode,
           setManualEditMode,
           form,
           selectedDepositPreset,
-          roomTags,
-          setRoomTags,
           updateField,
           applyDepositPreset,
           resetTransientState,
@@ -93,7 +86,6 @@ export function ApartmentDetailEditor({
           isCreateMode,
           initialForm,
           defaultCreateForm: DEFAULT_CREATE_FORM,
-          initialRoomTags,
      })
 
      const editMode = isCreateMode || isRouteEditMode || manualEditMode
@@ -209,21 +201,9 @@ export function ApartmentDetailEditor({
      const displayUploadPercent = Math.min(100, Math.max(0, Math.round(uploadPercent)))
 
      const hasMediaChanges = selectedImageFiles.length > 0 || !!selectedVideoFile
-
      const hasFormChanges = hasApartmentFormChanged(initialForm, form)
-
-     const hasRoomTagChanges = useMemo(() => {
-          if (roomTags.length !== initialRoomTags.length) {
-               return true
-          }
-
-          return roomTags.some((tag, index) => tag !== initialRoomTags[index])
-     }, [roomTags, initialRoomTags])
-
      const hasClientChanges =
-          !isCreateMode &&
-          (hasRoomTagChanges ||
-               (resolvedSectionVisibility.showIotSection && iotAssignment.hasSelectionChanges))
+          !isCreateMode && resolvedSectionVisibility.showIotSection && iotAssignment.hasSelectionChanges
 
      const canSaveChanges =
           !!form &&
@@ -237,8 +217,6 @@ export function ApartmentDetailEditor({
                allowEdit,
                apartmentId,
                initialStatus: initialApartmentStatus,
-               roomTags,
-               initialRoomTags,
                canSaveChanges,
                usableAreaInvalid,
                showIotSection: resolvedSectionVisibility.showIotSection,
@@ -246,7 +224,6 @@ export function ApartmentDetailEditor({
           editorState: {
                form,
                updateField,
-               setRoomTags,
                resetTransientState,
                startEditDraft,
                resetCreateDraft,
@@ -493,38 +470,23 @@ export function ApartmentDetailEditor({
                     {canRenderForm && form && (
                          <div className="space-y-5">
                               {resolvedSectionVisibility.showDetailsSection ? (
-                                   <ApartmentDetailsSection
-                                        model={detailsSectionModel}
-                                        actions={detailsSectionActions}
-                                   />
+                                   <ApartmentDetailsSection model={detailsSectionModel} actions={detailsSectionActions} />
                               ) : null}
 
                               {resolvedSectionVisibility.showOwnerSection ? (
-                                   <ApartmentOwnerSection
-                                        model={ownerSectionModel}
-                                        actions={ownerSectionActions}
-                                   />
+                                   <ApartmentOwnerSection model={ownerSectionModel} actions={ownerSectionActions} />
                               ) : null}
 
                               {resolvedSectionVisibility.showAmenitySection ? (
-                                   <ApartmentAmenitySection
-                                        model={amenitySectionModel}
-                                        actions={amenitySectionActions}
-                                   />
+                                   <ApartmentAmenitySection model={amenitySectionModel} actions={amenitySectionActions} />
                               ) : null}
 
                               {resolvedSectionVisibility.showMediaSection ? (
-                                   <ApartmentMediaSection
-                                        model={mediaSectionModel}
-                                        actions={mediaSectionActions}
-                                   />
+                                   <ApartmentMediaSection model={mediaSectionModel} actions={mediaSectionActions} />
                               ) : null}
 
                               {resolvedSectionVisibility.showIotSection ? (
-                                   <ApartmentIotSection
-                                        model={iotSectionModel}
-                                        actions={iotSectionActions}
-                                   />
+                                   <ApartmentIotSection model={iotSectionModel} actions={iotSectionActions} />
                               ) : null}
 
                               {resolvedSectionVisibility.showTenantSection && !isCreateMode ? (
@@ -574,4 +536,3 @@ export function ApartmentDetailEditor({
           </div>
      )
 }
-
