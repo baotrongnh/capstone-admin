@@ -6,6 +6,7 @@ import { useApartmentIotAssignment } from "@/hooks/apartment/use-apartment-iot-a
 import { buildApartmentFormData } from "@/lib/apartment/apartment-form-data"
 import type { ApartmentStatus } from "@/types/apartment"
 import type { ApartmentForm } from "@/types/apartment-form"
+import { uploadFile } from "@/utils/uploadFile"
 import { message } from "antd"
 
 type RouterLike = {
@@ -254,11 +255,37 @@ export function useApartmentDetailEditorController({
                return
           }
 
-          const payloadData = buildApartmentFormData(form, {
+          let uploadedImageUrls: string[] = []
+
+          if (!isCreateMode && selectedImageFiles.length > 0) {
+               try {
+                    uploadedImageUrls = await Promise.all(
+                         selectedImageFiles.map(async (file) => {
+                              const uploaded = await uploadFile(file)
+                              return uploaded.url
+                         }),
+                    )
+               } catch {
+                    message.error("Tải ảnh mới lên thất bại. Vui lòng thử lại.")
+                    return
+               }
+          }
+
+          const payloadImages = !isCreateMode
+               ? [...(form.images || []), ...uploadedImageUrls]
+               : form.images
+
+          const payloadData = buildApartmentFormData(
+               {
+                    ...form,
+                    images: payloadImages,
+               },
+               {
                mode: isCreateMode ? "create" : "update",
-               imageFiles: selectedImageFiles,
+               imageFiles: isCreateMode ? selectedImageFiles : [],
                videoFile: selectedVideoFile,
-          })
+               },
+          )
 
           if (isCreateMode) {
                await handleCreateApartment(payloadData)
