@@ -9,7 +9,6 @@ type UseApartmentEditorStateParams = {
      isCreateMode: boolean
      initialForm: ApartmentForm | null
      defaultCreateForm: ApartmentForm
-     initialRoomTags: string[]
 }
 
 type ApartmentFormPatch = Partial<Record<keyof ApartmentForm, unknown>>
@@ -60,16 +59,12 @@ export function useApartmentEditorState({
      isCreateMode,
      initialForm,
      defaultCreateForm,
-     initialRoomTags,
 }: UseApartmentEditorStateParams) {
      const [manualEditMode, setManualEditMode] = useState(false)
      const [draftForm, setDraftForm] = useState<ApartmentForm | null>(() =>
           isCreateMode ? defaultCreateForm : null,
      )
      const [selectedDepositPreset, setSelectedDepositPreset] = useState<DepositPreset | null>(null)
-
-     const [tenantCount, setTenantCount] = useState(0)
-     const [roomTags, setRoomTags] = useState<string[]>([])
 
      const form = useMemo(() => draftForm || initialForm, [draftForm, initialForm])
 
@@ -117,7 +112,6 @@ export function useApartmentEditorState({
           return patch
      }, [defaultCreateForm, initialForm, selectedDepositPreset])
 
-     // Compatibility wrappers for existing call sites during migration.
      const setField = useCallback((key: string, value: unknown) => {
           updateField(key as keyof ApartmentForm, value)
      }, [updateField])
@@ -131,19 +125,20 @@ export function useApartmentEditorState({
      }, [updateField])
 
      const applyDepositPreset = useCallback((value: DepositPreset) => {
-          if (!form?.baseRentPrice || form.baseRentPrice <= 0) {
+          const baseRentPrice = form?.baseRentPrice
+
+          if (!baseRentPrice || baseRentPrice <= 0) {
                return false
           }
 
           setSelectedDepositPreset(value)
-          setField("depositAmount", (form.baseRentPrice * value) as ApartmentForm["depositAmount"])
+          updateField("depositAmount", baseRentPrice * value)
           return true
-     }, [form?.baseRentPrice, setField])
+     }, [form, updateField])
 
      const resetTransientState = useCallback(() => {
           setSelectedDepositPreset(null)
-          setRoomTags(initialRoomTags)
-     }, [initialRoomTags])
+     }, [])
 
      const startEditDraft = useCallback(() => {
           if (!initialForm) return false
@@ -162,10 +157,6 @@ export function useApartmentEditorState({
           setDraftForm,
           form,
           selectedDepositPreset,
-          tenantCount,
-          setTenantCount,
-          roomTags,
-          setRoomTags,
           updateField,
           setField,
           setNumberField,
