@@ -24,7 +24,7 @@ export const useLogin = () => {
             setTokens(tokens)
 
             const user = await queryClient.fetchQuery({
-                queryKey: ['user', 'profile'],
+                queryKey: ['adminUser', 'profile'],
                 queryFn: () => userService.getProfile()
             })
             setAuth(user, tokens)
