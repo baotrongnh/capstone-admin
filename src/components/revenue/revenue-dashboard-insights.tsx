@@ -207,7 +207,7 @@ export function RevenueDashboardInsights({
      isLoading = false,
      className,
      title = "Tổng quan vận hành doanh thu",
-     description = "Số liệu tổng hợp từ API dashboard cho admin/operator trong khoảng ngày đã chọn.",
+     description = "Số liệu tổng hợp từ hệ thống trong khoảng ngày đã chọn.",
 }: RevenueDashboardInsightsProps) {
      const userStats = data?.userStats
      const occupancy = data?.occupancyStats
@@ -221,8 +221,7 @@ export function RevenueDashboardInsights({
      const totalUsers = userStats?.totalActiveUsers ?? 0
      const totalRevenueMix =
           (summary?.totalSystemRevenue ?? 0) +
-          (summary?.totalPartnerGrossRevenue ?? 0) +
-          (summary?.totalPartnerNetPayout ?? 0)
+          (summary?.totalPartnerGrossRevenue ?? 0)
 
      const hasAnyData =
           (summary?.totalPaidRevenue ?? 0) > 0 ||
@@ -238,7 +237,7 @@ export function RevenueDashboardInsights({
      const userDonutItems: DonutItem[] = [
           {
                key: "partners",
-               label: "Partner",
+               label: "Đối tác",
                value: userStats?.totalActivePartners ?? 0,
                color: "#06b6d4",
           },
@@ -268,19 +267,19 @@ export function RevenueDashboardInsights({
      const revenueDonutItems: DonutItem[] = [
           {
                key: "system",
-               label: "Doanh thu hệ thống",
+               label: "Doanh thu từ hệ thống",
                value: summary?.totalSystemRevenue ?? 0,
                color: "#0ea5e9",
           },
           {
                key: "gross",
-               label: "Tổng gộp đối tác",
+               label: "Doanh thu từ đối tác",
                value: summary?.totalPartnerGrossRevenue ?? 0,
                color: "#f59e0b",
           },
           {
                key: "payout",
-               label: "Chi trả ròng đối tác",
+               label: "Chi trả cho đối tác",
                value: summary?.totalPartnerNetPayout ?? 0,
                color: "#f97316",
           },
@@ -324,7 +323,7 @@ export function RevenueDashboardInsights({
                                    <Card className={cn("border-cyan-200/60 bg-cyan-500/5", CARD_HOVER_CLASS)}>
                                         <CardContent className="flex items-start justify-between p-4">
                                              <div>
-                                                  <p className="text-xs text-muted-foreground">Doanh thu hệ thống</p>
+                                                  <p className="text-xs text-muted-foreground">Doanh thu từ hệ thống</p>
                                                   <p className="mt-2 text-lg font-semibold">{formatVND(summary?.totalSystemRevenue ?? 0, true)}</p>
                                              </div>
                                              <ChartNoAxesCombined className="size-4 text-cyan-600" />
@@ -334,7 +333,7 @@ export function RevenueDashboardInsights({
                                    <Card className={cn("border-amber-200/60 bg-amber-500/5", CARD_HOVER_CLASS)}>
                                         <CardContent className="flex items-start justify-between p-4">
                                              <div>
-                                                  <p className="text-xs text-muted-foreground">Tổng gộp đối tác</p>
+                                                  <p className="text-xs text-muted-foreground">Doanh thu từ đối tác</p>
                                                   <p className="mt-2 text-lg font-semibold">{formatVND(summary?.totalPartnerGrossRevenue ?? 0, true)}</p>
                                              </div>
                                              <UsersRound className="size-4 text-amber-600" />
@@ -344,7 +343,7 @@ export function RevenueDashboardInsights({
                                    <Card className={cn("border-orange-200/60 bg-orange-500/5", CARD_HOVER_CLASS)}>
                                         <CardContent className="flex items-start justify-between p-4">
                                              <div>
-                                                  <p className="text-xs text-muted-foreground">Chi trả ròng đối tác</p>
+                                                  <p className="text-xs text-muted-foreground">Chi trả cho     đối tác</p>
                                                   <p className="mt-2 text-lg font-semibold">{formatVND(summary?.totalPartnerNetPayout ?? 0, true)}</p>
                                              </div>
                                              <HandCoins className="size-4 text-orange-600" />
@@ -368,7 +367,7 @@ export function RevenueDashboardInsights({
                <div className="grid gap-4 xl:grid-cols-3">
                     <RevenueDonutCard
                          title="Cơ cấu người dùng"
-                         description="Tỷ trọng partner và user thường trong nhóm đang hoạt động."
+                         description="Tỷ trọng đối tác và người dùng đang hoạt động."
                          totalLabel="Tổng người dùng hoạt động"
                          totalValue={totalUsers}
                          items={userDonutItems}
@@ -377,7 +376,7 @@ export function RevenueDashboardInsights({
 
                     <RevenueDonutCard
                          title="Tình trạng căn hộ"
-                         description="Phân bố căn hộ đang cho thuê và còn trống."
+                         description="Tỉ lệ căn hộ đang cho thuê và còn trống."
                          totalLabel="Tổng căn hộ"
                          totalValue={totalApartments}
                          items={occupancyDonutItems}
@@ -386,8 +385,8 @@ export function RevenueDashboardInsights({
 
                     <RevenueDonutCard
                          title="Cơ cấu doanh thu"
-                         description="So sánh ba dòng giá trị chính trong kỳ lọc."
-                         totalLabel="Tổng ba nhóm doanh thu"
+                         description="So sánh ba dòng chi tiêu chính."
+                         totalLabel="Tổng doanh thu hệ thống"
                          totalValue={totalRevenueMix}
                          items={revenueDonutItems}
                          isLoading={isLoading}
@@ -400,7 +399,7 @@ export function RevenueDashboardInsights({
                          <>
                               <Card className="border-border/70">
                                    <CardHeader>
-                                        <CardTitle className="text-base">Top căn hộ doanh thu</CardTitle>
+                                        <CardTitle className="text-base">Căn hộ có doanh thu cao nhất</CardTitle>
                                    </CardHeader>
                                    <CardContent>
                                         <RankingSkeleton />
@@ -408,7 +407,7 @@ export function RevenueDashboardInsights({
                               </Card>
                               <Card className="border-border/70">
                                    <CardHeader>
-                                        <CardTitle className="text-base">Bottom căn hộ doanh thu</CardTitle>
+                                        <CardTitle className="text-base">Căn hộ có doanh thu thấp nhất</CardTitle>
                                    </CardHeader>
                                    <CardContent>
                                         <RankingSkeleton />
@@ -418,13 +417,13 @@ export function RevenueDashboardInsights({
                     ) : (
                          <>
                               <RankingTable
-                                   title="Top căn hộ doanh thu"
-                                   description="Các căn hộ có paid revenue cao nhất trong khoảng lọc."
+                                   title="Căn hộ có doanh thu cao nhất"
+                                   description="Các căn hộ có doanh thu cao nhất trong khoảng lọc."
                                    items={ranking?.topApartments ?? []}
                               />
                               <RankingTable
-                                   title="Bottom căn hộ doanh thu"
-                                   description="Các căn hộ có paid revenue thấp nhất trong khoảng lọc."
+                                   title="Căn hộ có doanh thu thấp nhất"
+                                   description="Các căn hộ có doanh thu thấp nhất trong khoảng lọc."
                                    items={ranking?.bottomApartments ?? []}
                               />
                          </>
