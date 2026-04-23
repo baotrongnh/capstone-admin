@@ -14,4 +14,5 @@ export const endpoints = {
   chat: createEndpoints("chat"),
   revenues: createEndpoints("revenues"),
   viewRequest: createEndpoints("viewing-requests"),
+  invoices: createEndpoints("invoices"),
 }

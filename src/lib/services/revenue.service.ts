@@ -57,12 +57,12 @@ const EMPTY_REVENUE_DASHBOARD: RevenueDashboardApiData = {
 
 export const revenueService = {
      getOverview: async (params?: RevenueOverviewQuery): Promise<RevenueOverviewData> => {
-          const { data } = await apiClient.get(`${endpoints.revenues}/overview`, { params })
+          const { data } = await apiClient.get(`${endpoints.invoices}/overview`, { params })
           return data?.data ?? EMPTY_REVENUE_OVERVIEW
      },
 
      getDashboard: async (params?: RevenueDashboardQuery): Promise<RevenueDashboardApiData> => {
-          const { data } = await apiClient.get(`${endpoints.revenues}/dashboard`, { params })
+          const { data } = await apiClient.get(`${endpoints.invoices}/dashboard`, { params })
           return data?.data ?? EMPTY_REVENUE_DASHBOARD
      },
 
