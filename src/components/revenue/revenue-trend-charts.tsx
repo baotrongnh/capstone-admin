@@ -219,7 +219,7 @@ export function RevenueTrendCharts({
      const pieData = [
           {
                key: "revenue",
-               name: "Doanh thu hệ thống",
+               name: "Doanh thu từ hệ thống",
                value: piePoint?.totalSystemRevenue ?? 0,
           },
           {
@@ -229,7 +229,7 @@ export function RevenueTrendCharts({
           },
           {
                key: "gross",
-               name: "Tổng gộp đối tác",
+               name: "Doanh thu từ đối tác",
                value: piePoint?.totalPartnerGrossRevenue ?? 0,
           },
      ]

@@ -5,6 +5,8 @@ export type CreateDeviceRow = {
      deviceId: string
      deviceName: string
      topic: IotBoardDeviceCreateRequest["topic"]
+     status?: string // 'active' | 'inactive' | ...
+     isMarkedDeleted?: boolean
 }
 
 export type BoardFormState = {
@@ -27,6 +29,22 @@ export const TOPIC_OPTIONS: Array<IotBoardDeviceCreateRequest["topic"]> = [
      "door",
      "curtain",
 ]
+
+export const EMPTY_DEVICE_ROW: CreateDeviceRow = {
+     deviceId: "",
+     deviceName: "",
+     topic: "light",
+}
+
+export const normalizeTopic = (topic?: string | null): IotBoardDeviceCreateRequest["topic"] | undefined => {
+     if (!topic) {
+          return undefined
+     }
+
+     return TOPIC_OPTIONS.includes(topic as IotBoardDeviceCreateRequest["topic"])
+          ? (topic as IotBoardDeviceCreateRequest["topic"])
+          : undefined
+}
 
 export const STATUS_STYLE_MAP: Record<NonNullable<IotBoardListQuery["status"]>, string> = {
      active: "bg-emerald-100 text-emerald-700 border-emerald-200",
@@ -53,7 +71,7 @@ export const createDefaultBoardForm = (): BoardFormState => ({
      id: "",
      apartmentId: "",
      status: "active",
-     devices: [{ deviceId: "", deviceName: "", topic: "light" }],
+     devices: [{ ...EMPTY_DEVICE_ROW }],
 })
 
 export const createDefaultDeviceForm = (): DeviceFormState => ({

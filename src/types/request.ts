@@ -19,6 +19,7 @@ export interface Request {
   deposit: string;
   status: "submitted" | "approved" | "rejected";
   submittedDate: string;
+  createdAt: string;
   staffUpdate?: StaffUpdate;
   owner?: {
     fullName: string;

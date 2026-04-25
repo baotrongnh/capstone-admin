@@ -92,8 +92,8 @@ export default function RevenueManagementPage() {
                          data={dashboardData}
                          isLoading={isDashboardLoading}
                          className="px-4 lg:px-6"
-                         title="Số liệu Dashboard API trong khoảng đã chọn"
-                         description="Dữ liệu /api/v1/revenues/dashboard đồng bộ với bộ lọc ngày tháng phía trên."
+                         title="Số liệu Dashboard trong khoảng đã chọn"
+                         description=""
                     />
                </div>
           </div>

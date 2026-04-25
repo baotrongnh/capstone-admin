@@ -18,6 +18,15 @@ import { message } from "antd"
 
 const IOT_BOARD_QUERY_KEY = "iot-boards"
 
+const getErrorMessage = (error: unknown, fallback = "Đã có lỗi xảy ra, vui lòng thử lại sau!") => {
+     if (!error || typeof error !== "object") {
+          return fallback
+     }
+
+     const maybeMessage = "message" in error ? (error as { message?: unknown }).message : undefined
+     return typeof maybeMessage === "string" && maybeMessage.trim() ? maybeMessage : fallback
+}
+
 const invalidateBoardQueries = (queryClient: QueryClient) => {
      queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY] })
 }
@@ -45,7 +54,7 @@ export const useCreateIotBoard = () => {
                message.success("Tạo board IoT thành công!")
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }
@@ -62,7 +71,7 @@ export const useUpdateIotBoard = () => {
                message.success("Cập nhật board IoT thành công!")
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }
@@ -77,7 +86,7 @@ export const useDeleteIotBoard = () => {
                message.success("Đã khóa mạch IoT và thiết bị con!")
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }
@@ -94,7 +103,7 @@ export const useUnlinkBoardApartment = () => {
                message.success("Đã hủy liên kết căn hộ khỏi mạch IoT!")
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }
@@ -112,12 +121,12 @@ export const useUnlinkBoardsByApartment = () => {
                message.success(`Đã hủy liên kết ${affectedBoards} mạch (${affectedDevices} thiết bị).`)
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }
 
-export const useCreateIotBoardDevice = () => {
+export const useCreateIotBoardDevice = (silentSuccess = false) => {
      const queryClient = useQueryClient()
 
      return useMutation({
@@ -131,15 +140,17 @@ export const useCreateIotBoardDevice = () => {
           onSuccess: (_, variables) => {
                invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
-               message.success("Thêm thiết bị IoT thành công!")
+               if (!silentSuccess) {
+                    message.success("Thêm thiết bị IoT thành công!")
+               }
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }
 
-export const useUpdateIotBoardDevice = () => {
+export const useUpdateIotBoardDevice = (silentSuccess = false) => {
      const queryClient = useQueryClient()
 
      return useMutation({
@@ -156,15 +167,22 @@ export const useUpdateIotBoardDevice = () => {
           onSuccess: (_, variables) => {
                invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
-               message.success("Cập nhật thiết bị IoT thành công!")
+               if (!silentSuccess) {
+                    message.success("Cập nhật thiết bị IoT thành công!")
+               }
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               const errorMessage = getErrorMessage(error)
+               if (errorMessage.includes("status code 409")) {
+                    message.error("Bị trùng ID của thiết bị trong cùng 1 topic!")
+                    return
+               }
+               message.error(errorMessage)
           },
      })
 }
 
-export const useDeleteIotBoardDevice = () => {
+export const useDeleteIotBoardDevice = (silentSuccess = false) => {
      const queryClient = useQueryClient()
 
      return useMutation({
@@ -179,10 +197,12 @@ export const useDeleteIotBoardDevice = () => {
           onSuccess: (_, variables) => {
                invalidateBoardQueries(queryClient)
                queryClient.invalidateQueries({ queryKey: [IOT_BOARD_QUERY_KEY, variables.boardId] })
-               message.success("Đã xóa thiết bị IoT!")
+               if (!silentSuccess) {
+                    message.success("Đã xóa thiết bị IoT!")
+               }
           },
           onError: (error) => {
-               message.error(error?.message || "Có lỗi xảy ra!")
+               message.error(getErrorMessage(error))
           },
      })
 }

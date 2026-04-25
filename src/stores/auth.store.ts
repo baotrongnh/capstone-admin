@@ -11,7 +11,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     setAuth: (user: UserDetail, tokens) => {
         localStorage.setItem('adminAccessToken', tokens.accessToken)
         localStorage.setItem('adminRefreshToken', tokens.refreshToken)
-        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('adminUser', JSON.stringify(user))
         set({ user, tokens, isAuthenticated: true })
     },
     setTokens: (tokens: AuthTokens) => {
@@ -21,13 +21,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     logout: () => {
         localStorage.removeItem('adminAccessToken')
         localStorage.removeItem('adminRefreshToken')
-        localStorage.removeItem('user')
+        localStorage.removeItem('adminUser')
         set({ user: null, tokens: null, isAuthenticated: false })
     },
     hydrate: () => {
         const accessToken = localStorage.getItem('adminAccessToken')
         const refreshToken = localStorage.getItem('adminRefreshToken')
-        const userStr = localStorage.getItem('user')
+        const userStr = localStorage.getItem('adminUser')
 
         if (accessToken && refreshToken && userStr) {
             try {

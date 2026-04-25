@@ -12,14 +12,16 @@ type IotBoardTableProps = {
           boards: IotBoardItem[]
           isLoading: boolean
           isDeletingBoard: boolean
+          isUpdatingBoard: boolean
           onEditBoard: (board: IotBoardItem) => void
           onViewBoardDetails: (board: IotBoardItem) => void
+          onActivateBoard: (board: IotBoardItem) => void
           onDeleteBoard: (boardId: string, boardName: string) => void
      }
 }
 
 export const IotBoardTable = ({ data }: IotBoardTableProps) => {
-     const { boards, isLoading, isDeletingBoard, onEditBoard, onViewBoardDetails, onDeleteBoard } = data
+     const { boards, isLoading, isDeletingBoard, isUpdatingBoard, onEditBoard, onViewBoardDetails, onActivateBoard, onDeleteBoard } = data
 
      return (
           <div className="relative overflow-x-auto rounded-xl border bg-white shadow-sm">
@@ -31,7 +33,7 @@ export const IotBoardTable = ({ data }: IotBoardTableProps) => {
                               <TableHead>Trạng thái</TableHead>
                               <TableHead className="min-w-48">Thiết bị</TableHead>
                               <TableHead className="hidden xl:table-cell">Cập nhật</TableHead>
-                              <TableHead className="sticky right-0 z-20 bg-muted/40 text-right">Thao tác</TableHead>
+                              <TableHead className="text-right md:sticky md:right-0 md:z-20 md:bg-muted/40">Thao tác</TableHead>
                          </TableRow>
                     </TableHeader>
 
@@ -45,7 +47,7 @@ export const IotBoardTable = ({ data }: IotBoardTableProps) => {
                          ) : boards.length === 0 ? (
                               <TableRow>
                                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                                        Chưa có mạch IoT nào.
+                                        Chưa có mạch IoT nào. Hãy tạo mạch mới để bắt đầu quản lý thiết bị.
                                    </TableCell>
                               </TableRow>
                          ) : (
@@ -79,16 +81,16 @@ export const IotBoardTable = ({ data }: IotBoardTableProps) => {
                                                             ) : null}
                                                        </>
                                                   )}
-                                                  <span className="text-xs text-muted-foreground">({board.deviceCount} thiết bị)</span>
+                                                  <Badge variant="secondary">{board.deviceCount} thiết bị</Badge>
                                              </div>
                                         </TableCell>
                                         <TableCell className="hidden xl:table-cell whitespace-nowrap">
                                              {formatDateTime(board.updatedAt)}
                                         </TableCell>
-                                        <TableCell className="sticky right-0 z-10 bg-white text-right shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.18)]">
+                                        <TableCell className="bg-white text-right md:sticky md:right-0 md:z-10 md:shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.18)]">
                                              <DropdownMenu>
                                                   <DropdownMenuTrigger asChild>
-                                                       <Button variant="ghost" size="icon" className="size-8">
+                                                       <Button variant="ghost" size="icon" className="size-8" aria-label="Mở menu thao tác mạch">
                                                             <MoreHorizontalIcon className="size-4" />
                                                             <span className="sr-only">Mở menu thao tác</span>
                                                        </Button>
@@ -101,13 +103,22 @@ export const IotBoardTable = ({ data }: IotBoardTableProps) => {
                                                             Chỉnh sửa
                                                        </DropdownMenuItem>
                                                        <DropdownMenuSeparator />
-                                                       <DropdownMenuItem
-                                                            variant="destructive"
-                                                            disabled={isDeletingBoard || board.status !== 'active'}
-                                                            onClick={() => onDeleteBoard(board.id, board.name || board.id)}
-                                                       >
-                                                            Vô hiệu hóa
-                                                       </DropdownMenuItem>
+                                                       {board.status === "active" ? (
+                                                            <DropdownMenuItem
+                                                                 variant="destructive"
+                                                                 disabled={isDeletingBoard}
+                                                                 onClick={() => onDeleteBoard(board.id, board.name || board.id)}
+                                                            >
+                                                                 Khóa mạch
+                                                            </DropdownMenuItem>
+                                                       ) : (
+                                                            <DropdownMenuItem
+                                                                 disabled={isUpdatingBoard}
+                                                                 onClick={() => onActivateBoard(board)}
+                                                            >
+                                                                 Kích hoạt mạch
+                                                            </DropdownMenuItem>
+                                                       )}
                                                   </DropdownMenuContent>
                                              </DropdownMenu>
                                         </TableCell>

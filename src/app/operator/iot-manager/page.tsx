@@ -52,8 +52,8 @@ export default function IotManagerPage() {
                          </Select>
 
                          <Button variant="outline" onClick={data.filters.onRefresh} disabled={data.filters.isRefreshing}>
-                              <RefreshCcwIcon className="mr-1 size-4" />
-                              Làm mới
+                              <RefreshCcwIcon className={`mr-1 size-4 ${data.filters.isRefreshing ? "animate-spin" : ""}`} />
+                              {data.filters.isRefreshing ? "Đang làm mới..." : "Làm mới"}
                          </Button>
                     </div>
 

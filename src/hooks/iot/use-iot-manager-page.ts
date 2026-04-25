@@ -1,9 +1,9 @@
 "use client"
 
-import { createDefaultBoardForm, type BoardFormState, type CreateDeviceRow } from "@/components/iot/iot-shared"
+import { createDefaultBoardForm, EMPTY_DEVICE_ROW, normalizeTopic, type BoardFormState, type CreateDeviceRow } from "@/components/iot/iot-shared"
 import { useApartments } from "@/hooks/query/useApartments"
-import { useCreateIotBoard, useCreateIotBoardDevice, useDeleteIotBoard, useIotBoards, useUnlinkBoardApartment, useUpdateIotBoard, useUpdateIotBoardDevice } from "@/hooks/query/useIotDevices"
-import type { IotBoardDeviceCreateRequest, IotBoardItem, IotBoardListQuery } from "@/types/iot"
+import { useCreateIotBoard, useCreateIotBoardDevice, useDeleteIotBoard, useDeleteIotBoardDevice, useIotBoards, useUnlinkBoardApartment, useUpdateIotBoard, useUpdateIotBoardDevice } from "@/hooks/query/useIotDevices"
+import type { IotBoardDeviceCreateRequest, IotBoardDeviceUpdateRequest, IotBoardItem, IotBoardListQuery } from "@/types/iot"
 import { message } from "antd"
 import { useCallback, useMemo, useState } from "react"
 
@@ -15,19 +15,64 @@ type NormalizedBoardDevice = {
      state: "OFF"
 }
 
-const mapBoardDevicesToRows = (board: IotBoardItem): CreateDeviceRow[] => {
-     const rows = board.devices.map((device) => {
-          const rawTopic = (device.topic || "") as IotBoardDeviceCreateRequest["topic"]
+type DeviceSyncSummary = {
+     created: number
+     updated: number
+     deleted: number
+}
 
+const normalizeBoardDevices = (rows: BoardFormState["devices"]) => {
+     const normalized: NormalizedBoardDevice[] = []
+     const markedDeletedDeviceIds: string[] = []
+     let hasInvalidRow = false
+
+     rows.forEach((item) => {
+          if (item.id && item.isMarkedDeleted) {
+               markedDeletedDeviceIds.push(item.id)
+               return
+          }
+
+          const rawDeviceId = item.deviceId.trim()
+          const normalizedDeviceName = item.deviceName.trim()
+          const isBlankRow = !rawDeviceId && !normalizedDeviceName
+
+          if (isBlankRow) {
+               return
+          }
+
+          const parsedDeviceId = Number(rawDeviceId)
+          if (!Number.isFinite(parsedDeviceId) || parsedDeviceId <= 0 || !normalizedDeviceName) {
+               hasInvalidRow = true
+               return
+          }
+
+          normalized.push({
+               id: item.id,
+               deviceId: parsedDeviceId,
+               deviceName: normalizedDeviceName,
+               topic: item.topic,
+               state: "OFF",
+          })
+     })
+
+     return {
+          normalized,
+          markedDeletedDeviceIds,
+          hasInvalidRow,
+     }
+}
+
+const mapBoardDevicesToRows = (board: IotBoardItem): CreateDeviceRow[] => {
+     return board.devices.map((device) => {
+          const rawTopic = normalizeTopic(device.topic)
           return {
                id: device.id,
                deviceId: String(device.deviceId) || "",
                deviceName: device.deviceName || "",
-               topic: rawTopic || 'light',
+               topic: rawTopic || "light",
+               status: device.status,
           }
      })
-
-     return rows
 }
 
 type StatusFilterValue = "__all__" | NonNullable<IotBoardListQuery["status"]>
@@ -43,6 +88,7 @@ export function useIotManagerPage() {
      const [boardForm, setBoardForm] = useState<BoardFormState>(createDefaultBoardForm)
      const [isBoardDetailDialogOpen, setIsBoardDetailDialogOpen] = useState(false)
      const [detailBoardId, setDetailBoardId] = useState<string | null>(null)
+     const [reactivatingDeviceKey, setReactivatingDeviceKey] = useState<string | null>(null)
      const [deleteBoardTarget, setDeleteBoardTarget] = useState<{ id: string; name: string } | null>(null)
 
      const boardQuery = statusFilter === "__all__" ? undefined : { status: statusFilter }
@@ -58,15 +104,14 @@ export function useIotManagerPage() {
 
      const createBoard = useCreateIotBoard()
      const updateBoard = useUpdateIotBoard()
-     const createBoardDevice = useCreateIotBoardDevice()
-     const updateBoardDevice = useUpdateIotBoardDevice()
+     const createBoardDevice = useCreateIotBoardDevice(true)
+     const updateBoardDevice = useUpdateIotBoardDevice(true)
+     const deleteBoardDevice = useDeleteIotBoardDevice(true)
      const deleteBoard = useDeleteIotBoard()
      const unlinkBoardApartment = useUnlinkBoardApartment()
 
      const boards = useMemo(() => boardsResponse?.data ?? [], [boardsResponse?.data])
-     const apartmentOptions = useMemo(() => {
-          return apartmentResponse?.data || []
-     }, [apartmentResponse])
+     const apartmentOptions = useMemo(() => apartmentResponse?.data ?? [], [apartmentResponse?.data])
 
      const filteredBoards = useMemo(() => {
           if (!searchText) {
@@ -102,6 +147,7 @@ export function useIotManagerPage() {
           || updateBoard.isPending
           || createBoardDevice.isPending
           || updateBoardDevice.isPending
+          || deleteBoardDevice.isPending
           || unlinkBoardApartment.isPending
 
      const resetBoardDialog = useCallback(() => {
@@ -133,9 +179,7 @@ export function useIotManagerPage() {
      const onBoardDetailDialogOpenChange = useCallback((open: boolean) => {
           if (!open) {
                closeBoardDetailDialog()
-               return
           }
-          setIsBoardDetailDialogOpen(true)
      }, [closeBoardDetailDialog])
 
      const openEditBoardDialog = useCallback((board: IotBoardItem) => {
@@ -159,7 +203,7 @@ export function useIotManagerPage() {
           openEditBoardDialog(board)
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices, { deviceId: "", deviceName: "", topic: "light" }],
+               devices: [...prev.devices, { ...EMPTY_DEVICE_ROW }],
           }))
      }, [boardById, openEditBoardDialog])
 
@@ -182,13 +226,28 @@ export function useIotManagerPage() {
      const addCreateDeviceRow = useCallback(() => {
           setBoardForm((prev) => ({
                ...prev,
-               devices: [...prev.devices, { deviceId: "", deviceName: "", topic: "light" }],
+               devices: [...prev.devices, { ...EMPTY_DEVICE_ROW }],
           }))
      }, [])
 
      const removeCreateDeviceRow = useCallback((index: number) => {
           setBoardForm((prev) => {
-               const next = prev.devices.filter((_, i) => i !== index)
+               const target = prev.devices[index]
+               if (!target) {
+                    return prev
+               }
+
+               const next = target.id
+                    ? prev.devices.map((item, i) =>
+                         i === index
+                              ? {
+                                   ...item,
+                                   isMarkedDeleted: !item.isMarkedDeleted,
+                              }
+                              : item,
+                    )
+                    : prev.devices.filter((_, i) => i !== index)
+
                return {
                     ...prev,
                     devices: next
@@ -210,71 +269,63 @@ export function useIotManagerPage() {
           }))
      }, [])
 
-     const normalizeBoardDevices = (rows: BoardFormState["devices"]) => {
-          const normalized: NormalizedBoardDevice[] = []
-          let hasInvalidRow = false
-
-          rows.forEach((item) => {
-               const rawDeviceId = item.deviceId.trim()
-               const normalizedDeviceName = item.deviceName.trim()
-               const isBlankRow = !rawDeviceId && !normalizedDeviceName
-
-               if (isBlankRow) {
-                    return
-               }
-
-               const parsedDeviceId = Number(rawDeviceId)
-               if (!Number.isFinite(parsedDeviceId) || parsedDeviceId <= 0 || !normalizedDeviceName) {
-                    hasInvalidRow = true
-                    return
-               }
-
-               normalized.push({
-                    id: item.id,
-                    deviceId: parsedDeviceId,
-                    deviceName: normalizedDeviceName,
-                    topic: item.topic,
-                    state: "OFF",
-               })
-          })
-
-          return {
-               normalized,
-               hasInvalidRow,
-          }
-     }
-
-     const getValidNormalizedDevices = useCallback((rows: BoardFormState["devices"]) => {
-          const { normalized, hasInvalidRow } = normalizeBoardDevices(rows)
-
-          if (hasInvalidRow) {
-               message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
-               return null
-          }
-
-          return normalized
-     }, [])
-
-     const persistDevicesToBoard = useCallback(async (boardId: string, normalizedDevices: NormalizedBoardDevice[]) => {
+     const persistDevicesToBoard = useCallback(async (
+          boardId: string,
+          normalizedDevices: NormalizedBoardDevice[],
+          markedDeletedDeviceIds: string[],
+     ): Promise<DeviceSyncSummary> => {
           const existingDevices = editingBoardId ? boardById.get(editingBoardId)?.devices || [] : []
           const existingById = new Map(existingDevices.map((device) => [device.id, device]))
+          const summary: DeviceSyncSummary = {
+               created: 0,
+               updated: 0,
+               deleted: 0,
+          }
+
+          const createDevice = async (device: NormalizedBoardDevice) => {
+               await createBoardDevice.mutateAsync({
+                    boardId,
+                    payload: {
+                         deviceId: device.deviceId,
+                         deviceName: device.deviceName,
+                         topic: device.topic,
+                         state: device.state,
+                    },
+               })
+               summary.created += 1
+          }
+
+          const normalizedDeviceIds = new Set(
+               normalizedDevices
+                    .map((device) => device.id)
+                    .filter((value): value is string => Boolean(value)),
+          )
+
+          const deletedDeviceIds = new Set(markedDeletedDeviceIds)
+
+          existingDevices.forEach((device) => {
+               if (!normalizedDeviceIds.has(device.id)) {
+                    deletedDeviceIds.add(device.id)
+               }
+          })
+
+          for (const deviceId of deletedDeviceIds) {
+               await deleteBoardDevice.mutateAsync({
+                    boardId,
+                    deviceId,
+               })
+               summary.deleted += 1
+          }
 
           for (const device of normalizedDevices) {
                if (!device.id) {
-                    await createBoardDevice.mutateAsync({
-                         boardId,
-                         payload: {
-                              deviceId: device.deviceId,
-                              deviceName: device.deviceName,
-                              topic: device.topic,
-                              state: device.state,
-                         },
-                    })
+                    await createDevice(device)
                     continue
                }
 
                const current = existingById.get(device.id)
                if (!current) {
+                    await createDevice(device)
                     continue
                }
 
@@ -296,8 +347,31 @@ export function useIotManagerPage() {
                          topic: device.topic,
                     },
                })
+               summary.updated += 1
           }
-     }, [boardById, createBoardDevice, editingBoardId, updateBoardDevice])
+
+          return summary
+     }, [boardById, createBoardDevice, deleteBoardDevice, editingBoardId, updateBoardDevice])
+
+     const showDeviceSyncToast = useCallback((summary: DeviceSyncSummary) => {
+          const total = summary.created + summary.updated + summary.deleted
+          if (total === 0) {
+               return
+          }
+
+          const parts: string[] = []
+          if (summary.created > 0) {
+               parts.push(`đã thêm ${summary.created}`)
+          }
+          if (summary.updated > 0) {
+               parts.push(`đã cập nhật ${summary.updated}`)
+          }
+          if (summary.deleted > 0) {
+               parts.push(`đã xóa ${summary.deleted}`)
+          }
+
+          message.success(`Cập nhật thiết bị thành công: ${parts.join(", ")}.`)
+     }, [])
 
      const handleSaveBoard = useCallback(async () => {
           const boardId = boardForm.id.trim()
@@ -306,8 +380,14 @@ export function useIotManagerPage() {
                return
           }
 
-          const normalizedDevices = getValidNormalizedDevices(boardForm.devices)
-          if (!normalizedDevices) {
+          const {
+               normalized: normalizedDevices,
+               markedDeletedDeviceIds,
+               hasInvalidRow,
+          } = normalizeBoardDevices(boardForm.devices)
+
+          if (hasInvalidRow) {
+               message.error("Vui lòng nhập đầy đủ Device ID và tên thiết bị cho các dòng đã thêm.")
                return
           }
 
@@ -327,25 +407,25 @@ export function useIotManagerPage() {
                     })
 
                     const savedBoardId = updatedBoardResponse?.data?.id || boardId
-                    await persistDevicesToBoard(savedBoardId, normalizedDevices)
+                    const summary = await persistDevicesToBoard(savedBoardId, normalizedDevices, markedDeletedDeviceIds)
+                    showDeviceSyncToast(summary)
                } else {
-                    await createBoard.mutateAsync({
+                    const createdBoardResponse = await createBoard.mutateAsync({
                          id: boardId,
                          apartmentId: boardForm.apartmentId || undefined,
-                         devices: normalizedDevices.map((device) => ({
-                              deviceId: device.deviceId,
-                              deviceName: device.deviceName,
-                              topic: device.topic,
-                              state: device.state,
-                         })),
+                         devices: [],
                     })
+
+                    const savedBoardId = createdBoardResponse?.data?.id || boardId
+                    const summary = await persistDevicesToBoard(savedBoardId, normalizedDevices, [])
+                    showDeviceSyncToast(summary)
                }
 
                resetBoardDialog()
           } catch {
                // Error toast handled in hooks.
           }
-     }, [boardForm, createBoard, canSelectApartment, editingBoardId, getValidNormalizedDevices, persistDevicesToBoard, resetBoardDialog, updateBoard])
+     }, [boardForm, createBoard, canSelectApartment, editingBoardId, persistDevicesToBoard, resetBoardDialog, showDeviceSyncToast, updateBoard])
 
      const handleUnlinkCurrentApartmentBeforeRelink = useCallback(async () => {
           if (!editingBoardId || !initialEditApartmentId) {
@@ -369,6 +449,25 @@ export function useIotManagerPage() {
      const handleDeleteBoard = useCallback((boardId: string, boardName: string) => {
           setDeleteBoardTarget({ id: boardId, name: boardName })
      }, [])
+
+     const handleActivateBoard = useCallback(async (board: IotBoardItem) => {
+          if (board.status === "active") {
+               return
+          }
+
+          try {
+               await updateBoard.mutateAsync({
+                    boardId: board.id,
+                    payload: {
+                         id: board.id,
+                         apartmentId: board.apartment?.id || undefined,
+                         status: "active",
+                    },
+               })
+          } catch {
+               // Error toast handled in hooks.
+          }
+     }, [updateBoard])
 
      const closeDeleteBoardDialog = useCallback(() => {
           if (deleteBoard.isPending) return
@@ -400,6 +499,43 @@ export function useIotManagerPage() {
      const onSearchTextChange = useCallback((value: string) => {
           setSearchText(value)
      }, [])
+
+     const reactivateBoardDevice = useCallback(async (boardId: string, device: IotBoardItem["devices"][number]) => {
+          if (device.status !== "inactive") {
+               return
+          }
+
+          const normalizedTopic = normalizeTopic(device.topic)
+          if (!normalizedTopic) {
+               message.error("Không thể kích hoạt lại thiết bị do topic không hợp lệ.")
+               return
+          }
+
+          const deviceKey = `${boardId}:${device.id}`
+          setReactivatingDeviceKey(deviceKey)
+
+          try {
+               const payload: IotBoardDeviceUpdateRequest = {
+                    status: "active",
+                    deviceId: device.deviceId,
+                    deviceName: device.deviceName || undefined,
+                    topic: normalizedTopic,
+                    state: device.state === "ON" ? "ON" : "OFF",
+               }
+
+               await updateBoardDevice.mutateAsync({
+                    boardId,
+                    deviceId: device.id,
+                    payload,
+               })
+
+               message.success("Đã kích hoạt lại thiết bị.")
+          } catch {
+               // Error toast handled in mutation hook.
+          } finally {
+               setReactivatingDeviceKey(null)
+          }
+     }, [updateBoardDevice])
 
      const onRefresh = useCallback(() => {
           void refetchBoards()
@@ -440,16 +576,20 @@ export function useIotManagerPage() {
                boards: filteredBoards,
                isLoading: isBoardListLoading,
                isDeletingBoard: deleteBoard.isPending,
+               isUpdatingBoard: updateBoard.isPending,
                onEditBoard: openEditBoardDialog,
                onViewBoardDetails: openBoardDetailDialog,
+               onActivateBoard: handleActivateBoard,
                onDeleteBoard: handleDeleteBoard,
           }),
           [
                filteredBoards,
                isBoardListLoading,
                deleteBoard.isPending,
+               updateBoard.isPending,
                openEditBoardDialog,
                openBoardDetailDialog,
+               handleActivateBoard,
                handleDeleteBoard,
           ],
      )
@@ -458,16 +598,20 @@ export function useIotManagerPage() {
           () => ({
                open: isBoardDetailDialogOpen,
                board: detailBoard,
+               reactivatingDeviceKey,
                onOpenChange: onBoardDetailDialogOpenChange,
                onEditBoard: openEditBoardDialog,
                onAddDevice: openEditBoardForAddDevice,
+               onReactivateDevice: reactivateBoardDevice,
           }),
           [
                isBoardDetailDialogOpen,
                detailBoard,
+               reactivatingDeviceKey,
                onBoardDetailDialogOpenChange,
                openEditBoardDialog,
                openEditBoardForAddDevice,
+               reactivateBoardDevice,
           ],
      )
 
