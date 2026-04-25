@@ -78,9 +78,8 @@ export function ApartmentCoordinateMap({
 
                normalizeLeafletLayering(map)
 
-               L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                    maxZoom: 19,
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+               L.tileLayer("https://maps.vietmap.vn/api/tm/{z}/{x}/{y}.png?apikey=b089c6fc2b6ae481ffcf9c8400f519ab86fcf9cd63610e44", {
+                    maxZoom: 19
                }).addTo(map)
 
                const marker = L.marker([coordRef.current.lat, coordRef.current.lng], {
