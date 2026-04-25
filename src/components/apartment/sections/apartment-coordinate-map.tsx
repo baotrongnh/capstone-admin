@@ -78,7 +78,7 @@ export function ApartmentCoordinateMap({
 
                normalizeLeafletLayering(map)
 
-               L.tileLayer("https://maps.vietmap.vn/api/tm/{z}/{x}/{y}.png?apikey=b089c6fc2b6ae481ffcf9c8400f519ab86fcf9cd63610e44", {
+               L.tileLayer(`https://maps.vietmap.vn/api/tm/{z}/{x}/{y}.png?apikey=${process.env.NEXT_PUBLIC_VIETMAP_KEY}`, {
                     maxZoom: 19
                }).addTo(map)
 
