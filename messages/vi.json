@@ -75,6 +75,16 @@
       "emergencyMaintenance": "Bảo trì khẩn cấp",
       "schedulingConflict": "Trùng lịch",
       "other": "Khác"
+    },
+    "toast": {
+      "confirmSuccess": "Đã xác nhận lịch hẹn.",
+      "confirmError": "Xác nhận lịch hẹn thất bại.",
+      "denySuccess": "Đã từ chối lịch hẹn.",
+      "denyError": "Từ chối lịch hẹn thất bại.",
+      "cancelSuccess": "Đã hủy lịch hẹn.",
+      "cancelError": "Hủy lịch hẹn thất bại.",
+      "doneSuccess": "Đã đánh dấu lịch hẹn là hoàn thành.",
+      "doneError": "Đánh dấu hoàn thành lịch hẹn thất bại."
     }
   }
 }
