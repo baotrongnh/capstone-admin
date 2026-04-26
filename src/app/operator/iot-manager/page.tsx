@@ -66,6 +66,7 @@ export default function IotManagerPage() {
                <IotBoardDetailModal data={data.detailModal} />
                <IotBoardModal data={data.boardModal} />
                <IotActionConfirmDialog data={data.deleteDialog} />
+
           </div>
      )
 }

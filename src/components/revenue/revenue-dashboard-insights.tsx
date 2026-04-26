@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils"
 import type { RevenueDashboardApiData, RevenueDashboardRankingItem } from "@/types/revenue"
 import { formatVND } from "@/utils/format"
 import { ChartNoAxesCombined, HandCoins, Inbox, ReceiptText, UsersRound, Wallet } from "lucide-react"
+import Link from "next/link"
 import { Cell, Pie, PieChart } from "recharts"
 
 type RevenueDashboardInsightsProps = {
@@ -28,6 +29,7 @@ type RevenueDashboardInsightsProps = {
      className?: string
      title?: string
      description?: string
+     invoiceCountHref?: string
 }
 
 const formatPercent = (value: number) => `${(value * 100).toFixed(1)}%`
@@ -148,7 +150,18 @@ const RevenueDonutCard = ({
                                         <PieChart>
                                              <ChartTooltip
                                                   cursor={false}
-                                                  content={<ChartTooltipContent formatter={(value) => valueFormatter(Number(value))} />}
+                                                  content={
+                                                       <ChartTooltipContent
+                                                            formatter={(value, name) => (
+                                                                 <div className="space-y-1">
+                                                                      <p className="text-sm font-semibold text-foreground">{String(name)}</p>
+                                                                      <p className="text-sm font-medium text-foreground">{valueFormatter(Number(value))}</p>
+                                                                      <p className="text-xs text-muted-foreground">Biểu đồ: {title}</p>
+                                                                      <p className="text-xs text-muted-foreground">Nguồn dữ liệu: {description}</p>
+                                                                 </div>
+                                                            )}
+                                                       />
+                                                  }
                                              />
                                              <Pie
                                                   data={items}
@@ -208,6 +221,7 @@ export function RevenueDashboardInsights({
      className,
      title = "Tổng quan vận hành doanh thu",
      description = "Số liệu tổng hợp từ hệ thống trong khoảng ngày đã chọn.",
+     invoiceCountHref,
 }: RevenueDashboardInsightsProps) {
      const userStats = data?.userStats
      const occupancy = data?.occupancyStats
@@ -351,12 +365,24 @@ export function RevenueDashboardInsights({
                                    </Card>
 
                                    <Card className={cn("border-sky-200/60 bg-sky-500/5", CARD_HOVER_CLASS)}>
-                                        <CardContent className="flex items-start justify-between p-4">
-                                             <div>
-                                                  <p className="text-xs text-muted-foreground">Số hóa đơn</p>
-                                                  <p className="mt-2 text-lg font-semibold">{(summary?.invoiceCount ?? 0).toLocaleString("vi-VN")}</p>
-                                             </div>
-                                             <ReceiptText className="size-4 text-sky-600" />
+                                        <CardContent className="p-0">
+                                             {invoiceCountHref ? (
+                                                  <Link href={invoiceCountHref} className="flex items-start justify-between p-4">
+                                                       <div>
+                                                            <p className="text-xs text-muted-foreground">Số hóa đơn</p>
+                                                            <p className="mt-2 text-lg font-semibold">{(summary?.invoiceCount ?? 0).toLocaleString("vi-VN")}</p>
+                                                       </div>
+                                                       <ReceiptText className="size-4 text-sky-600" />
+                                                  </Link>
+                                             ) : (
+                                                  <div className="flex items-start justify-between p-4">
+                                                       <div>
+                                                            <p className="text-xs text-muted-foreground">Số hóa đơn</p>
+                                                            <p className="mt-2 text-lg font-semibold">{(summary?.invoiceCount ?? 0).toLocaleString("vi-VN")}</p>
+                                                       </div>
+                                                       <ReceiptText className="size-4 text-sky-600" />
+                                                  </div>
+                                             )}
                                         </CardContent>
                                    </Card>
                               </>

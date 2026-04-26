@@ -37,7 +37,7 @@ export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: I
                     <DialogHeader>
                          <DialogTitle>Chi tiết mạch IoT</DialogTitle>
                          <DialogDescription>
-                              Xem đầy đủ thiết bị.
+                              Xem đầy đủ thông tin mạch và các thiết bị đang gắn trên mạch.
                          </DialogDescription>
                     </DialogHeader>
 
@@ -133,7 +133,7 @@ export const IotBoardDetailModal = memo(function IotBoardDetailModal({ data }: I
                                                                            <MoreHorizontalIcon className="size-4" />
                                                                       </Button>
                                                                  </DropdownMenuTrigger>
-                                                                 <DropdownMenuContent align="end" className="w-40">
+                                                                 <DropdownMenuContent align="end" className="w-48">
                                                                       <DropdownMenuItem
                                                                            disabled={!isInactive || isReactivating}
                                                                            onClick={() => onReactivateDevice(board.id, device)}

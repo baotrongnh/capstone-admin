@@ -6,6 +6,7 @@ import { isSidebarItemActive } from "@/components/layout/sidebar-active"
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -18,32 +19,42 @@ export function AdminNavMain({
 }: {
   items: {
     title: string
-    url: string
-    icon?: Icon
+    items: {
+      title: string
+      url: string
+      icon?: Icon
+    }[]
   }[]
 }) {
   const pathname = usePathname()
 
   return (
-    <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                tooltip={item.title}
-                isActive={isSidebarItemActive(pathname, item.url)}
-                asChild
-              >
-                <Link href={item.url}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    <>
+      {items.map((group) => (
+        <SidebarGroup key={group.title} className="py-1">
+          <SidebarGroupLabel className="h-6 px-2 text-[11px] font-semibold uppercase tracking-wide">
+            {group.title}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {group.items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    isActive={isSidebarItemActive(pathname, item.url)}
+                    asChild
+                  >
+                    <Link href={item.url}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      ))}
+    </>
   )
 }
