@@ -6,6 +6,11 @@ import {
   useChatConversationMessages,
 } from "@/hooks/query/useChat"
 import { ApartmentCardMessage } from "@/components/chat/apartment-card-message"
+import {
+  ChatImageGrid,
+  ChatImageLightbox,
+  ChatImagePreviewStrip,
+} from "@/components/chat/chat-image"
 import { chatService } from "@/lib/services/chat.service"
 import { socket } from "@/lib/socket/socket"
 import {
@@ -19,7 +24,6 @@ import {
 } from "@/types/chat"
 import { formatTimeFromString } from "@/utils/format"
 import { useQueryClient } from "@tanstack/react-query"
-import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import type { ChangeEvent, ClipboardEvent } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -52,6 +56,7 @@ export default function ChatPage() {
   const [socketError, setSocketError] = useState<string | null>(null)
   const [selectedImages, setSelectedImages] = useState<File[]>([])
   const [isUploadingImages, setIsUploadingImages] = useState(false)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   const { data: conversation } = useChatConversation(activeConversationId)
   const { data: messages = [], isLoading: isLoadingMessages } = useChatConversationMessages(activeConversationId)
@@ -296,42 +301,24 @@ export default function ChatPage() {
                       key={message.id}
                       className={`flex ${isSupport ? "justify-end" : "justify-start"}`}
                     >
-                      <div
-                        className={[
-                          "max-w-[78%] rounded-2xl px-3 py-2 text-sm shadow-sm",
-                          isSupport
-                            ? "rounded-br-md bg-blue-600 text-white"
-                            : "rounded-bl-md border border-gray-200 bg-white text-gray-900",
-                        ].join(" ")}
-                      >
-                        {message.content && <p>{message.content}</p>}
-                        {message.images && message.images.length > 0 && (
-                          <div className="mt-2 grid grid-cols-2 gap-2">
-                            {message.images.map((imageUrl, index) => (
-                              <a
-                                key={`${message.id}-img-${index}`}
-                                href={imageUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="block overflow-hidden rounded-md border border-gray-200"
-                              >
-                                <Image
-                                  src={imageUrl}
-                                  alt={`chat-image-${index + 1}`}
-                                  width={192}
-                                  height={96}
-                                  unoptimized
-                                  onLoad={scrollToBottom}
-                                  className="h-24 w-full object-cover"
-                                />
-                              </a>
-                            ))}
+                      <div className="max-w-[78%]">
+                        {message.content && (
+                          <div
+                            className={[
+                              "rounded-2xl px-3 py-2 text-sm shadow-sm",
+                              isSupport
+                                ? "rounded-br-md bg-blue-600 text-white"
+                                : "rounded-bl-md border border-gray-200 bg-white text-gray-900",
+                            ].join(" ")}
+                          >
+                            <p>{message.content}</p>
                           </div>
                         )}
+                        <ChatImageGrid images={message.images ?? []} onPreview={setPreviewImage} />
                         {message.apartmentId && (
                           <ApartmentCardMessage apartmentId={message.apartmentId} />
                         )}
-                        <p className={`mt-1 text-[11px] ${isSupport ? "text-blue-100" : "text-gray-400"}`}>
+                        <p className={`mt-1 px-1 text-[11px] ${isSupport ? "text-right text-gray-400" : "text-gray-400"}`}>
                           {formatTimeFromString(message.timestamp)}
                         </p>
                       </div>
@@ -344,30 +331,16 @@ export default function ChatPage() {
           </div>
 
           <footer className="border-t border-gray-200 p-3">
-            {selectedImagePreviews.length > 0 && (
-              <div className="mb-2 flex flex-wrap gap-2">
-                {selectedImagePreviews.map((preview, index) => (
-                  <div key={preview.url} className="relative">
-                    <Image
-                      src={preview.url}
-                      alt={preview.name}
-                      width={56}
-                      height={56}
-                      unoptimized
-                      className="h-14 w-14 rounded-md border border-gray-200 object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSelectedImage(index)}
-                      className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-black/70 text-xs text-white"
-                      aria-label="remove-image"
-                    >
-                      x
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="mb-2">
+              <ChatImagePreviewStrip
+                images={selectedImagePreviews.map((preview) => ({
+                  key: preview.url,
+                  src: preview.url,
+                  alt: preview.name,
+                }))}
+                onRemove={handleRemoveSelectedImage}
+              />
+            </div>
 
             <div className="flex items-center gap-2">
               <label
@@ -408,6 +381,7 @@ export default function ChatPage() {
               </button>
             </div>
           </footer>
+          <ChatImageLightbox image={previewImage} onClose={() => setPreviewImage(null)} />
         </>
       )}
     </section>
