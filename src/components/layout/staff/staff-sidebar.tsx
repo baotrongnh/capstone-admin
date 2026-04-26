@@ -33,7 +33,7 @@ export function StaffSidebar({
   const t = useTranslations("StaffSidebar");
 
   const navMain = [
-    { title: t("dashboard"), url: "#", icon: IconLayoutDashboard },
+    // { title: t("dashboard"), url: "#", icon: IconLayoutDashboard },
     {
       title: 'Lịch hẹn xem căn hộ',
       url: ROUTE_STAFF.SCHEDULE,
