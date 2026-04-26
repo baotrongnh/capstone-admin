@@ -6,8 +6,10 @@ export type MaintenanceListQuery =
      paths["/api/v1/maintenance"]["get"]["parameters"]["query"]
 export type MaintenanceDetailResponse =
      paths["/api/v1/maintenance/{id}"]["get"]["responses"]["200"]["content"]["application/json"]
+export type MaintenanceCreateRequestBody =
+     paths["/api/v1/maintenance"]["post"]["requestBody"]["content"]["multipart/form-data"]
 export type MaintenanceUpdateRequestBody =
-     paths["/api/v1/maintenance/{id}"]["patch"]['requestBody']['content']['application/json']
+     paths["/api/v1/maintenance/{id}"]["patch"]["requestBody"]["content"]["application/json"]
 export type MaintenanceUpdateResponse =
      paths["/api/v1/maintenance/{id}"]["patch"]["responses"]["200"]["content"]["application/json"]
 export type MaintenanceCompleteResponse =
@@ -15,23 +17,35 @@ export type MaintenanceCompleteResponse =
 
 export type MaintenanceItem = NonNullable<MaintenanceListResponse["data"]>[number]
 export type MaintenanceDetailData = NonNullable<MaintenanceDetailResponse["data"]>
+export type MaintenanceApartment = MaintenanceDetailData["apartment"]
 
 export type MaintenanceStatus = NonNullable<NonNullable<MaintenanceListQuery>["status"]>
 export type MaintenancePriority = NonNullable<MaintenanceUpdateRequestBody["priority"]>
+export type MaintenanceCategory = NonNullable<MaintenanceCreateRequestBody["category"]>
 
 export type MaintenanceOption<T extends string> = {
-     value: T;
-     label: string;
-     badgeClass: string;
-};
+     value: T
+     label: string
+     badgeClass: string
+}
 
 export type MaintenanceUpdateForm = {
-     status: MaintenanceStatus;
-     priority: MaintenancePriority;
-     scheduledDate: string;
-     resolutionNotes: string;
-     cost: string;
-};
+     status: MaintenanceStatus
+     priority: MaintenancePriority
+     scheduledDate: string
+     resolutionNotes: string
+     cost: string
+}
+
+export const MAINTENANCE_CATEGORY_LABELS: Record<MaintenanceCategory, string> = {
+     plumbing: "Nước",
+     electrical: "Điện",
+     hvac: "Điều hòa",
+     appliance: "Thiết bị",
+     structural: "Kết cấu",
+     pest_control: "Côn trùng",
+     other: "Khác",
+}
 
 export const MAINTENANCE_STATUS_OPTIONS: MaintenanceOption<MaintenanceStatus>[] = [
      {
@@ -64,7 +78,7 @@ export const MAINTENANCE_STATUS_OPTIONS: MaintenanceOption<MaintenanceStatus>[] 
           label: "Đã hủy",
           badgeClass: "bg-rose-100 text-rose-700 border-rose-200",
      },
-];
+]
 
 export const MAINTENANCE_PRIORITY_OPTIONS: MaintenanceOption<MaintenancePriority>[] = [
      {
@@ -87,47 +101,38 @@ export const MAINTENANCE_PRIORITY_OPTIONS: MaintenanceOption<MaintenancePriority
           label: "Khẩn cấp",
           badgeClass: "bg-red-100 text-red-700 border-red-200",
      },
-];
+]
 
-export const DEFAULT_MAINTENANCE_UPDATE_FORM: MaintenanceUpdateForm = {
-     status: "submitted",
-     priority: "medium",
-     scheduledDate: "",
-     resolutionNotes: "",
-     cost: "",
-};
+export const normalizeMaintenancePriority = (value?: string | null): MaintenancePriority =>
+     MAINTENANCE_PRIORITY_OPTIONS.find((option) => option.value === value)?.value || "medium"
 
-export const normalizeMaintenanceStatus = (value?: string | null): MaintenanceStatus => {
-     const found = MAINTENANCE_STATUS_OPTIONS.find((option) => option.value === value);
-     return found?.value || "submitted";
-};
+export const getMaintenanceStatusOption = (value?: string | null) =>
+     MAINTENANCE_STATUS_OPTIONS.find((item) => item.value === value)
 
-export const normalizeMaintenancePriority = (value?: string | null): MaintenancePriority => {
-     const found = MAINTENANCE_PRIORITY_OPTIONS.find((option) => option.value === value);
-     return found?.value || "medium";
-};
+export const getMaintenancePriorityOption = (value?: string | null) =>
+     MAINTENANCE_PRIORITY_OPTIONS.find((item) => item.value === value)
 
-export const getMaintenanceStatusOption = (value?: string | null) => {
-     return MAINTENANCE_STATUS_OPTIONS.find((item) => item.value === value);
-};
+export const getMaintenanceCategoryLabel = (value?: string | null) =>
+     (value && MAINTENANCE_CATEGORY_LABELS[value as MaintenanceCategory]) || value || "Khác"
 
-export const getMaintenancePriorityOption = (value?: string | null) => {
-     return MAINTENANCE_PRIORITY_OPTIONS.find((item) => item.value === value);
-};
+export const getMaintenanceAddress = (apartment?: MaintenanceApartment | null) =>
+     apartment?.fullAddress || apartment?.address || apartment?.streetAddress || "-"
 
 export const toLocalDateTimeInput = (value?: string | null) => {
-     if (!value) return "";
-     const date = new Date(value);
-     if (Number.isNaN(date.getTime())) return "";
+     if (!value) return ""
 
-     const offset = date.getTimezoneOffset();
-     const localDate = new Date(date.getTime() - offset * 60_000);
-     return localDate.toISOString().slice(0, 16);
-};
+     const date = new Date(value)
+     if (Number.isNaN(date.getTime())) return ""
+
+     const offset = date.getTimezoneOffset()
+     return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 16)
+}
+
+export const toLocalDateInput = (value?: string | null) => toLocalDateTimeInput(value).slice(0, 10)
 
 export const toIsoDateTime = (value: string) => {
-     if (!value) return undefined;
-     const date = new Date(value);
-     if (Number.isNaN(date.getTime())) return undefined;
-     return date.toISOString();
-};
+     if (!value) return undefined
+
+     const date = new Date(value)
+     return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+}
