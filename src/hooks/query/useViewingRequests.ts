@@ -10,6 +10,7 @@ import type {
 } from "@/types/appointment"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { message } from "antd"
+import { useTranslations } from "next-intl"
 
 export const useAppointments = () => {
     return useQuery({
@@ -19,6 +20,7 @@ export const useAppointments = () => {
 }
 
 export const useConfirmAppointment = () => {
+    const t = useTranslations("StaffSchedule.toast")
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (payload: ConfirmAppointmentPayload) =>
@@ -39,55 +41,58 @@ export const useConfirmAppointment = () => {
                     return { ...current, data: nextData }
                 },
             )
-            message.success("Appointment confirmed.")
+            message.success(t("confirmSuccess"))
         },
-        onError: (error) => {
-            message.error(error?.message || "Failed to confirm appointment.")
+        onError: () => {
+            message.error(t("confirmError"))
         },
     })
 }
 
 export const useDenyAppointment = () => {
+    const t = useTranslations("StaffSchedule.toast")
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (payload: DenyAppointmentPayload) =>
             viewingRequestService.denyAppointment(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["appointments"] })
-            message.success("Appointment denied.")
+            message.success(t("denySuccess"))
         },
-        onError: (error) => {
-            message.error(error?.message || "Failed to deny appointment.")
+        onError: () => {
+            message.error(t("denyError"))
         },
     })
 }
 
 export const useCancelAppointment = () => {
+    const t = useTranslations("StaffSchedule.toast")
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (payload: CancelAppointmentPayload) =>
             viewingRequestService.cancelAppointment(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["appointments"] })
-            message.success("Appointment cancelled.")
+            message.success(t("cancelSuccess"))
         },
-        onError: (error) => {
-            message.error(error?.message || "Failed to cancel appointment.")
+        onError: () => {
+            message.error(t("cancelError"))
         },
     })
 }
 
 export const useDoneAppointment = () => {
+    const t = useTranslations("StaffSchedule.toast")
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (payload: DoneAppointmentPayload) =>
             viewingRequestService.doneAppointment(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["appointments"] })
-            message.success("Appointment marked as done.")
+            message.success(t("doneSuccess"))
         },
-        onError: (error) => {
-            message.error(error?.message || "Failed to complete appointment.")
+        onError: () => {
+            message.error(t("doneError"))
         },
     })
 }

@@ -75,6 +75,16 @@
       "emergencyMaintenance": "Emergency maintenance",
       "schedulingConflict": "Scheduling conflict",
       "other": "Other"
+    },
+    "toast": {
+      "confirmSuccess": "Appointment confirmed.",
+      "confirmError": "Failed to confirm appointment.",
+      "denySuccess": "Appointment denied.",
+      "denyError": "Failed to deny appointment.",
+      "cancelSuccess": "Appointment cancelled.",
+      "cancelError": "Failed to cancel appointment.",
+      "doneSuccess": "Appointment marked as done.",
+      "doneError": "Failed to complete appointment."
     }
   }
 }
