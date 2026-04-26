@@ -30,7 +30,7 @@ export type BackofficeRole = "admin" | "operator" | "staff";
 const DEFAULT_ROUTE_BY_ROLE: Record<BackofficeRole, string> = {
   admin: ROUTE_ADMIN.DASHBOARD,
   operator: ROUTE_OPERATOR.APARTMENT,
-  staff: ROUTE_STAFF.INQUIRY,
+  staff: ROUTE_STAFF.SCHEDULE,
 };
 
 export const getDefaultRouteByRole = (role?: string | null) => {
