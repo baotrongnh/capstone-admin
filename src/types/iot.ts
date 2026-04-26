@@ -25,7 +25,6 @@ export type IotBoardUpdateRequest = Omit<
      "apartmentId"
 > & {
      apartmentId?: string | null
-     status?: NonNullable<IotBoardListQuery["status"]>
 }
 
 export type IotBoardUpdateResponse =
@@ -52,9 +51,7 @@ export type IotBoardDeviceCreateResponse =
      paths["/api/v1/iot/boards/{boardId}/devices"]["post"]["responses"]["201"]["content"]["application/json"]
 
 export type IotBoardDeviceUpdateRequest =
-     paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["patch"]["requestBody"]["content"]["application/json"] & {
-          status?: NonNullable<IotBoardListQuery["status"]>
-     }
+     paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["patch"]["requestBody"]["content"]["application/json"]
 
 export type IotBoardDeviceUpdateResponse =
      paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["patch"]["responses"]["200"]["content"]["application/json"]
@@ -62,9 +59,20 @@ export type IotBoardDeviceUpdateResponse =
 export type IotBoardDeviceDeleteResponse =
      paths["/api/v1/iot/boards/{boardId}/devices/{deviceId}"]["delete"]["responses"]["200"]["content"]["application/json"]
 
+export type IotDoorPinResetRequest =
+     paths["/api/v1/iot/doors/{boardId}/{deviceId}/pin/reset"]["patch"]["requestBody"]["content"]["application/json"]
+
+export type IotDoorPinResetResponse =
+     paths["/api/v1/iot/doors/{boardId}/{deviceId}/pin/reset"]["patch"]["responses"]["200"]["content"]["application/json"]
+
+export type IotHealthCheckResponse =
+     paths["/api/v1/iot/devices/{espId}/check-health"]["get"]["responses"]["200"]["content"]["application/json"]
+
 export type IotBoardItem = NonNullable<IotBoardListResponse["data"]>[number]
 export type IotBoardDetail = NonNullable<IotBoardDetailResponse["data"]>
 export type IotBoardDeviceItem = NonNullable<IotBoardDetail["devices"]>[number]
 export type IotBoardDeleteResult = NonNullable<IotBoardDeleteResponse["data"]>
 export type IotBoardUnlinkResult = NonNullable<IotBoardUnlinkApartmentResponse["data"]>
 export type IotApartmentBoardsUnlinkResult = NonNullable<IotApartmentBoardsUnlinkResponse["data"]>
+export type IotDoorPinResetResult = NonNullable<IotDoorPinResetResponse["data"]>
+export type IotHealthCheckResult = NonNullable<IotHealthCheckResponse["data"]>

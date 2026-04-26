@@ -941,7 +941,7 @@ export interface paths {
         head?: never;
         /**
          * Update editable PDF content of contract
-         * @description Update fields that are rendered in contract PDF and regenerate PDF immediately.
+         * @description Update fields that are rendered in the rental contract PDF and regenerate the PDF immediately. landlordAddress is shown as business address, while landlordIdIssuePlace is kept only for backward compatibility.
          */
         patch: operations["ContractsController_updatePdfContent"];
         trace?: never;
@@ -961,7 +961,7 @@ export interface paths {
         head?: never;
         /**
          * Activate contract after deposit paid
-         * @description Activate pending/signed contract when deposit invoice is paid and contract is not expired.
+         * @description Frontend test helper. Bypasses status, deposit, and move-in validation to force activation for draft/pending/signed contracts, but still refuses expired contracts.
          */
         patch: operations["ContractsController_activatePaid"];
         trace?: never;
@@ -1189,7 +1189,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Update smart door PIN for tenant flow with old PIN verification and board acknowledgement */
+        /** Update smart door PIN for tenant flow with board acknowledgement; old PIN is only required after the first setup */
         patch: operations["IoTController_updateDoorPin"];
         trace?: never;
     };
@@ -1226,6 +1226,186 @@ export interface paths {
         head?: never;
         /** Update an IoT board child device */
         patch: operations["IoTController_updateBoardDevice"];
+        trace?: never;
+    };
+    "/api/v1/invoices/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * System revenue overview
+         * @description Revenue from paid invoices. For partner apartments, system revenue is calculated by cooperation commission percentage, except forfeited deposits which belong fully to the system.
+         */
+        get: operations["InvoicesController_getOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/partners": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Partner revenue summaries
+         * @description Grouped revenue summaries by partner with gross revenue, system commission, and net payout.
+         */
+        get: operations["InvoicesController_getPartnerSummaries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Revenue transaction reconciliation list
+         * @description Detailed reconciled revenue rows with invoice, apartment, rental contract and cooperation contract information.
+         */
+        get: operations["InvoicesController_getTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/me/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Partner view own apartment revenue overview
+         * @description Partner-only endpoint. Revenue is calculated as paid receivable invoices minus system commission.
+         */
+        get: operations["InvoicesController_getMyOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/me/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Partner view own apartment revenue transactions
+         * @description Partner-only endpoint. Returns reconciled transaction rows for apartments owned by current partner user.
+         */
+        get: operations["InvoicesController_getMyTransactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dashboard statistics for operators and admins
+         * @description Aggregated user and partner ratios, apartment occupancy, apartment revenue ranking, and system revenue summary.
+         */
+        get: operations["InvoicesController_getDashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/timeseries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * System revenue timeseries
+         * @description System-wide paid revenue grouped by month or year for a selected time window.
+         */
+        get: operations["InvoicesController_getRevenueTimeseries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/staff/partner-payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Staff view monthly partner payout summaries
+         * @description Show monthly amount that should be transferred to each partner (rent revenue minus system commission).
+         */
+        get: operations["InvoicesController_getStaffPartnerPayoutSummaries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/invoices/staff/partner-payouts/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Staff confirm monthly payout transfer to partner
+         * @description Confirm transfer by uploading transfer proof image and saving confirmation for the partner/month.
+         */
+        post: operations["InvoicesController_confirmStaffPartnerPayout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/invoices/me": {
@@ -1860,7 +2040,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** User updates own house password */
+        /** Legacy endpoint for updating the cached local house password field only */
         patch: operations["UserApartmentsController_updateMyHousePassword"];
         trace?: never;
     };
@@ -2170,186 +2350,6 @@ export interface paths {
          * @description Admin/Operator updates amenity metadata.
          */
         patch: operations["AmenitiesController_update"];
-        trace?: never;
-    };
-    "/api/v1/revenues/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * System revenue overview
-         * @description Revenue from paid invoices excluding deposit fees. For partner apartments, system revenue is calculated by cooperation commission percentage.
-         */
-        get: operations["RevenueController_getOverview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/partners": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Partner revenue summaries
-         * @description Grouped revenue summaries by partner with gross revenue, system commission, and net payout.
-         */
-        get: operations["RevenueController_getPartnerSummaries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Revenue transaction reconciliation list
-         * @description Detailed reconciled revenue rows with invoice, apartment, rental contract and cooperation contract information.
-         */
-        get: operations["RevenueController_getTransactions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/partner/me/overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Partner view own apartment revenue overview
-         * @description Partner-only endpoint. Revenue is calculated as paid rent invoices minus system commission.
-         */
-        get: operations["RevenueController_getMyPartnerOverview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/partner/me/transactions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Partner view own apartment revenue transactions
-         * @description Partner-only endpoint. Returns reconciled transaction rows for apartments owned by current partner user.
-         */
-        get: operations["RevenueController_getMyPartnerTransactions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/dashboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Dashboard statistics for operators and admins
-         * @description Aggregated user and partner ratios, apartment occupancy, apartment revenue ranking, and system revenue summary.
-         */
-        get: operations["RevenueController_getDashboard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/timeseries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * System revenue timeseries
-         * @description System-wide paid revenue grouped by month or year for a selected time window.
-         */
-        get: operations["RevenueController_getRevenueTimeseries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/staff/partner-payouts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Staff view monthly partner payout summaries
-         * @description Show monthly amount that should be transferred to each partner (rent revenue minus system commission).
-         */
-        get: operations["RevenueController_getStaffPartnerPayoutSummaries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/revenues/staff/partner-payouts/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Staff confirm monthly payout transfer to partner
-         * @description Confirm transfer by uploading transfer proof image and saving confirmation for the partner/month.
-         */
-        post: operations["RevenueController_confirmStaffPartnerPayout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
 }
@@ -3164,29 +3164,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        RoomDto: {
-            id: string;
-            /** @example R01 */
-            roomNumber: string;
-            /** @example bedroom */
-            roomType: string;
-            /** @example 20.00 */
-            area?: string | null;
-            /** @example true */
-            hasWindow: boolean;
-            /** @example true */
-            hasAirConditioning: boolean;
-            /** @example false */
-            hasPrivateBathroom: boolean;
-            /** @example 1 */
-            maxOccupancy: number;
-            /** @example 5000000.00 */
-            rentPrice?: string | null;
-            /** @example available */
-            status: string;
-            description?: string | null;
-            images?: string[] | null;
-        };
         OwnerSummaryDto: {
             /** @example e33f798c-7978-4a86-b243-b3ac43e020ba */
             id: string;
@@ -3366,7 +3343,6 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            rooms: components["schemas"]["RoomDto"][];
             owner?: components["schemas"]["OwnerSummaryDto"];
             /** @example [] */
             iotDevices: Record<string, never>[];
@@ -3521,6 +3497,16 @@ export interface components {
             id: string;
             /** @example P-1205 */
             apartmentNumber: string;
+            /**
+             * @description Mã phường/xã (v2)
+             * @example 26728
+             */
+            wardCode?: number | null;
+            /**
+             * @description Mã tỉnh/thành (v2), auto-resolved từ wardCode
+             * @example 79
+             */
+            provinceCode?: number | null;
             /**
              * @description inactive when media is missing, verified when both image and video are uploaded at submit
              * @example inactive
@@ -4059,7 +4045,7 @@ export interface components {
             provinceCode?: number | null;
             /** @example Phuong Ben Nghe */
             wardName?: string | null;
-            /** @example Thanh pho Ho Chi Minh */
+            /** @example Thành phố Hồ Chí Minh */
             provinceName?: string | null;
             /** @example 12 Nguyễn Huệ, Phường Bến Nghé */
             streetAddress?: string | null;
@@ -4076,7 +4062,7 @@ export interface components {
         };
         ContractListMemberUserDto: {
             id: string;
-            /** @example Nguyen Van A */
+            /** @example Nguyễn Văn A */
             fullName: string;
             /** @example user@example.com */
             email: string;
@@ -4135,7 +4121,7 @@ export interface components {
         };
         ContractCreatorDto: {
             id: string;
-            /** @example Le Van B */
+            /** @example Lê Văn B */
             fullName: string;
         };
         ContractInvoiceDto: {
@@ -4151,7 +4137,7 @@ export interface components {
         };
         ContractMemberUserDto: {
             id: string;
-            /** @example Nguyen Van A */
+            /** @example Nguyễn Văn A */
             fullName: string;
             /** @example user@example.com */
             email: string;
@@ -4206,17 +4192,17 @@ export interface components {
             utilitiesCharges?: Record<string, never> | null;
             contractTerms?: string | null;
             specialConditions?: string | null;
-            /** @example Cong ty TNHH IntelliServOps */
+            /** @example Hoàng Kim Long */
             landlordName?: string | null;
-            /** @example 0312345678 */
+            /** @example 060204000351 */
             landlordIdNumber?: string | null;
-            /** @example 01/01/2020 */
+            /** @example 19/04/2021 */
             landlordIdIssueDate?: string | null;
-            /** @example So KH&DT TP. Ho Chi Minh */
+            /** @example Legacy field - not rendered in rental contract PDF */
             landlordIdIssuePlace?: string | null;
-            /** @example TP. Ho Chi Minh, Viet Nam */
+            /** @example Chung cư Vinhomes Grand Park, phường Long Bình, TP Thủ Đức */
             landlordAddress?: string | null;
-            /** @example 1900 0000 */
+            /** @example 0388969964 */
             landlordPhone?: string | null;
             /** @example active */
             status: string;
@@ -4526,32 +4512,32 @@ export interface components {
         UpdateContractPdfContentDto: {
             /**
              * @description Landlord name displayed in PDF (Party A)
-             * @example Cong ty TNHH IntelliServOps
+             * @example Hoàng Kim Long
              */
             landlordName?: string;
             /**
-             * @description Landlord/company ID number displayed in PDF
-             * @example 0312345678
+             * @description Landlord national ID number displayed in PDF
+             * @example 060204000351
              */
             landlordIdNumber?: string;
             /**
              * @description Issue date of landlord ID/license
-             * @example 01/01/2020
+             * @example 19/04/2021
              */
             landlordIdIssueDate?: string;
             /**
-             * @description Issue place of landlord ID/license
-             * @example So KH&DT TP. Ho Chi Minh
+             * @description Legacy issue-place field kept for backward compatibility; rental contract PDF no longer renders this value
+             * @example Canh sat quan ly hanh chinh ve trat tu xa hoi
              */
             landlordIdIssuePlace?: string;
             /**
-             * @description Landlord registered address displayed in PDF
-             * @example TP. Ho Chi Minh, Viet Nam
+             * @description Landlord business address displayed in PDF
+             * @example Chung cư Vinhomes Grand Park, phường Long Bình, TP Thủ Đức
              */
             landlordAddress?: string;
             /**
              * @description Landlord phone number displayed in PDF
-             * @example 1900 0000
+             * @example 0388969964
              */
             landlordPhone?: string;
             /**
@@ -4587,12 +4573,12 @@ export interface components {
             paymentMethod?: "bank_transfer" | "cash" | "e_wallet" | "auto_debit" | "credit_card" | "debit_card";
             /**
              * @description Special conditions shown in contract PDF
-             * @example Khong nuoi thu cung trong can ho.
+             * @example Không nuôi thú cưng trong căn hộ.
              */
             specialConditions?: string;
             /**
              * @description Additional contract terms shown in contract PDF
-             * @example Khong thay doi ket cau can ho trong thoi han thue.
+             * @example Không thay đổi kết cấu căn hộ trong thời hạn thuê.
              */
             contractTerms?: string;
         };
@@ -4664,7 +4650,7 @@ export interface components {
         CancelContractDto: {
             /**
              * @description Reason provided by user when cancelling contract
-             * @example Khong co nhu cau thue nua
+             * @example Không có nhu cầu thuê nữa
              */
             reason: string;
         };
@@ -4865,9 +4851,14 @@ export interface components {
             id?: string;
             /**
              * Format: uuid
-             * @description Optional apartment owning this board and its child devices
+             * @description Optional apartment owning this board and its child devices. Re-link is only allowed after unlink.
              */
             apartmentId?: string;
+            /**
+             * @description Optional board status. When updated, the same status is propagated to all child devices.
+             * @enum {string}
+             */
+            status?: "active" | "inactive";
         };
         IoTBoardDeleteResultDto: {
             /** @example ESP_A101 */
@@ -4937,10 +4928,10 @@ export interface components {
         };
         UpdateDoorPinDto: {
             /**
-             * @description Current 6-digit door PIN
+             * @description Current 6-digit door PIN. Optional on first-time setup when the apartment door has no active PIN yet.
              * @example 258036
              */
-            oldPin: string;
+            oldPin?: string;
             /**
              * @description New 6-digit door PIN
              * @example 290304
@@ -4982,6 +4973,11 @@ export interface components {
              * @enum {string}
              */
             state?: "ON" | "OFF";
+            /**
+             * @description Optional runtime status for this board child device.
+             * @enum {string}
+             */
+            status?: "active" | "inactive";
         };
         IoTBoardDeviceDeleteResultDto: {
             /** @example 36ed4722-82e2-49e9-8175-4d099e80102d */
@@ -4993,6 +4989,258 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "inactive" | "maintenance" | "error";
+        };
+        InvoiceRevenueApartmentDto: {
+            id: string;
+            apartmentNumber: string;
+            buildingName?: string | null;
+        };
+        InvoiceRevenueContractDto: {
+            id: string;
+            contractNumber: string;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            status: string;
+        };
+        InvoiceRevenuePartnerDto: {
+            id: string;
+            fullName: string;
+            companyName?: string | null;
+        };
+        InvoiceRevenueCooperationContractDto: {
+            id: string;
+            contractNumber: string;
+            /** @example 10 */
+            commissionRate: number;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+        };
+        InvoiceRevenueTransactionDto: {
+            invoiceId: string;
+            invoiceNumber: string;
+            invoiceType: string;
+            /** Format: date-time */
+            invoicePaidAt: string;
+            /** @example 12000000 */
+            invoiceAmount: number;
+            /** @example true */
+            isPartnerApartment: boolean;
+            /** @example 10 */
+            commissionRateApplied: number | null;
+            /** @example 1200000 */
+            systemRevenueAmount: number;
+            /** @example 12000000 */
+            partnerGrossRevenueAmount: number;
+            /** @example 10800000 */
+            partnerNetPayoutAmount: number;
+            apartment: components["schemas"]["InvoiceRevenueApartmentDto"];
+            contract: components["schemas"]["InvoiceRevenueContractDto"];
+            partner?: components["schemas"]["InvoiceRevenuePartnerDto"] | null;
+            cooperationContract?: components["schemas"]["InvoiceRevenueCooperationContractDto"] | null;
+        };
+        InvoiceRevenueOverviewDto: {
+            /** @example 25 */
+            invoiceCount: number;
+            /** @example 350000000 */
+            totalInvoiceAmount: number;
+            /** @example 275000000 */
+            totalSystemRevenue: number;
+            /** @example 100000000 */
+            totalPartnerGrossRevenue: number;
+            /** @example 85000000 */
+            totalPartnerNetPayout: number;
+            invoices: components["schemas"]["InvoiceRevenueTransactionDto"][];
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 2 */
+            totalPages: number;
+        };
+        InvoicePartnerRevenueSummaryItemDto: {
+            partner: components["schemas"]["InvoiceRevenuePartnerDto"];
+            /** @example 10 */
+            invoiceCount: number;
+            /** @example 2 */
+            apartmentCount: number;
+            /** @example 3 */
+            contractCount: number;
+            /** @example 120000000 */
+            totalGrossRevenue: number;
+            /** @example 12000000 */
+            totalSystemCommissionRevenue: number;
+            /** @example 108000000 */
+            totalNetPayoutRevenue: number;
+        };
+        InvoiceRevenueTransactionListDto: {
+            items: components["schemas"]["InvoiceRevenueTransactionDto"][];
+            /** @example 100 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 5 */
+            totalPages: number;
+        };
+        InvoiceMyRevenueOverviewDto: {
+            /** @example 12 */
+            invoiceCount: number;
+            /** @example 180000000 */
+            totalGrossRevenue: number;
+            /** @example 18000000 */
+            totalSystemCommissionAmount: number;
+            /** @example 162000000 */
+            totalNetPayoutRevenue: number;
+        };
+        InvoiceRevenueUserStatsDto: {
+            /** @example 120 */
+            totalActiveUsers: number;
+            /** @example 18 */
+            totalActivePartners: number;
+            /** @example 102 */
+            totalActiveNonPartnerUsers: number;
+            /** @example 0.15 */
+            partnerRatio: number;
+            /** @example 0.85 */
+            userRatio: number;
+        };
+        InvoiceRevenueOccupancyStatsDto: {
+            /** @example 35 */
+            occupiedApartmentCount: number;
+            /** @example 14 */
+            vacantApartmentCount: number;
+        };
+        InvoiceRevenueApartmentRankingItemDto: {
+            apartmentId: string;
+            /** @example A101 */
+            apartmentNumber: string;
+            /** @example Vinhomes Central Park */
+            buildingName?: string | null;
+            /** @example 72000000 */
+            paidRevenue: number;
+            /** @example 4 */
+            invoiceCount: number;
+        };
+        InvoiceRevenueApartmentRankingSummaryDto: {
+            topApartments: components["schemas"]["InvoiceRevenueApartmentRankingItemDto"][];
+            bottomApartments: components["schemas"]["InvoiceRevenueApartmentRankingItemDto"][];
+        };
+        InvoiceRevenueSystemSummaryDto: {
+            /** @example 350000000 */
+            totalPaidRevenue: number;
+            /** @example 275000000 */
+            totalSystemRevenue: number;
+            /** @example 100000000 */
+            totalPartnerGrossRevenue: number;
+            /** @example 85000000 */
+            totalPartnerNetPayout: number;
+            /** @example 25 */
+            invoiceCount: number;
+        };
+        InvoiceRevenueDashboardDto: {
+            userStats: components["schemas"]["InvoiceRevenueUserStatsDto"];
+            occupancyStats: components["schemas"]["InvoiceRevenueOccupancyStatsDto"];
+            apartmentRevenueStats: components["schemas"]["InvoiceRevenueApartmentRankingSummaryDto"];
+            systemRevenueSummary: components["schemas"]["InvoiceRevenueSystemSummaryDto"];
+        };
+        InvoiceRevenueTimeseriesItemDto: {
+            /** @example 2026-04 */
+            periodKey: string;
+            /** @example 04/2026 */
+            periodLabel: string;
+            /** @example 95000000 */
+            totalPaidRevenue: number;
+            /** @example 72000000 */
+            totalSystemRevenue: number;
+            /** @example 23000000 */
+            totalPartnerGrossRevenue: number;
+            /** @example 20700000 */
+            totalPartnerNetPayout: number;
+            /** @example 7 */
+            invoiceCount: number;
+        };
+        InvoiceRevenueTimeseriesDto: {
+            /**
+             * @example month
+             * @enum {string}
+             */
+            granularity: "month" | "year";
+            /** @example 2026-01-01T00:00:00.000Z */
+            from?: string | null;
+            /** @example 2026-12-31T23:59:59.999Z */
+            to?: string | null;
+            items: components["schemas"]["InvoiceRevenueTimeseriesItemDto"][];
+        };
+        InvoicePartnerPayoutPartnerInfoDto: {
+            id: string;
+            fullName: string;
+            companyName?: string | null;
+        };
+        InvoicePartnerPayoutSummaryItemDto: {
+            partner: components["schemas"]["InvoicePartnerPayoutPartnerInfoDto"];
+            /** @example 2026-04 */
+            periodMonth: string;
+            /** Format: date-time */
+            periodStart: string;
+            /** Format: date-time */
+            periodEnd: string;
+            /** @example 12 */
+            invoiceCount: number;
+            /** @example 3 */
+            apartmentCount: number;
+            /** @example 150000000 */
+            totalGrossAmount: number;
+            /** @example 15000000 */
+            totalSystemCommissionAmount: number;
+            /** @example 135000000 */
+            totalNetPayoutAmount: number;
+            /** @example false */
+            isTransferred: boolean;
+            transferProofImageUrl?: string | null;
+            transferNote?: string | null;
+            /** Format: date-time */
+            confirmedAt?: string | null;
+            confirmedByStaffId?: string | null;
+            confirmedByStaffName?: string | null;
+        };
+        InvoicePartnerPayoutSummaryListDto: {
+            items: components["schemas"]["InvoicePartnerPayoutSummaryItemDto"][];
+            /** @example 10 */
+            total: number;
+            /** @example 1 */
+            page: number;
+            /** @example 20 */
+            limit: number;
+            /** @example 1 */
+            totalPages: number;
+        };
+        ConfirmInvoicePartnerPayoutResultDto: {
+            payout: components["schemas"]["InvoicePartnerPayoutSummaryItemDto"];
+        };
+        ConfirmInvoicePartnerPayoutDto: {
+            /**
+             * Format: uuid
+             * @description Partner user id to confirm monthly transfer
+             * @example 9fbc9e7e-5a4d-4f38-9ba8-cc96af4f0eaf
+             */
+            partnerId: string;
+            /**
+             * @description Month in YYYY-MM format
+             * @example 2026-04
+             */
+            month: string;
+            /** @example Da chuyen khoan du ngay 05/04/2026 */
+            note?: string;
+            /**
+             * Format: binary
+             * @description Transfer proof image (JPEG/PNG/WebP)
+             */
+            transferProof: string;
         };
         InvoiceMePaymentSummaryDto: {
             paymentId?: string | null;
@@ -5787,12 +6035,6 @@ export interface components {
             isRated: boolean;
             apartment: components["schemas"]["MaintenanceApartmentDto"];
         };
-        MaintenanceRoomDto: {
-            /** @example R01 */
-            roomNumber: string;
-            /** @example bedroom */
-            roomType: string;
-        };
         MaintenanceHistoryItemDto: {
             id: string;
             /** @example Broken AC in bedroom */
@@ -5824,7 +6066,6 @@ export interface components {
             /** @example true */
             isRated: boolean;
             apartment: components["schemas"]["MaintenanceApartmentDto"];
-            room?: components["schemas"]["MaintenanceRoomDto"] | null;
         };
         MaintenanceUserDto: {
             id: string;
@@ -5838,7 +6079,6 @@ export interface components {
             userId: string;
             rentalContractId: string;
             apartmentId: string;
-            roomId?: string | null;
             /** @example hvac */
             category: string;
             /** @example Broken AC in bedroom */
@@ -5883,7 +6123,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             apartment: components["schemas"]["MaintenanceApartmentDto"];
-            room?: components["schemas"]["MaintenanceRoomDto"] | null;
             user: components["schemas"]["MaintenanceUserDto"];
         };
         MaintenanceCreatedDto: {
@@ -5901,11 +6140,6 @@ export interface components {
              * @description Apartment ID
              */
             apartmentId: string;
-            /**
-             * Format: uuid
-             * @description Room ID if specific to a room
-             */
-            roomId?: string;
             /** @example Broken air conditioner */
             title: string;
             /** @example AC unit in bedroom not cooling properly */
@@ -6194,7 +6428,11 @@ export interface components {
             moveInDate?: string | null;
             /** Format: date-time */
             moveOutDate?: string | null;
-            apartmentDoorPassword?: string | null;
+            /**
+             * @description True only when a matching door smart-lock exists and its PIN has not been initialized yet. Apartments without a door smart-lock return false.
+             * @example true
+             */
+            isFirstPass: boolean;
             buildingGateCode?: string | null;
             smartLockPin?: string | null;
             mailboxCode?: string | null;
@@ -6445,7 +6683,11 @@ export interface components {
             moveInDate?: string | null;
             /** Format: date-time */
             moveOutDate?: string | null;
-            apartmentDoorPassword?: string | null;
+            /**
+             * @description True only when a matching door smart-lock exists and its PIN has not been initialized yet. Apartments without a door smart-lock return false.
+             * @example true
+             */
+            isFirstPass: boolean;
             buildingGateCode?: string | null;
             smartLockPin?: string | null;
             mailboxCode?: string | null;
@@ -6475,7 +6717,11 @@ export interface components {
             moveInDate?: string | null;
             /** Format: date-time */
             moveOutDate?: string | null;
-            apartmentDoorPassword?: string | null;
+            /**
+             * @description True only when a matching door smart-lock exists and its PIN has not been initialized yet. Apartments without a door smart-lock return false.
+             * @example true
+             */
+            isFirstPass: boolean;
             buildingGateCode?: string | null;
             smartLockPin?: string | null;
             mailboxCode?: string | null;
@@ -6494,7 +6740,7 @@ export interface components {
         };
         UpdateUserApartmentAccessDto: {
             /**
-             * @description Apartment door password/PIN
+             * @description Legacy cached local house password field. This does not control smart-lock first-pass PIN state.
              * @example 2580
              */
             apartmentDoorPassword?: string;
@@ -6546,7 +6792,7 @@ export interface components {
         };
         UpdateHousePasswordDto: {
             /**
-             * @description New apartment door password (4-12 digits)
+             * @description New legacy cached local house password (4-12 digits). This does not update smart-lock first-pass PIN state.
              * @example 258036
              */
             housePassword: string;
@@ -6669,7 +6915,7 @@ export interface components {
             id: string;
             /** @example A101 */
             apartmentNumber: string;
-            /** @example 123 Nguyen Hue, Q1 */
+            /** @example 123 Nguyễn Huệ, Quận 1 */
             address: string;
             /** @example 15000000.00 */
             baseRentPrice: string;
@@ -6942,258 +7188,6 @@ export interface components {
              * @example true
              */
             isActive: boolean;
-        };
-        RevenueApartmentDto: {
-            id: string;
-            apartmentNumber: string;
-            buildingName?: string | null;
-        };
-        RevenueContractDto: {
-            id: string;
-            contractNumber: string;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-            status: string;
-        };
-        RevenuePartnerDto: {
-            id: string;
-            fullName: string;
-            companyName?: string | null;
-        };
-        RevenueCooperationContractDto: {
-            id: string;
-            contractNumber: string;
-            /** @example 10 */
-            commissionRate: number;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-        };
-        RevenueTransactionDto: {
-            invoiceId: string;
-            invoiceNumber: string;
-            invoiceType: string;
-            /** Format: date-time */
-            invoicePaidAt: string;
-            /** @example 12000000 */
-            invoiceAmount: number;
-            /** @example true */
-            isPartnerApartment: boolean;
-            /** @example 10 */
-            commissionRateApplied: number | null;
-            /** @example 1200000 */
-            systemRevenueAmount: number;
-            /** @example 12000000 */
-            partnerGrossRevenueAmount: number;
-            /** @example 10800000 */
-            partnerNetPayoutAmount: number;
-            apartment: components["schemas"]["RevenueApartmentDto"];
-            contract: components["schemas"]["RevenueContractDto"];
-            partner?: components["schemas"]["RevenuePartnerDto"] | null;
-            cooperationContract?: components["schemas"]["RevenueCooperationContractDto"] | null;
-        };
-        RevenueOverviewDto: {
-            /** @example 25 */
-            invoiceCount: number;
-            /** @example 350000000 */
-            totalInvoiceAmount: number;
-            /** @example 275000000 */
-            totalSystemRevenue: number;
-            /** @example 100000000 */
-            totalPartnerGrossRevenue: number;
-            /** @example 85000000 */
-            totalPartnerNetPayout: number;
-            invoices: components["schemas"]["RevenueTransactionDto"][];
-            /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 2 */
-            totalPages: number;
-        };
-        PartnerRevenueSummaryItemDto: {
-            partner: components["schemas"]["RevenuePartnerDto"];
-            /** @example 10 */
-            invoiceCount: number;
-            /** @example 2 */
-            apartmentCount: number;
-            /** @example 3 */
-            contractCount: number;
-            /** @example 120000000 */
-            totalGrossRevenue: number;
-            /** @example 12000000 */
-            totalSystemCommissionRevenue: number;
-            /** @example 108000000 */
-            totalNetPayoutRevenue: number;
-        };
-        RevenueTransactionListDto: {
-            items: components["schemas"]["RevenueTransactionDto"][];
-            /** @example 100 */
-            total: number;
-            /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 5 */
-            totalPages: number;
-        };
-        PartnerMyRevenueOverviewDto: {
-            /** @example 12 */
-            invoiceCount: number;
-            /** @example 180000000 */
-            totalGrossRevenue: number;
-            /** @example 18000000 */
-            totalSystemCommissionAmount: number;
-            /** @example 162000000 */
-            totalNetPayoutRevenue: number;
-        };
-        RevenueUserStatsDto: {
-            /** @example 120 */
-            totalActiveUsers: number;
-            /** @example 18 */
-            totalActivePartners: number;
-            /** @example 102 */
-            totalActiveNonPartnerUsers: number;
-            /** @example 0.15 */
-            partnerRatio: number;
-            /** @example 0.85 */
-            userRatio: number;
-        };
-        RevenueOccupancyStatsDto: {
-            /** @example 35 */
-            occupiedApartmentCount: number;
-            /** @example 14 */
-            vacantApartmentCount: number;
-        };
-        RevenueApartmentRankingItemDto: {
-            apartmentId: string;
-            /** @example A101 */
-            apartmentNumber: string;
-            /** @example Vinhomes Central Park */
-            buildingName?: string | null;
-            /** @example 72000000 */
-            paidRevenue: number;
-            /** @example 4 */
-            invoiceCount: number;
-        };
-        RevenueApartmentRankingSummaryDto: {
-            topApartments: components["schemas"]["RevenueApartmentRankingItemDto"][];
-            bottomApartments: components["schemas"]["RevenueApartmentRankingItemDto"][];
-        };
-        RevenueSystemSummaryDto: {
-            /** @example 350000000 */
-            totalPaidRevenue: number;
-            /** @example 275000000 */
-            totalSystemRevenue: number;
-            /** @example 100000000 */
-            totalPartnerGrossRevenue: number;
-            /** @example 85000000 */
-            totalPartnerNetPayout: number;
-            /** @example 25 */
-            invoiceCount: number;
-        };
-        RevenueDashboardDto: {
-            userStats: components["schemas"]["RevenueUserStatsDto"];
-            occupancyStats: components["schemas"]["RevenueOccupancyStatsDto"];
-            apartmentRevenueStats: components["schemas"]["RevenueApartmentRankingSummaryDto"];
-            systemRevenueSummary: components["schemas"]["RevenueSystemSummaryDto"];
-        };
-        RevenueTimeseriesItemDto: {
-            /** @example 2026-04 */
-            periodKey: string;
-            /** @example 04/2026 */
-            periodLabel: string;
-            /** @example 95000000 */
-            totalPaidRevenue: number;
-            /** @example 72000000 */
-            totalSystemRevenue: number;
-            /** @example 23000000 */
-            totalPartnerGrossRevenue: number;
-            /** @example 20700000 */
-            totalPartnerNetPayout: number;
-            /** @example 7 */
-            invoiceCount: number;
-        };
-        RevenueTimeseriesDto: {
-            /**
-             * @example month
-             * @enum {string}
-             */
-            granularity: "month" | "year";
-            /** @example 2026-01-01T00:00:00.000Z */
-            from?: string | null;
-            /** @example 2026-12-31T23:59:59.999Z */
-            to?: string | null;
-            items: components["schemas"]["RevenueTimeseriesItemDto"][];
-        };
-        PartnerPayoutPartnerInfoDto: {
-            id: string;
-            fullName: string;
-            companyName?: string | null;
-        };
-        PartnerPayoutSummaryItemDto: {
-            partner: components["schemas"]["PartnerPayoutPartnerInfoDto"];
-            /** @example 2026-04 */
-            periodMonth: string;
-            /** Format: date-time */
-            periodStart: string;
-            /** Format: date-time */
-            periodEnd: string;
-            /** @example 12 */
-            invoiceCount: number;
-            /** @example 3 */
-            apartmentCount: number;
-            /** @example 150000000 */
-            totalGrossAmount: number;
-            /** @example 15000000 */
-            totalSystemCommissionAmount: number;
-            /** @example 135000000 */
-            totalNetPayoutAmount: number;
-            /** @example false */
-            isTransferred: boolean;
-            transferProofImageUrl?: string | null;
-            transferNote?: string | null;
-            /** Format: date-time */
-            confirmedAt?: string | null;
-            confirmedByStaffId?: string | null;
-            confirmedByStaffName?: string | null;
-        };
-        PartnerPayoutSummaryListDto: {
-            items: components["schemas"]["PartnerPayoutSummaryItemDto"][];
-            /** @example 10 */
-            total: number;
-            /** @example 1 */
-            page: number;
-            /** @example 20 */
-            limit: number;
-            /** @example 1 */
-            totalPages: number;
-        };
-        ConfirmPartnerPayoutResultDto: {
-            payout: components["schemas"]["PartnerPayoutSummaryItemDto"];
-        };
-        ConfirmPartnerPayoutDto: {
-            /**
-             * Format: uuid
-             * @description Partner user id to confirm monthly transfer
-             * @example 9fbc9e7e-5a4d-4f38-9ba8-cc96af4f0eaf
-             */
-            partnerId: string;
-            /**
-             * @description Month in YYYY-MM format
-             * @example 2026-04
-             */
-            month: string;
-            /** @example Da chuyen khoan du ngay 05/04/2026 */
-            note?: string;
-            /**
-             * Format: binary
-             * @description Transfer proof image (JPEG/PNG/WebP)
-             */
-            transferProof: string;
         };
     };
     responses: never;
@@ -9503,7 +9497,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Contract activated after deposit payment validation */
+            /** @description Contract force-activated for frontend testing */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9529,7 +9523,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Contract cannot be activated because it is expired, invalid status, or deposit not paid */
+            /** @description Contract cannot be activated because it is expired or in an unsupported final status */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10243,6 +10237,354 @@ export interface operations {
                             timestamp?: string;
                         };
                     };
+                };
+            };
+        };
+    };
+    InvoicesController_getOverview: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Filter by partner owner userId */
+                partnerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revenue overview for system and partner payout context */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoiceRevenueOverviewDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getPartnerSummaries: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Filter by partner owner userId */
+                partnerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Partner revenue summaries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoicePartnerRevenueSummaryItemDto"][];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getTransactions: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Filter by partner owner userId */
+                partnerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated revenue transaction list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoiceRevenueTransactionListDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getMyOverview: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Filter by partner owner userId */
+                partnerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Partner own revenue overview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoiceMyRevenueOverviewDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getMyTransactions: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Filter by partner owner userId */
+                partnerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated partner own revenue transactions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoiceRevenueTransactionListDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getDashboard: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Number of apartments returned for top and bottom rankings */
+                topLimit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Dashboard summary for operator/admin back office */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoiceRevenueDashboardDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getRevenueTimeseries: {
+        parameters: {
+            query?: {
+                /** @description Start date filter based on invoice paidAt */
+                from?: string;
+                /** @description End date filter based on invoice paidAt */
+                to?: string;
+                /** @description Grouping granularity for system revenue timeseries */
+                granularity?: "month" | "year";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revenue timeseries grouped by month or year */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoiceRevenueTimeseriesDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_getStaffPartnerPayoutSummaries: {
+        parameters: {
+            query?: {
+                /** @description Month in YYYY-MM format. Default is current month */
+                month?: string;
+                /** @description Filter by partner user id */
+                partnerId?: string;
+                page?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated partner payout summaries for selected month */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["InvoicePartnerPayoutSummaryListDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+        };
+    };
+    InvoicesController_confirmStaffPartnerPayout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ConfirmInvoicePartnerPayoutDto"];
+            };
+        };
+        responses: {
+            /** @description Partner payout confirmation saved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example 200 */
+                        statusCode?: number;
+                        /** @example Success */
+                        message?: string;
+                        data?: components["schemas"]["ConfirmInvoicePartnerPayoutResultDto"];
+                        meta?: {
+                            /** @example 2026-02-26T10:21:00.000Z */
+                            timestamp?: string;
+                        };
+                    };
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfirmInvoicePartnerPayoutResultDto"];
                 };
             };
         };
@@ -12544,354 +12886,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    RevenueController_getOverview: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Revenue overview for system and partner payout context */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueOverviewDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getPartnerSummaries: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner revenue summaries */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerRevenueSummaryItemDto"][];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getTransactions: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated revenue transaction list */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueTransactionListDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getMyPartnerOverview: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Partner own revenue overview */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerMyRevenueOverviewDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getMyPartnerTransactions: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Filter by partner owner userId */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated partner own revenue transactions */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueTransactionListDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getDashboard: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Number of apartments returned for top and bottom rankings */
-                topLimit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Dashboard summary for operator/admin back office */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueDashboardDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getRevenueTimeseries: {
-        parameters: {
-            query?: {
-                /** @description Start date filter based on invoice paidAt */
-                from?: string;
-                /** @description End date filter based on invoice paidAt */
-                to?: string;
-                /** @description Grouping granularity for system revenue timeseries */
-                granularity?: "month" | "year";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Revenue timeseries grouped by month or year */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["RevenueTimeseriesDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_getStaffPartnerPayoutSummaries: {
-        parameters: {
-            query?: {
-                /** @description Month in YYYY-MM format. Default is current month */
-                month?: string;
-                /** @description Filter by partner user id */
-                partnerId?: string;
-                page?: number;
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated partner payout summaries for selected month */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["PartnerPayoutSummaryListDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-        };
-    };
-    RevenueController_confirmStaffPartnerPayout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["ConfirmPartnerPayoutDto"];
-            };
-        };
-        responses: {
-            /** @description Partner payout confirmation saved successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 200 */
-                        statusCode?: number;
-                        /** @example Success */
-                        message?: string;
-                        data?: components["schemas"]["ConfirmPartnerPayoutResultDto"];
-                        meta?: {
-                            /** @example 2026-02-26T10:21:00.000Z */
-                            timestamp?: string;
-                        };
-                    };
-                };
-            };
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConfirmPartnerPayoutResultDto"];
-                };
             };
         };
     };

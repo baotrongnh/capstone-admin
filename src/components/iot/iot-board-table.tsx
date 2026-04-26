@@ -16,12 +16,23 @@ type IotBoardTableProps = {
           onEditBoard: (board: IotBoardItem) => void
           onViewBoardDetails: (board: IotBoardItem) => void
           onActivateBoard: (board: IotBoardItem) => void
+          onCheckBoardHealth: (board: IotBoardItem) => void
           onDeleteBoard: (boardId: string, boardName: string) => void
      }
 }
 
 export const IotBoardTable = ({ data }: IotBoardTableProps) => {
-     const { boards, isLoading, isDeletingBoard, isUpdatingBoard, onEditBoard, onViewBoardDetails, onActivateBoard, onDeleteBoard } = data
+     const {
+          boards,
+          isLoading,
+          isDeletingBoard,
+          isUpdatingBoard,
+          onEditBoard,
+          onViewBoardDetails,
+          onActivateBoard,
+          onCheckBoardHealth,
+          onDeleteBoard,
+     } = data
 
      return (
           <div className="relative overflow-x-auto rounded-xl border bg-white shadow-sm">
@@ -98,6 +109,9 @@ export const IotBoardTable = ({ data }: IotBoardTableProps) => {
                                                   <DropdownMenuContent align="end" className="w-44">
                                                        <DropdownMenuItem onClick={() => onViewBoardDetails(board)}>
                                                             Xem chi tiết
+                                                       </DropdownMenuItem>
+                                                       <DropdownMenuItem onClick={() => onCheckBoardHealth(board)}>
+                                                            Check online
                                                        </DropdownMenuItem>
                                                        <DropdownMenuItem onClick={() => onEditBoard(board)}>
                                                             Chỉnh sửa

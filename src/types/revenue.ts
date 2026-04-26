@@ -1,9 +1,9 @@
 import type { paths } from "@/types/api"
 
-export type RevenueOverviewQuery = paths["/api/v1/revenues/overview"]["get"]["parameters"]["query"]
+export type RevenueOverviewQuery = paths["/api/v1/invoices/overview"]["get"]["parameters"]["query"]
 
 export type RevenueOverviewData = NonNullable<
-     paths["/api/v1/revenues/overview"]["get"]["responses"]["200"]["content"]["application/json"]["data"]
+     paths["/api/v1/invoices/overview"]["get"]["responses"]["200"]["content"]["application/json"]["data"]
 >
 
 export type RevenuePeriod = "day" | "month" | "quarter" | "year"
@@ -46,24 +46,24 @@ export type RevenueDashboardData = {
      piePoint: RevenuePoint | null
 }
 
-export type RevenueDashboardQuery = paths["/api/v1/revenues/dashboard"]["get"]["parameters"]["query"]
+export type RevenueDashboardQuery = paths["/api/v1/invoices/dashboard"]["get"]["parameters"]["query"]
 
-export type RevenueDashboardResponse = paths["/api/v1/revenues/dashboard"]["get"]["responses"]["200"]["content"]["application/json"]
+export type RevenueDashboardResponse = paths["/api/v1/invoices/dashboard"]["get"]["responses"]["200"]["content"]["application/json"]
 
 export type RevenueDashboardApiData = NonNullable<RevenueDashboardResponse["data"]>
 
 export type RevenueDashboardRankingItem = RevenueDashboardApiData["apartmentRevenueStats"]["topApartments"][number]
 
-export type StaffPartnerPayoutListQuery = paths["/api/v1/revenues/staff/partner-payouts"]["get"]["parameters"]["query"]
+export type StaffPartnerPayoutListQuery = paths["/api/v1/invoices/staff/partner-payouts"]["get"]["parameters"]["query"]
 
-export type StaffPartnerPayoutListResponse = paths["/api/v1/revenues/staff/partner-payouts"]["get"]["responses"]["200"]["content"]["application/json"]
+export type StaffPartnerPayoutListResponse = paths["/api/v1/invoices/staff/partner-payouts"]["get"]["responses"]["200"]["content"]["application/json"]
 
 export type StaffPartnerPayoutListData = NonNullable<StaffPartnerPayoutListResponse["data"]>
 
 export type StaffPartnerPayoutItem = StaffPartnerPayoutListData["items"][number]
 
-export type StaffPartnerPayoutConfirmRequest = paths["/api/v1/revenues/staff/partner-payouts/confirm"]["post"]["requestBody"]["content"]["multipart/form-data"]
+export type StaffPartnerPayoutConfirmRequest = paths["/api/v1/invoices/staff/partner-payouts/confirm"]["post"]["requestBody"]["content"]["multipart/form-data"]
 
-export type StaffPartnerPayoutConfirmResponse = paths["/api/v1/revenues/staff/partner-payouts/confirm"]["post"]["responses"]["200"]["content"]["application/json"]
+export type StaffPartnerPayoutConfirmResponse = paths["/api/v1/invoices/staff/partner-payouts/confirm"]["post"]["responses"]["200"]["content"]["application/json"]
 
 export type StaffPartnerPayoutConfirmResult = NonNullable<StaffPartnerPayoutConfirmResponse["data"]>

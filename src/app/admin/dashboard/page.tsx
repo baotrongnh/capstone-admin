@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { RevenueDashboardInsights } from "@/components/revenue/revenue-dashboard-insights"
+import { ROUTE_ADMIN } from "@/constant/routes"
 import {
      RevenueDateRangePicker,
      type RevenueDateRangeValue,
@@ -85,6 +86,7 @@ export default function Dashboard() {
                          data={data}
                          isLoading={isLoading}
                          className="px-4 lg:px-6"
+                         invoiceCountHref={ROUTE_ADMIN.INVOICES}
                     />
                </div>
           </div>

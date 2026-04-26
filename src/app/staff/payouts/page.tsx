@@ -1,8 +1,11 @@
-"use client"
+﻿"use client"
+
+import { useMemo, useState } from "react"
+import { RefreshCcwIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
      Dialog,
      DialogContent,
@@ -12,296 +15,315 @@ import {
      DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import {
-     useConfirmStaffPartnerPayout,
-     useStaffPartnerPayouts,
-} from "@/hooks/query/useRevenues"
-import type { StaffPartnerPayoutItem } from "@/types/revenue"
+     useConfirmContractDepositPayout,
+     useConfirmPartnerMonthlyPayout,
+     useDueContractDepositPayouts,
+     useDuePartnerMonthlyPayouts,
+} from "@/hooks/query/usePayments"
+import type { ContractDepositPayoutItem, PartnerMonthlyPayoutItem } from "@/types/payment"
 import { formatDateTime, formatVND } from "@/utils/format"
-import { CalendarIcon, RefreshCcwIcon } from "lucide-react"
-import { useMemo, useState } from "react"
-import { vi } from "date-fns/locale"
 import { toast } from "sonner"
 
-const ALL_PARTNERS = "__all__"
+type PayoutKind = "partner" | "deposit"
+
+type ConfirmTarget =
+     | { kind: "partner"; item: PartnerMonthlyPayoutItem }
+     | { kind: "deposit"; item: ContractDepositPayoutItem }
 
 const toMonthValue = (date: Date) => {
+     const month = String(date.getMonth() + 1).padStart(2, "0")
+     return `${date.getFullYear()}-${month}`
+}
+
+const previousMonth = () => {
      const now = new Date()
-     const source = Number.isNaN(date.getTime()) ? now : date
-     const month = String(source.getMonth() + 1).padStart(2, "0")
-     return `${source.getFullYear()}-${month}`
+     return new Date(now.getFullYear(), now.getMonth() - 1, 1)
 }
 
-const parseMonthValue = (value: string) => {
-     const [year, month] = value.split("-").map(Number)
-     if (!year || !month) {
-          return new Date()
+const getStatusLabel = (status?: string | null) => {
+     switch (status) {
+          case "pending":
+               return "Chờ chi trả"
+          case "paid":
+               return "Đã chi trả"
+          case "refunded":
+               return "Đã hoàn cọc"
+          default:
+               return status || "-"
      }
-     return new Date(year, month - 1, 1)
 }
 
-const formatMonthLabelVi = (value: string) =>
-     parseMonthValue(value).toLocaleDateString("vi-VN", {
-          month: "long",
-          year: "numeric",
-     })
+const getStatusClass = (status?: string | null) => {
+     switch (status) {
+          case "paid":
+          case "refunded":
+               return "border-emerald-200 bg-emerald-100 text-emerald-700"
+          default:
+               return "border-amber-200 bg-amber-100 text-amber-700"
+     }
+}
+
+const toMoney = (value?: string | number | null) => formatVND(value ?? 0, true)
 
 export default function StaffPartnerPayoutsPage() {
-     const [monthFilter, setMonthFilter] = useState(() => toMonthValue(new Date()))
-     const [partnerFilter, setPartnerFilter] = useState(ALL_PARTNERS)
-     const [openConfirm, setOpenConfirm] = useState(false)
-     const [selectedPayout, setSelectedPayout] = useState<StaffPartnerPayoutItem | null>(null)
-     const [confirmNote, setConfirmNote] = useState("")
-     const [transferProofFile, setTransferProofFile] = useState<File | null>(null)
+     const [activeTab, setActiveTab] = useState<PayoutKind>("partner")
+     const [month, setMonth] = useState(() => toMonthValue(previousMonth()))
+     const [target, setTarget] = useState<ConfirmTarget | null>(null)
+     const [transferReference, setTransferReference] = useState("")
+     const [transferNote, setTransferNote] = useState("")
+     const [refundReason, setRefundReason] = useState("")
+     const [transferProof, setTransferProof] = useState<File | null>(null)
 
-     const queryParams = {
-          month: monthFilter || undefined,
-          partnerId: partnerFilter === ALL_PARTNERS ? undefined : partnerFilter,
-          page: 1,
-          limit: 50,
+     const query = useMemo(() => ({ month: month || undefined }), [month])
+     const partnerQuery = useDuePartnerMonthlyPayouts(query)
+     const depositQuery = useDueContractDepositPayouts(query)
+     const confirmPartner = useConfirmPartnerMonthlyPayout()
+     const confirmDeposit = useConfirmContractDepositPayout()
+
+     const partnerPayouts = partnerQuery.data ?? []
+     const depositPayouts = depositQuery.data ?? []
+     const isLoading = activeTab === "partner" ? partnerQuery.isLoading : depositQuery.isLoading
+     const isFetching = partnerQuery.isFetching || depositQuery.isFetching
+     const isConfirming = confirmPartner.isPending || confirmDeposit.isPending
+
+     const resetDialog = () => {
+          setTarget(null)
+          setTransferReference("")
+          setTransferNote("")
+          setRefundReason("")
+          setTransferProof(null)
      }
 
-     const { data: payoutList, isLoading, isFetching, refetch } = useStaffPartnerPayouts(queryParams)
-     const confirmPayoutMutation = useConfirmStaffPartnerPayout()
-
-     const payouts = useMemo(() => payoutList?.items ?? [], [payoutList])
-
-     const partnerOptions = useMemo(
-          () =>
-               Array.from(
-                    new Map(
-                         payouts.map((item) => [item.partner.id, item.partner]),
-                    ).values(),
-               ),
-          [payouts],
-     )
-
-     const openConfirmDialog = (item: StaffPartnerPayoutItem) => {
-          setSelectedPayout(item)
-          setConfirmNote("")
-          setTransferProofFile(null)
-          setOpenConfirm(true)
+     const openConfirm = (nextTarget: ConfirmTarget) => {
+          setTarget(nextTarget)
+          setTransferReference("")
+          setTransferNote(nextTarget.kind === "partner" ? `Chi trả doanh thu tháng ${nextTarget.item.payoutMonth}` : "Hoàn trả tiền cọc hợp đồng")
+          setRefundReason(nextTarget.kind === "deposit" ? "Hợp đồng đã kết thúc, hoàn trả tiền cọc" : "")
+          setTransferProof(null)
      }
 
-     const closeConfirmDialog = () => {
-          setOpenConfirm(false)
-          setSelectedPayout(null)
-          setConfirmNote("")
-          setTransferProofFile(null)
+     const refetch = () => {
+          partnerQuery.refetch()
+          depositQuery.refetch()
      }
 
-     const handleConfirmPayout = async () => {
-          if (!selectedPayout) {
-               return
-          }
-
-          if (!transferProofFile) {
+     const handleConfirm = async () => {
+          if (!target) return
+          if (!transferProof) {
                toast.error("Vui lòng chọn ảnh minh chứng chuyển khoản.")
                return
           }
 
           try {
-               await confirmPayoutMutation.mutateAsync({
-                    partnerId: selectedPayout.partner.id,
-                    month: selectedPayout.periodMonth,
-                    note: confirmNote.trim() || undefined,
-                    transferProof: transferProofFile,
-               })
-               closeConfirmDialog()
+               if (target.kind === "partner") {
+                    await confirmPartner.mutateAsync({
+                         partnerId: target.item.partnerId,
+                         payoutMonth: target.item.payoutMonth,
+                         transferReference,
+                         transferNote,
+                         transferProof,
+                    })
+               } else {
+                    await confirmDeposit.mutateAsync({
+                         contractId: target.item.contractId,
+                         transferReference,
+                         transferNote,
+                         refundReason,
+                         transferProof,
+                    })
+               }
+
+               resetDialog()
           } catch {
-               // Error toast handled in mutation hook.
           }
      }
 
      return (
           <div className="space-y-5">
-               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                         <h1 className="text-2xl font-bold text-gray-900">Chi trả doanh thu đối tác</h1>
+                         <h1 className="text-2xl font-bold text-gray-900">Chi trả</h1>
                          <p className="text-sm text-muted-foreground">
-                              Theo dõi doanh thu chi trả theo tháng và xác nhận chuyển khoản cho partner.
+                              Quản lý chi trả doanh thu đối tác và hoàn tiền cọc đến hạn theo tháng.
                          </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                         <Popover>
-                              <PopoverTrigger asChild>
-                                   <Button variant="outline" className="w-55 justify-start text-left font-normal">
-                                        <CalendarIcon className="mr-2 size-4" />
-                                        {formatMonthLabelVi(monthFilter)}
-                                   </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start">
-                                   <Calendar
-                                        mode="single"
-                                        locale={vi}
-                                        formatters={{
-                                             formatMonthDropdown: (date) =>
-                                                  date.toLocaleString("vi-VN", { month: "long" }),
-                                        }}
-                                        selected={parseMonthValue(monthFilter)}
-                                        onSelect={(date) => {
-                                             if (date) {
-                                                  setMonthFilter(toMonthValue(date))
-                                             }
-                                        }}
-                                        captionLayout="dropdown"
-                                   />
-                              </PopoverContent>
-                         </Popover>
-
-                         <Select value={partnerFilter} onValueChange={setPartnerFilter}>
-                              <SelectTrigger className="w-70">
-                                   <SelectValue placeholder="Lọc theo partner" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                   <SelectItem value={ALL_PARTNERS}>Tất cả partner</SelectItem>
-                                   {partnerOptions.map((partner) => (
-                                        <SelectItem key={partner.id} value={partner.id}>
-                                             {partner.fullName}
-                                        </SelectItem>
-                                   ))}
-                              </SelectContent>
-                         </Select>
-
-                         <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-                              <RefreshCcwIcon className="mr-1 size-4" />
+                         <Input className="h-9 w-[150px]" type="month" value={month} onChange={(event) => setMonth(event.target.value)} />
+                         <Button variant="outline" onClick={refetch} disabled={isFetching}>
+                              <RefreshCcwIcon className="size-4" />
                               Làm mới
                          </Button>
                     </div>
                </div>
 
-               <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-                    <Table>
-                         <TableHeader className="bg-muted/40">
-                              <TableRow>
-                                   <TableHead>Partner</TableHead>
-                                   <TableHead>Tháng</TableHead>
-                                   <TableHead>Số HĐ</TableHead>
-                                   <TableHead>Tổng gộp</TableHead>
-                                   <TableHead>Hoa hồng hệ thống</TableHead>
-                                   <TableHead>Thực nhận</TableHead>
-                                   <TableHead>Trạng thái</TableHead>
-                                   <TableHead>Xác nhận</TableHead>
-                                   <TableHead className="text-right">Thao tác</TableHead>
-                              </TableRow>
-                         </TableHeader>
-                         <TableBody>
-                              {isLoading ? (
-                                   <TableRow>
-                                        <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
-                                             Đang tải danh sách chi trả...
-                                        </TableCell>
-                                   </TableRow>
-                              ) : payouts.length === 0 ? (
-                                   <TableRow>
-                                        <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
-                                             Không có dữ liệu chi trả.
-                                        </TableCell>
-                                   </TableRow>
-                              ) : (
-                                   payouts.map((item) => (
-                                        <TableRow key={`${item.partner.id}-${item.periodMonth}`}>
-                                             <TableCell>
-                                                  <div className="space-y-1">
-                                                       <p className="font-semibold text-sm">{item.partner.fullName}</p>
-                                                       <p className="text-xs text-muted-foreground">{item.partner.companyName || item.partner.id}</p>
-                                                  </div>
-                                             </TableCell>
-                                             <TableCell>{item.periodMonth}</TableCell>
-                                             <TableCell>{item.invoiceCount}</TableCell>
-                                             <TableCell>{formatVND(item.totalGrossAmount, true)}</TableCell>
-                                             <TableCell>{formatVND(item.totalSystemCommissionAmount, true)}</TableCell>
-                                             <TableCell className="font-medium">{formatVND(item.totalNetPayoutAmount, true)}</TableCell>
-                                             <TableCell>
-                                                  <Badge className={`${item.isTransferred ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-amber-100 text-amber-700 border-amber-200"} border`}>
-                                                       {item.isTransferred ? "Đã chuyển" : "Chưa chuyển"}
-                                                  </Badge>
-                                             </TableCell>
-                                             <TableCell>
-                                                  <div className="space-y-1 text-xs text-muted-foreground">
-                                                       <p>{formatDateTime(item.confirmedAt)}</p>
-                                                       <p>{item.confirmedByStaffName || "-"}</p>
-                                                  </div>
-                                             </TableCell>
-                                             <TableCell className="text-right">
-                                                  <Button
-                                                       size="sm"
-                                                       disabled={item.isTransferred || confirmPayoutMutation.isPending}
-                                                       onClick={() => openConfirmDialog(item)}
-                                                  >
-                                                       Xác nhận CK
-                                                  </Button>
-                                             </TableCell>
-                                        </TableRow>
-                                   ))
-                              )}
-                         </TableBody>
-                    </Table>
-               </div>
+               <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PayoutKind)}>
+                    <TabsList>
+                         <TabsTrigger value="partner">Chi trả doanh thu</TabsTrigger>
+                         <TabsTrigger value="deposit">Trả tiền cọc</TabsTrigger>
+                    </TabsList>
 
-               <Dialog open={openConfirm} onOpenChange={(open) => {
-                    if (!open) {
-                         closeConfirmDialog()
-                         return
-                    }
-                    setOpenConfirm(true)
-               }}>
+                    <TabsContent value="partner">
+                         <Card>
+                              <CardHeader>
+                                   <CardTitle className="text-base">Chi trả doanh thu đến hạn ({partnerPayouts.length})</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                   <Table>
+                                        <TableHeader>
+                                             <TableRow>
+                                                  <TableHead>Đối tác</TableHead>
+                                                  <TableHead>Ngân hàng</TableHead>
+                                                  <TableHead>Kỳ</TableHead>
+                                                  <TableHead>Hạn trả</TableHead>
+                                                  <TableHead className="text-right">Số tiền</TableHead>
+                                                  <TableHead>Trạng thái</TableHead>
+                                                  <TableHead className="text-right">Thao tác</TableHead>
+                                             </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                             {isLoading ? (
+                                                  <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
+                                             ) : partnerPayouts.length === 0 ? (
+                                                  <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Không có chi trả doanh thu đến hạn.</TableCell></TableRow>
+                                             ) : partnerPayouts.map((item) => (
+                                                  <TableRow key={`${item.partnerId}-${item.payoutMonth}`}>
+                                                       <TableCell>
+                                                            <p className="font-medium">{item.partnerCompanyName || item.partnerName}</p>
+                                                            <p className="text-xs text-muted-foreground">{item.partnerName}</p>
+                                                       </TableCell>
+                                                       <TableCell>
+                                                            <p>{item.bankName || "-"}</p>
+                                                            <p className="text-xs text-muted-foreground">{item.bankAccountNumber || "-"}</p>
+                                                       </TableCell>
+                                                       <TableCell>{item.payoutMonth}</TableCell>
+                                                       <TableCell>{formatDateTime(item.dueDate)}</TableCell>
+                                                       <TableCell className="text-right font-semibold">{toMoney(item.payoutAmount)}</TableCell>
+                                                       <TableCell><Badge className={`${getStatusClass(item.status)} border`}>{getStatusLabel(item.status)}</Badge></TableCell>
+                                                       <TableCell className="text-right">
+                                                            <Button size="sm" onClick={() => openConfirm({ kind: "partner", item })} disabled={isConfirming}>
+                                                                 Xác nhận
+                                                            </Button>
+                                                       </TableCell>
+                                                  </TableRow>
+                                             ))}
+                                        </TableBody>
+                                   </Table>
+                              </CardContent>
+                         </Card>
+                    </TabsContent>
+
+                    <TabsContent value="deposit">
+                         <Card>
+                              <CardHeader>
+                                   <CardTitle className="text-base">Trả tiền cọc thuê nhà</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                   <Table>
+                                        <TableHeader>
+                                             <TableRow>
+                                                  <TableHead>Người nhận</TableHead>
+                                                  <TableHead>Hợp đồng</TableHead>
+                                                  <TableHead>Căn hộ</TableHead>
+                                                  <TableHead>Ngân hàng</TableHead>
+                                                  <TableHead>Hạn trả</TableHead>
+                                                  <TableHead className="text-right">Tiền cọc</TableHead>
+                                                  <TableHead>Trạng thái</TableHead>
+                                                  <TableHead className="text-right">Thao tác</TableHead>
+                                             </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                             {isLoading ? (
+                                                  <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
+                                             ) : depositPayouts.length === 0 ? (
+                                                  <TableRow><TableCell colSpan={8} className="py-8 text-center text-muted-foreground">Không có tiền cọc đến hạn trả.</TableCell></TableRow>
+                                             ) : depositPayouts.map((item) => (
+                                                  <TableRow key={item.contractId}>
+                                                       <TableCell>
+                                                            <p className="font-medium">{item.recipientFullName}</p>
+                                                            <p className="text-xs text-muted-foreground">{item.recipientPhone || "-"}</p>
+                                                       </TableCell>
+                                                       <TableCell>{item.contractNumber}</TableCell>
+                                                       <TableCell>{item.apartmentNumber}</TableCell>
+                                                       <TableCell>
+                                                            <p>{item.recipientBankName || "-"}</p>
+                                                            <p className="text-xs text-muted-foreground">{item.recipientBankAccountNumber || "-"}</p>
+                                                       </TableCell>
+                                                       <TableCell>{formatDateTime(item.dueDate)}</TableCell>
+                                                       <TableCell className="text-right font-semibold">{toMoney(item.payoutAmount)}</TableCell>
+                                                       <TableCell><Badge className={`${getStatusClass(item.status)} border`}>{getStatusLabel(item.status)}</Badge></TableCell>
+                                                       <TableCell className="text-right">
+                                                            <Button size="sm" onClick={() => openConfirm({ kind: "deposit", item })} disabled={isConfirming}>
+                                                                 Xác nhận
+                                                            </Button>
+                                                       </TableCell>
+                                                  </TableRow>
+                                             ))}
+                                        </TableBody>
+                                   </Table>
+                              </CardContent>
+                         </Card>
+                    </TabsContent>
+               </Tabs>
+
+               <Dialog open={!!target} onOpenChange={(open) => !open && resetDialog()}>
                     <DialogContent className="sm:max-w-xl">
                          <DialogHeader>
-                              <DialogTitle>Xác nhận chuyển khoản cho partner</DialogTitle>
+                              <DialogTitle>{target?.kind === "deposit" ? "Xác nhận trả tiền cọc" : "Xác nhận chi trả doanh thu"}</DialogTitle>
                               <DialogDescription>
-                                   Thực hiện POST /api/v1/revenues/staff/partner-payouts/confirm với ảnh minh chứng chuyển khoản.
+                                   Upload ảnh minh chứng và thông tin giao dịch sau khi đã chuyển khoản.
                               </DialogDescription>
                          </DialogHeader>
 
                          <div className="space-y-3 text-sm">
-                              <div className="rounded-lg border p-3">
-                                   <p><span className="text-muted-foreground">Partner:</span> {selectedPayout?.partner.fullName || "-"}</p>
-                                   <p><span className="text-muted-foreground">Tháng:</span> {selectedPayout?.periodMonth || "-"}</p>
-                                   <p><span className="text-muted-foreground">Số tiền chi trả:</span> {formatVND(selectedPayout?.totalNetPayoutAmount ?? 0, true)}</p>
-                              </div>
-
-                              <div className="space-y-1">
-                                   <p className="text-xs text-muted-foreground">Ghi chú chuyển khoản</p>
-                                   <Textarea
-                                        value={confirmNote}
-                                        onChange={(event) => setConfirmNote(event.target.value)}
-                                        rows={3}
-                                        placeholder="Ví dụ: Đã chuyển khoản lúc 10:30 ngày 08/04/2026"
-                                   />
-                              </div>
-
-                              <div className="space-y-1">
-                                   <p className="text-xs text-muted-foreground">Ảnh minh chứng chuyển khoản (bắt buộc)</p>
-                                   <Input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(event) => setTransferProofFile(event.target.files?.[0] ?? null)}
-                                   />
-                                   {selectedPayout?.transferProofImageUrl ? (
-                                        <a
-                                             href={selectedPayout.transferProofImageUrl}
-                                             target="_blank"
-                                             rel="noreferrer"
-                                             className="text-xs text-primary underline"
-                                        >
-                                             Xem ảnh minh chứng hiện tại
-                                        </a>
+                              <div className="rounded-lg border bg-muted/30 p-3">
+                                   {target?.kind === "partner" ? (
+                                        <>
+                                             <p><span className="text-muted-foreground">Đối tác:</span> {target.item.partnerCompanyName || target.item.partnerName}</p>
+                                             <p><span className="text-muted-foreground">Tháng:</span> {target.item.payoutMonth}</p>
+                                             <p><span className="text-muted-foreground">Số tiền:</span> {toMoney(target.item.payoutAmount)}</p>
+                                        </>
+                                   ) : target?.kind === "deposit" ? (
+                                        <>
+                                             <p><span className="text-muted-foreground">Người nhận:</span> {target.item.recipientFullName}</p>
+                                             <p><span className="text-muted-foreground">Hợp đồng:</span> {target.item.contractNumber}</p>
+                                             <p><span className="text-muted-foreground">Số tiền:</span> {toMoney(target.item.payoutAmount)}</p>
+                                        </>
                                    ) : null}
+                              </div>
+
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                   <div className="space-y-1">
+                                        <p className="text-xs text-muted-foreground">Mã giao dịch</p>
+                                        <Input value={transferReference} onChange={(event) => setTransferReference(event.target.value)} placeholder="VD: MB-TRX-000321" />
+                                   </div>
+                                   <div className="space-y-1">
+                                        <p className="text-xs text-muted-foreground">Ảnh minh chứng *</p>
+                                        <Input type="file" accept="image/*" onChange={(event) => setTransferProof(event.target.files?.[0] ?? null)} />
+                                   </div>
+                              </div>
+
+                              {target?.kind === "deposit" ? (
+                                   <div className="space-y-1">
+                                        <p className="text-xs text-muted-foreground">Lý do hoàn cọc</p>
+                                        <Input value={refundReason} onChange={(event) => setRefundReason(event.target.value)} />
+                                   </div>
+                              ) : null}
+
+                              <div className="space-y-1">
+                                   <p className="text-xs text-muted-foreground">Ghi chú</p>
+                                   <Textarea value={transferNote} onChange={(event) => setTransferNote(event.target.value)} rows={3} />
                               </div>
                          </div>
 
                          <DialogFooter>
-                              <Button variant="outline" onClick={closeConfirmDialog} disabled={confirmPayoutMutation.isPending}>
-                                   Hủy
-                              </Button>
-                              <Button onClick={handleConfirmPayout} disabled={confirmPayoutMutation.isPending || !transferProofFile}>
-                                   {confirmPayoutMutation.isPending ? "Đang xác nhận..." : "Xác nhận chuyển khoản"}
+                              <Button variant="outline" onClick={resetDialog} disabled={isConfirming}>Hủy</Button>
+                              <Button onClick={handleConfirm} disabled={isConfirming || !transferProof}>
+                                   {isConfirming ? "Đang xác nhận..." : "Xác nhận đã chuyển"}
                               </Button>
                          </DialogFooter>
                     </DialogContent>
