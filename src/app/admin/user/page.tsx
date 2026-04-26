@@ -226,7 +226,7 @@ export default function User() {
                 <div>
                   <span className="text-sm text-gray-600">Xác thực</span>
                   <p className="font-medium">
-                    {selectedUser.isVerified ? "✓ Xác thực" : "⏳ Chờ xác thực"}
+                    {selectedUser.isVerified ? "Xác thực" : "Chờ xác thực"}
                   </p>
                 </div>
                 <div>
