@@ -12,6 +12,10 @@ export const ROUTE_STAFF = {
 export const ROUTE_ADMIN = {
   DASHBOARD: "/admin/dashboard",
   REVENUES: "/admin/revenues",
+  INVOICES: "/admin/invoices",
+  IOT_MANAGER: "/admin/iot-manager",
+  ACTIVITY_LOGS: "/admin/activity-logs",
+  CONFIG: "/admin/config",
   USER: "/admin/user",
   SCHEDULE: "/staff/schedule",
   VERIFY_USER_INFORMATION: "/staff/verify-user-information",

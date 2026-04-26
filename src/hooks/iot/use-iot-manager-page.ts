@@ -2,7 +2,7 @@
 
 import { createDefaultBoardForm, EMPTY_DEVICE_ROW, normalizeTopic, type BoardFormState, type CreateDeviceRow } from "@/components/iot/iot-shared"
 import { useApartments } from "@/hooks/query/useApartments"
-import { useCreateIotBoard, useCreateIotBoardDevice, useDeleteIotBoard, useDeleteIotBoardDevice, useIotBoards, useUnlinkBoardApartment, useUpdateIotBoard, useUpdateIotBoardDevice } from "@/hooks/query/useIotDevices"
+import { useCheckIotBoardHealth, useCreateIotBoard, useCreateIotBoardDevice, useDeleteIotBoard, useDeleteIotBoardDevice, useIotBoards, useUnlinkBoardApartment, useUpdateIotBoard, useUpdateIotBoardDevice } from "@/hooks/query/useIotDevices"
 import type { IotBoardDeviceCreateRequest, IotBoardDeviceUpdateRequest, IotBoardItem, IotBoardListQuery } from "@/types/iot"
 import { message } from "antd"
 import { useCallback, useMemo, useState } from "react"
@@ -109,6 +109,7 @@ export function useIotManagerPage() {
      const deleteBoardDevice = useDeleteIotBoardDevice(true)
      const deleteBoard = useDeleteIotBoard()
      const unlinkBoardApartment = useUnlinkBoardApartment()
+     const checkBoardHealth = useCheckIotBoardHealth()
 
      const boards = useMemo(() => boardsResponse?.data ?? [], [boardsResponse?.data])
      const apartmentOptions = useMemo(() => apartmentResponse?.data ?? [], [apartmentResponse?.data])
@@ -402,7 +403,9 @@ export function useIotManagerPage() {
                          payload: {
                               id: boardId,
                               apartmentId,
-                              status: boardForm.status,
+                              status: boardForm.status === "active" || boardForm.status === "inactive"
+                                   ? boardForm.status
+                                   : undefined,
                          },
                     })
 
@@ -468,6 +471,25 @@ export function useIotManagerPage() {
                // Error toast handled in hooks.
           }
      }, [updateBoard])
+
+     const handleCheckBoardHealth = useCallback(async (board: IotBoardItem) => {
+          try {
+               const response = await checkBoardHealth.mutateAsync(board.id)
+               const health = response?.data
+               if (!health) {
+                    message.info("Không nhận được dữ liệu trạng thái từ mạch.")
+                    return
+               }
+
+               message.info(
+                    health.online
+                         ? `Mạch ${health.espId} đang online${health.lastSeenAt ? `, cập nhật lần cuối ${new Date(health.lastSeenAt).toLocaleString("vi-VN")}` : ""}.`
+                         : `Mạch ${health.espId} đang offline${health.lastSeenAt ? `, lần cuối ghi nhận ${new Date(health.lastSeenAt).toLocaleString("vi-VN")}` : ""}.`,
+               )
+          } catch {
+               // handled in mutation
+          }
+     }, [checkBoardHealth])
 
      const closeDeleteBoardDialog = useCallback(() => {
           if (deleteBoard.isPending) return
@@ -580,6 +602,7 @@ export function useIotManagerPage() {
                onEditBoard: openEditBoardDialog,
                onViewBoardDetails: openBoardDetailDialog,
                onActivateBoard: handleActivateBoard,
+               onCheckBoardHealth: handleCheckBoardHealth,
                onDeleteBoard: handleDeleteBoard,
           }),
           [
@@ -590,6 +613,7 @@ export function useIotManagerPage() {
                openEditBoardDialog,
                openBoardDetailDialog,
                handleActivateBoard,
+               handleCheckBoardHealth,
                handleDeleteBoard,
           ],
      )

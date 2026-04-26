@@ -9,6 +9,9 @@ import {
      IotBoardDeviceDeleteResponse,
      IotBoardDeviceUpdateRequest,
      IotBoardDeviceUpdateResponse,
+     IotDoorPinResetRequest,
+     IotDoorPinResetResponse,
+     IotHealthCheckResponse,
      IotBoardListQuery,
      IotBoardUnlinkApartmentResponse,
      IotBoardUpdateRequest,
@@ -203,6 +206,36 @@ export const useDeleteIotBoardDevice = (silentSuccess = false) => {
           },
           onError: (error) => {
                message.error(getErrorMessage(error))
+          },
+     })
+}
+
+export const useResetIotDoorPin = () => {
+     return useMutation({
+          mutationFn: ({
+               boardId,
+               deviceId,
+               payload,
+          }: {
+               boardId: string
+               deviceId: number
+               payload: IotDoorPinResetRequest
+          }): Promise<IotDoorPinResetResponse> =>
+               iotService.resetDoorPin(boardId, deviceId, payload),
+          onSuccess: (response) => {
+               message.success(response?.data?.message || "Đã đặt lại mật khẩu cửa thành công.")
+          },
+          onError: (error) => {
+               message.error(getErrorMessage(error, "Không thể đặt lại mật khẩu cửa."))
+          },
+     })
+}
+
+export const useCheckIotBoardHealth = () => {
+     return useMutation({
+          mutationFn: (espId: string): Promise<IotHealthCheckResponse> => iotService.checkBoardHealth(espId),
+          onError: (error) => {
+               message.error(getErrorMessage(error, "Không thể kiểm tra trạng thái online của mạch."))
           },
      })
 }

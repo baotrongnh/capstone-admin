@@ -112,7 +112,7 @@ export function TableUser({
                       : "bg-yellow-100 text-yellow-800 border border-yellow-200"
                   }`}
                 >
-                  {user.isVerified ? "✓ Xác thực" : "⏳ Chờ xác thực"}
+                  {user.isVerified ? "Xác thực" : "Chờ xác thực"}
                 </Badge>
               </TableCell>
 

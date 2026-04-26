@@ -8,6 +8,9 @@ import {
      IotBoardDeviceDeleteResponse,
      IotBoardDeviceUpdateRequest,
      IotBoardDeviceUpdateResponse,
+     IotDoorPinResetRequest,
+     IotDoorPinResetResponse,
+     IotHealthCheckResponse,
      IotBoardListQuery,
      IotBoardListResponse,
      IotApartmentBoardsUnlinkResponse,
@@ -84,6 +87,20 @@ export const iotService = {
           deviceId: string,
      ): Promise<IotBoardDeviceDeleteResponse> => {
           const { data } = await apiClient.delete(`${endpoints.iot}/boards/${boardId}/devices/${deviceId}`)
+          return data
+     },
+
+     resetDoorPin: async (
+          boardId: string,
+          deviceId: number,
+          payload: IotDoorPinResetRequest,
+     ): Promise<IotDoorPinResetResponse> => {
+          const { data } = await apiClient.patch(`${endpoints.iot}/doors/${boardId}/${deviceId}/pin/reset`, payload)
+          return data
+     },
+
+     checkBoardHealth: async (espId: string): Promise<IotHealthCheckResponse> => {
+          const { data } = await apiClient.get(`${endpoints.iot}/devices/${espId}/check-health`)
           return data
      },
 }
