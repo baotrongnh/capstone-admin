@@ -23,7 +23,6 @@ interface IFormData {
   phone: string;
   fullName: string;
   employeeCode: string;
-  role: string;
   department: string;
   workingCity: string;
   workingDistrict: string;
@@ -42,6 +41,16 @@ export default function ModalEditStaff({
   const [form] = Form.useForm<IFormData>();
   const [loading, setLoading] = React.useState(false);
   const { mutateAsync: updateStaff } = useUpdateStaff(staff?.id || "");
+  const todayInputValue = new Date().toISOString().split("T")[0];
+  const staffRole =
+    staff?.staffRole ||
+    (staff?.department === "customer_service"
+      ? "customer_service"
+      : staff?.department === "maintenance"
+        ? "maintenance"
+        : staff?.department === "technician"
+          ? "technician"
+          : "general");
 
   useEffect(() => {
     if (staff && open) {
@@ -50,7 +59,6 @@ export default function ModalEditStaff({
         phone: staff.phone || "",
         fullName: staff.fullName || "",
         employeeCode: staff.employeeCode || "",
-        role: undefined,
         department: staff.department || "",
         workingCity: staff.workingCity || "",
         workingDistrict: staff.workingDistrict || "",
@@ -86,7 +94,7 @@ export default function ModalEditStaff({
       phone: values.phone,
       fullName: values.fullName,
       employeeCode: values.employeeCode,
-      role: values.role,
+      role: staffRole,
       department: values.department,
       workingCity: "",
       workingDistrict: "",
@@ -105,7 +113,6 @@ export default function ModalEditStaff({
       onClose();
     } catch (error) {
       console.error("Error updating staff:", error);
-      alert("Lỗi khi cập nhật thông tin nhân viên");
     } finally {
       setLoading(false);
     }
@@ -178,19 +185,6 @@ export default function ModalEditStaff({
 
           <div className="grid grid-cols-2 gap-3">
             <Form.Item
-              label="Vai trò"
-              name="role"
-              rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
-              style={{ marginBottom: 12 }}
-            >
-              <Select
-                options={roleOptions}
-                placeholder="Chọn vai trò"
-                allowClear
-              />
-            </Form.Item>
-
-            <Form.Item
               label="Phòng ban"
               name="department"
               rules={[{ required: true, message: "Vui lòng chọn phòng ban" }]}
@@ -200,22 +194,33 @@ export default function ModalEditStaff({
                 options={departmentOptions}
                 placeholder="Chọn phòng ban"
                 allowClear
+                getPopupContainer={(triggerNode) => triggerNode.parentNode}
               />
             </Form.Item>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
             <Form.Item
               label="Ngày bắt đầu làm việc"
               name="hireDate"
               rules={[
                 { required: true, message: "Vui lòng chọn ngày bắt đầu" },
+                () => ({
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+
+                    return value < todayInputValue
+                      ? Promise.reject(
+                          new Error("Ngày bắt đầu không được ở trong quá khứ"),
+                        )
+                      : Promise.resolve();
+                  },
+                }),
               ]}
               style={{ marginBottom: 12 }}
             >
-              <Input type="date" />
+              <Input type="date" min={todayInputValue} />
             </Form.Item>
+          </div>
 
+          <div className="grid grid-cols-2 gap-3">
             <Form.Item
               label="Mật khẩu"
               name="password"

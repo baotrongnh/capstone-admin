@@ -1,4 +1,5 @@
 import { staffService } from "@/lib/services/staff.service";
+import { getErrorMessage } from "@/lib/utils/api-error";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
 
@@ -19,7 +20,7 @@ export const useCreateStaff = () => {
     },
     onError: (error) => {
       console.error("Error creating staff:", error);
-      message.error("Lỗi khi thêm nhân viên.");
+      message.error(getErrorMessage(error, "Lỗi khi thêm nhân viên."));
     },
   });
 };
@@ -34,7 +35,9 @@ export const useUpdateStaff = (id: string) => {
     },
     onError: (error) => {
       console.error("Error updating staff:", error);
-      message.error("Lỗi khi cập nhật thông tin nhân viên.");
+      message.error(
+        getErrorMessage(error, "Lỗi khi cập nhật thông tin nhân viên."),
+      );
     },
   });
 };
@@ -49,7 +52,7 @@ export const useDeleteStaff = (id: string) => {
     },
     onError: (error) => {
       console.error("Error deleting staff:", error);
-      message.error("Lỗi khi khóa/mở khóa nhân viên.");
+      message.error(getErrorMessage(error, "Lỗi khi khóa/mở khóa nhân viên."));
     },
   });
 };

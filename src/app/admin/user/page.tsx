@@ -115,6 +115,19 @@ export default function User() {
 
   const operatorsList = operators?.data || [];
 
+  const getStaffDepartmentLabel = (
+    department?: string | null,
+    staffRole?: string | null,
+  ) => {
+    const value = department || staffRole;
+
+    if (value === "customer_service") return "Dịch vụ khách hàng";
+    if (value === "maintenance") return "Bảo trì";
+    if (value === "technician") return "Kỹ thuật viên";
+
+    return "---";
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div>
@@ -330,12 +343,10 @@ export default function User() {
                 <div>
                   <span className="text-sm text-gray-600">Loại nhân viên</span>
                   <p className="font-medium">
-                    {selectedStaff.staffRole === "customer_service" &&
-                      "Dịch vụ khách hàng"}
-                    {selectedStaff.staffRole === "maintenance" && "Bảo trì"}
-                    {selectedStaff.staffRole === "technician" &&
-                      "Kỹ thuật viên"}
-                    {!selectedStaff.staffRole && "---"}
+                    {getStaffDepartmentLabel(
+                      selectedStaff.department,
+                      selectedStaff.staffRole,
+                    )}
                   </p>
                 </div>
 

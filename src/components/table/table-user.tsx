@@ -1,5 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
+import { Pagination } from "antd";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -37,12 +41,24 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
+const PAGE_SIZE = 7;
+
 export function TableUser({
   users,
   onViewDetail,
   onEdit,
   onDelete,
 }: TableUserProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalItems = users.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedUsers = useMemo(() => {
+    const start = (safeCurrentPage - 1) * PAGE_SIZE;
+    return users.slice(start, start + PAGE_SIZE);
+  }, [safeCurrentPage, users]);
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
@@ -60,7 +76,7 @@ export function TableUser({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
+          {paginatedUsers.map((user) => (
             <TableRow key={user.id} className="hover:bg-gray-50 transition">
               <TableCell>
                 <div className="flex items-center gap-3">
@@ -170,9 +186,20 @@ export function TableUser({
           ))}
         </TableBody>
       </Table>
-      {users.length === 0 && (
+      {totalItems === 0 && (
         <div className="text-center py-8 text-gray-500">
           Không có dữ liệu người dùng
+        </div>
+      )}
+      {totalItems > PAGE_SIZE && (
+        <div className="flex justify-end border-t bg-white px-4 py-3">
+          <Pagination
+            current={safeCurrentPage}
+            total={totalItems}
+            pageSize={PAGE_SIZE}
+            showSizeChanger={false}
+            onChange={setCurrentPage}
+          />
         </div>
       )}
     </div>

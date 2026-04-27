@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useCreateStaff } from "@/hooks/query/useStaff";
-import { Button, Checkbox, Form, Input, message, Select, Space } from "antd";
+import { Button, Checkbox, Form, Input, Select, Space } from "antd";
 import React from "react";
 
 interface ModalAddStaffProps {
@@ -32,10 +32,21 @@ interface IFormData {
   isActive: boolean;
 }
 
+const getTodayInputValue = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 export default function ModalAddStaff({ open, onClose }: ModalAddStaffProps) {
   const [form] = Form.useForm<IFormData>();
   const [loading, setLoading] = React.useState(false);
   const { mutateAsync: createStaff } = useCreateStaff();
+  const todayInputValue = getTodayInputValue();
+
   const handleSubmit = async (values: IFormData) => {
     setLoading(true);
     const payload = {
@@ -60,7 +71,6 @@ export default function ModalAddStaff({ open, onClose }: ModalAddStaffProps) {
       onClose();
     } catch (error) {
       console.error("Error adding staff:", error);
-      message.error("Lỗi khi thêm nhân viên");
     } finally {
       setLoading(false);
     }
@@ -152,10 +162,21 @@ export default function ModalAddStaff({ open, onClose }: ModalAddStaffProps) {
               name="hireDate"
               rules={[
                 { required: true, message: "Vui lòng chọn ngày bắt đầu" },
+                () => ({
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+
+                    return value < todayInputValue
+                      ? Promise.reject(
+                          new Error("Ngày bắt đầu không được ở trong quá khứ"),
+                        )
+                      : Promise.resolve();
+                  },
+                }),
               ]}
               style={{ marginBottom: 12 }}
             >
-              <Input type="date" />
+              <Input type="date" min={todayInputValue} />
             </Form.Item>
 
             <Form.Item
