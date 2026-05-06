@@ -15,11 +15,14 @@ import {
      IotBoardListQuery,
      IotBoardUnlinkApartmentResponse,
      IotBoardUpdateRequest,
+     UpdateGlobalUtilityRatesRequest,
 } from "@/types/iot"
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { message } from "antd"
 
 const IOT_BOARD_QUERY_KEY = "iot-boards"
+const CURRENT_UTILITY_RATES_QUERY_KEY = "utility-rates-current"
+const GLOBAL_UTILITY_RATES_QUERY_KEY = "utility-rates-global"
 
 const getErrorMessage = (error: unknown, fallback = "Đã có lỗi xảy ra, vui lòng thử lại sau!") => {
      if (!error || typeof error !== "object") {
@@ -236,6 +239,47 @@ export const useCheckIotBoardHealth = () => {
           mutationFn: (espId: string): Promise<IotHealthCheckResponse> => iotService.checkBoardHealth(espId),
           onError: (error) => {
                message.error(getErrorMessage(error, "Không thể kiểm tra trạng thái online của mạch."))
+          },
+     })
+}
+
+export const useCurrentUtilityRatesByApartments = (apartmentIds: string[]) =>
+     useQuery({
+          queryKey: [CURRENT_UTILITY_RATES_QUERY_KEY, apartmentIds],
+          queryFn: async () => {
+               const results = await Promise.allSettled(
+                    apartmentIds.map((apartmentId) => iotService.getCurrentUtilityRates({ apartmentId })),
+               )
+
+               return apartmentIds.map((apartmentId, index) => {
+                    const result = results[index]
+                    return {
+                         apartmentId,
+                         rates: result.status === "fulfilled" ? result.value.data ?? null : null,
+                         isError: result.status === "rejected",
+                    }
+               })
+          },
+          enabled: apartmentIds.length > 0,
+     })
+
+export const useGlobalUtilityRates = () =>
+     useQuery({
+          queryKey: [GLOBAL_UTILITY_RATES_QUERY_KEY],
+          queryFn: () => iotService.getGlobalUtilityRates(),
+     })
+
+export const useUpdateGlobalUtilityRates = () => {
+     const queryClient = useQueryClient()
+
+     return useMutation({
+          mutationFn: (payload: UpdateGlobalUtilityRatesRequest) => iotService.updateGlobalUtilityRates(payload),
+          onSuccess: (response) => {
+               queryClient.setQueryData([GLOBAL_UTILITY_RATES_QUERY_KEY], response)
+               message.success("Cập nhật giá mặc định toàn hệ thống thành công!")
+          },
+          onError: (error) => {
+               message.error(getErrorMessage(error, "Không thể cập nhật giá mặc định toàn hệ thống."))
           },
      })
 }

@@ -17,6 +17,11 @@ import {
      IotBoardUnlinkApartmentResponse,
      IotBoardUpdateRequest,
      IotBoardUpdateResponse,
+     CurrentUtilityRatesQuery,
+     CurrentUtilityRatesResponse,
+     GlobalUtilityRatesResponse,
+     UpdateGlobalUtilityRatesRequest,
+     UpdateGlobalUtilityRatesResponse,
 } from "@/types/iot"
 import { apiClient } from "../apis/client"
 import { endpoints } from "../apis/endpoints"
@@ -101,6 +106,23 @@ export const iotService = {
 
      checkBoardHealth: async (espId: string): Promise<IotHealthCheckResponse> => {
           const { data } = await apiClient.get(`${endpoints.iot}/devices/${espId}/check-health`)
+          return data
+     },
+
+     getCurrentUtilityRates: async (params: CurrentUtilityRatesQuery): Promise<CurrentUtilityRatesResponse> => {
+          const { data } = await apiClient.get(`${endpoints.iot}/utility-rates/current`, { params })
+          return data
+     },
+
+     getGlobalUtilityRates: async (): Promise<GlobalUtilityRatesResponse> => {
+          const { data } = await apiClient.get(`${endpoints.iot}/utility-rates/global`)
+          return data
+     },
+
+     updateGlobalUtilityRates: async (
+          payload: UpdateGlobalUtilityRatesRequest,
+     ): Promise<UpdateGlobalUtilityRatesResponse> => {
+          const { data } = await apiClient.patch(`${endpoints.iot}/utility-rates/global`, payload)
           return data
      },
 }
