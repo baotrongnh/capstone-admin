@@ -17,15 +17,12 @@ import {
 
 import {
      formatSignedPercent,
-     REVENUE_PERIOD_LABEL,
-     REVENUE_PERIOD_ORDER,
      REVENUE_PREVIOUS_LABEL,
 } from "@/utils/revenue-calc"
 import type { RevenuePeriod, RevenuePoint, RevenueTrend } from "@/types/revenue"
 import { formatVND } from "@/utils/format"
 import {
      Card,
-     CardAction,
      CardContent,
      CardDescription,
      CardFooter,
@@ -39,7 +36,6 @@ import {
      type ChartConfig,
 } from "@/components/ui/chart"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const chartConfig = {
      revenue: {
@@ -60,7 +56,6 @@ type RevenueTrendChartsProps = {
      trend?: RevenueTrend
      piePoint?: RevenuePoint | null
      period: RevenuePeriod
-     onPeriodChange: (period: RevenuePeriod) => void
      isLoading?: boolean
 }
 
@@ -210,7 +205,6 @@ export function RevenueTrendCharts({
      trend,
      piePoint,
      period,
-     onPeriodChange,
      isLoading = false,
 }: RevenueTrendChartsProps) {
      const points = trend?.points ?? []
@@ -237,27 +231,9 @@ export function RevenueTrendCharts({
      return (
           <div className="grid gap-4 px-4 lg:px-6">
                <Card>
-                    <CardHeader className="gap-4">
-                         <div>
-                              <CardTitle>{trend?.title ?? "Doanh thu"}</CardTitle>
-                              <CardDescription>{trend?.subtitle ?? "Dữ liệu tổng hợp"}</CardDescription>
-                         </div>
-
-                         <CardAction className="w-full sm:w-auto">
-                              <Tabs
-                                   value={period}
-                                   onValueChange={(value) => onPeriodChange(value as RevenuePeriod)}
-                                   className="w-full sm:w-auto"
-                              >
-                                   <TabsList className="grid w-full grid-cols-4 sm:w-auto">
-                                        {REVENUE_PERIOD_ORDER.map((item) => (
-                                             <TabsTrigger key={item} value={item}>
-                                                  {REVENUE_PERIOD_LABEL[item]}
-                                             </TabsTrigger>
-                                        ))}
-                                   </TabsList>
-                              </Tabs>
-                         </CardAction>
+                    <CardHeader>
+                         <CardTitle>{trend?.title ?? "Doanh thu"}</CardTitle>
+                         <CardDescription>{trend?.subtitle ?? "Dữ liệu tổng hợp"}</CardDescription>
                     </CardHeader>
 
                     <CardContent>

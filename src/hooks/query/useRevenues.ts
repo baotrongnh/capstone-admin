@@ -14,7 +14,7 @@ import type {
      StaffPartnerPayoutListData,
      StaffPartnerPayoutListQuery,
 } from "@/types/revenue"
-import { endOfDay, endOfMonth, endOfQuarter, endOfYear, formatDayLabel, formatMonthLabel, formatQuarterLabel, formatYearLabel, normalizeDateFilter, startOfDay, startOfMonth, startOfQuarter, startOfYear, toIso } from "@/utils/date-utils"
+import { endOfDay, endOfMonth, endOfQuarter, endOfYear, formatDayLabel, formatMonthLabel, formatQuarterLabel, formatYearLabel, maxDate, minDate, normalizeDateFilter, startOfDay, startOfMonth, startOfQuarter, startOfYear, toIso } from "@/utils/date-utils"
 import { percentChange, REVENUE_PERIOD_META, roundPercent } from "@/utils/revenue-calc"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { message } from "antd"
@@ -23,6 +23,8 @@ type RevenueRangeQuery = {
      from: string
      to: string
 }
+
+type RevenueDashboardMode = RevenuePeriod | "custom"
 
 type DateOffset = {
      days?: number
@@ -71,6 +73,16 @@ const shiftDate = (date: Date, offset: DateOffset) => {
 
 const getReferenceDate = (filter?: RevenueDateFilter) => normalizeDateFilter(filter)?.to ?? new Date()
 
+const formatCustomRangeLabel = (from: Date, to: Date) => {
+     const formatDate = (date: Date) => date.toLocaleDateString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+     })
+
+     return `${formatDate(from)} - ${formatDate(to)}`
+}
+
 const buildDayRanges = (referenceDate: Date): RevenueDateRange[] => {
      const year = referenceDate.getFullYear()
      const month = referenceDate.getMonth()
@@ -109,6 +121,67 @@ const buildYearRanges = (referenceDate: Date): RevenueDateRange[] => {
           const date = new Date(startYear + index, 0, 1)
           return toRange(formatYearLabel(date), startOfYear(date), endOfYear(date))
      })
+}
+
+const buildCustomDayRanges = (from: Date, to: Date): RevenueDateRange[] => {
+     const ranges: RevenueDateRange[] = []
+     const cursor = startOfDay(from)
+     const end = endOfDay(to)
+
+     while (cursor.getTime() <= end.getTime()) {
+          ranges.push(toRange(formatDayLabel(cursor), startOfDay(cursor), endOfDay(cursor)))
+          cursor.setDate(cursor.getDate() + 1)
+     }
+
+     return ranges
+}
+
+const buildCustomMonthRanges = (from: Date, to: Date): RevenueDateRange[] => {
+     const ranges: RevenueDateRange[] = []
+     const cursor = startOfMonth(from)
+     const end = endOfDay(to)
+
+     while (cursor.getTime() <= end.getTime()) {
+          ranges.push(toRange(
+               formatMonthLabel(cursor),
+               maxDate(startOfMonth(cursor), from),
+               minDate(endOfMonth(cursor), to),
+          ))
+          cursor.setMonth(cursor.getMonth() + 1)
+     }
+
+     return ranges
+}
+
+const buildCustomYearRanges = (from: Date, to: Date): RevenueDateRange[] => {
+     const ranges: RevenueDateRange[] = []
+     const cursor = startOfYear(from)
+     const end = endOfDay(to)
+
+     while (cursor.getTime() <= end.getTime()) {
+          ranges.push(toRange(
+               formatYearLabel(cursor),
+               maxDate(startOfYear(cursor), from),
+               minDate(endOfYear(cursor), to),
+          ))
+          cursor.setFullYear(cursor.getFullYear() + 1)
+     }
+
+     return ranges
+}
+
+const buildCustomRanges = (from: Date, to: Date): { period: RevenuePeriod; ranges: RevenueDateRange[] } => {
+     const dayCount = Math.ceil((endOfDay(to).getTime() - startOfDay(from).getTime()) / 86_400_000)
+
+     if (dayCount <= 45) {
+          return { period: "day", ranges: buildCustomDayRanges(from, to) }
+     }
+
+     if (dayCount <= 730) {
+          return { period: "month", ranges: buildCustomMonthRanges(from, to) }
+     }
+
+     return { period: "year", ranges: buildCustomYearRanges(from, to) }
 }
 
 const PERIOD_TOOLS: Record<RevenuePeriod, PeriodTool> = {
@@ -166,9 +239,58 @@ const toPartnerPayoutConfirmFormData = (payload: StaffPartnerPayoutConfirmFormPa
 }
 
 const buildRevenueDashboardData = async (
-     period: RevenuePeriod,
+     mode: RevenueDashboardMode,
      filter?: RevenueDateFilter,
 ): Promise<RevenueDashboardData> => {
+     if (mode === "custom") {
+          const normalizedFilter = normalizeDateFilter(filter)
+          const from = normalizedFilter?.from ?? startOfMonth(new Date())
+          const to = normalizedFilter?.to ?? endOfDay(new Date())
+          const { period, ranges } = buildCustomRanges(from, to)
+          const currentQuery = { from: toIso(from), to: toIso(to) }
+          const previousTo = new Date(from.getTime() - 1)
+          const previousFrom = new Date(previousTo.getTime() - (to.getTime() - from.getTime()))
+
+          const [points, currentOverview, previousOverview] = await Promise.all([
+               Promise.all(ranges.map(toRevenuePoint)),
+               revenueService.getOverview(currentQuery),
+               revenueService.getOverview({ from: toIso(previousFrom), to: toIso(previousTo) }),
+          ])
+
+          const current = currentOverview.totalSystemRevenue
+          const previous = previousOverview.totalSystemRevenue
+          const changePercent = roundPercent(percentChange(current, previous))
+          const title = "Tùy chọn"
+          const subtitle = formatCustomRangeLabel(from, to)
+
+          return {
+               period,
+               trend: {
+                    period,
+                    title,
+                    subtitle,
+                    points,
+                    current,
+                    previous,
+                    changePercent,
+               },
+               summary: {
+                    period,
+                    title,
+                    current,
+                    previous,
+                    changePercent,
+               },
+               piePoint: {
+                    ...currentOverview,
+                    label: subtitle,
+                    from: currentQuery.from,
+                    to: currentQuery.to,
+               },
+          }
+     }
+
+     const period = mode
      const tool = PERIOD_TOOLS[period]
      const referenceDate = getReferenceDate(filter)
      const monthQuery = PERIOD_TOOLS.month.toQuery(referenceDate)
@@ -232,9 +354,9 @@ export const useRevenueAdminDashboard = (params?: RevenueDashboardQuery) => useQ
      queryFn: () => revenueService.getDashboard(params),
 })
 
-export const useRevenueDashboard = (period: RevenuePeriod = "month", filter?: RevenueDateFilter) => useQuery<RevenueDashboardData>({
-     queryKey: ["revenues", "dashboard", period, filter?.from ?? null, filter?.to ?? null],
-     queryFn: () => buildRevenueDashboardData(period, filter),
+export const useRevenueDashboard = (mode: RevenueDashboardMode = "month", filter?: RevenueDateFilter) => useQuery<RevenueDashboardData>({
+     queryKey: ["revenues", "dashboard", mode, filter?.from ?? null, filter?.to ?? null],
+     queryFn: () => buildRevenueDashboardData(mode, filter),
 })
 
 export const useStaffPartnerPayouts = (params?: StaffPartnerPayoutListQuery) => useQuery<StaffPartnerPayoutListData>({
