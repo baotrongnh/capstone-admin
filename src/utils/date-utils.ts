@@ -29,11 +29,11 @@ export const toInputDate = (date: Date) => {
 }
 
 export const toDisplayDate = (value: string) =>
-     parseInputDate(value).toLocaleDateString("vi-VN", {
+     parseDateValue(value)?.toLocaleDateString("vi-VN", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
-     })
+     }) || "Chọn ngày"
 
 export const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)
 export const endOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999)
@@ -87,8 +87,22 @@ export const formatQuarterLabel = (date: Date) => {
 
 export const formatYearLabel = (date: Date) => String(date.getFullYear())
 
-export const toStartOfDayIso = (value: string) => toIso(startOfDay(parseInputDate(value)))
-export const toEndOfDayIso = (value: string) => toIso(endOfDay(parseInputDate(value)))
+export const toLocalDateInput = (value?: string | null) => {
+     const date = parseDateValue(value || undefined)
+     if (!date) return ""
+     const offset = date.getTimezoneOffset()
+     return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10)
+}
+
+export const toStartOfDayIso = (value: string) => {
+     const date = parseDateValue(value)
+     return date ? toIso(startOfDay(date)) : undefined
+}
+
+export const toEndOfDayIso = (value: string) => {
+     const date = parseDateValue(value)
+     return date ? toIso(endOfDay(date)) : undefined
+}
 
 export const isFullMonthRange = (from: string, to: string) => {
      const fromDate = parseInputDate(from)

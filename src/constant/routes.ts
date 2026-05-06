@@ -14,6 +14,8 @@ export const ROUTE_ADMIN = {
   REVENUES: "/admin/revenues",
   INVOICES: "/admin/invoices",
   IOT_MANAGER: "/admin/iot-manager",
+  UTILITY_RATES: "/admin/utility-rates",
+  UTILITY_RATES_APARTMENTS: "/admin/utility-rates/apartments",
   ACTIVITY_LOGS: "/admin/activity-logs",
   CONFIG: "/admin/config",
   USER: "/admin/user",
@@ -30,6 +32,8 @@ export const ROUTE_OPERATOR = {
 };
 
 export type BackofficeRole = "admin" | "operator" | "staff";
+
+export const ROUTE_ACCOUNT = "/account";
 
 const DEFAULT_ROUTE_BY_ROLE: Record<BackofficeRole, string> = {
   admin: ROUTE_ADMIN.DASHBOARD,

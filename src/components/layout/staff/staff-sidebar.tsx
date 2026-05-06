@@ -7,8 +7,6 @@ import {
   IconHelp,
   IconHomeQuestion,
   IconInnerShadowTop,
-  IconLayoutDashboard,
-  IconMessage2Question,
 } from "@tabler/icons-react";
 import * as React from "react";
 
@@ -25,7 +23,6 @@ import {
 import { ROUTE_STAFF } from "@/constant/routes";
 import { useTranslations } from "next-intl";
 import { StaffNavMain } from "./staff-nav-main";
-import { StaffNavSecondary } from "./staff-nav-secondary";
 
 export function StaffSidebar({
   ...props
@@ -33,7 +30,6 @@ export function StaffSidebar({
   const t = useTranslations("StaffSidebar");
 
   const navMain = [
-    // { title: t("dashboard"), url: "#", icon: IconLayoutDashboard },
     {
       title: 'Lịch hẹn xem căn hộ',
       url: ROUTE_STAFF.SCHEDULE,
@@ -45,11 +41,6 @@ export function StaffSidebar({
   const navMain2 = [
     { title: t("messages"), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
     { title: "Yêu cầu bảo trì", url: ROUTE_STAFF.MAINTENANCE, icon: IconHelp },
-    // {
-    //   title: t("inquiries"),
-    //   url: ROUTE_STAFF.INQUIRY,
-    //   icon: IconMessage2Question,
-    // },
   ];
 
   const navMain3 = [
@@ -61,8 +52,6 @@ export function StaffSidebar({
     
     { title: "Hợp đồng thuê", url: ROUTE_STAFF.CONTRACT, icon: IconContract },
   ];
-
-  const navSecondary = [{ title: t("help"), url: "#", icon: IconHelp }];
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -87,7 +76,6 @@ export function StaffSidebar({
         <StaffNavMain items={navMain} groupLable="Vận hành" />
         <StaffNavMain items={navMain2} groupLable="Giao tiếp" />
         <StaffNavMain items={navMain3} groupLable="Cư trú" />
-        <StaffNavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

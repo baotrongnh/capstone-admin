@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react"
 import { message } from "antd"
-import { KeyRoundIcon, RefreshCcwIcon, SearchIcon, WifiIcon } from "lucide-react"
-
+import Link from "next/link"
+import { KeyRoundIcon, RefreshCcwIcon, SearchIcon, SettingsIcon, WifiIcon } from "lucide-react"
 import { STATUS_LABEL_MAP, STATUS_STYLE_MAP, TOPIC_LABEL_MAP } from "@/components/iot/iot-shared"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ROUTE_ADMIN } from "@/constant/routes"
 import { useCheckIotBoardHealth, useIotBoards, useResetIotDoorPin } from "@/hooks/query/useIotDevices"
 import type { IotBoardItem, IotBoardListQuery } from "@/types/iot"
 import { formatDateTime } from "@/utils/format"
@@ -147,6 +148,12 @@ export default function AdminIotManagerPage() {
                               Trang này chỉ dành cho admin để kiểm tra trạng thái mạch và đổi mật khẩu cho thiết bị cửa.
                          </p>
                     </div>
+                    <Button asChild>
+                         <Link href={ROUTE_ADMIN.UTILITY_RATES}>
+                              <SettingsIcon className="mr-1 size-4" />
+                              Quản lý giá điện/nước
+                         </Link>
+                    </Button>
                </div>
 
                <Card className="border-border/70">

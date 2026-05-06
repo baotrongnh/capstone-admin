@@ -5,9 +5,9 @@ import {
   IconAdjustmentsCog,
   IconBusinessplan,
   IconFileInvoice,
-  IconHelp,
   IconInnerShadowTop,
   IconLayoutDashboard,
+  IconReceipt2,
   IconTopologyStar3,
   IconUser,
 } from "@tabler/icons-react"
@@ -27,7 +27,6 @@ import {
 import { ROUTE_ADMIN } from "@/constant/routes"
 import { useTranslations } from "next-intl"
 import { AdminNavMain } from "./admin-nav-main"
-import { AdminNavSecondary } from "./admin-nav-secondary"
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("StaffSidebar")
@@ -48,6 +47,7 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       title: "Vận hành",
       items: [
         { title: "Quản lý IoT", url: ROUTE_ADMIN.IOT_MANAGER, icon: IconTopologyStar3 },
+        { title: "Giá điện/nước", url: ROUTE_ADMIN.UTILITY_RATES, icon: IconReceipt2 },
         { title: "Quản lý người dùng", url: ROUTE_ADMIN.USER, icon: IconUser },
       ],
     },
@@ -59,8 +59,6 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       ],
     },
   ]
-
-  const navSecondary = [{ title: t("help"), url: "#", icon: IconHelp }]
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -78,7 +76,6 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       </SidebarHeader>
       <SidebarContent>
         <AdminNavMain items={navMain} />
-        <AdminNavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

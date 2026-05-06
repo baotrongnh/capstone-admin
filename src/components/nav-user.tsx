@@ -28,6 +28,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { ROUTE_ACCOUNT } from "@/constant/routes"
 import { useAuthStore } from "@/stores/auth.store"
 
 export function NavUser() {
@@ -99,7 +100,7 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(ROUTE_ACCOUNT)}>
                 <IconUserCircle />
                 Tài khoản
               </DropdownMenuItem>
