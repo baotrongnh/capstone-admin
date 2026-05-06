@@ -2,13 +2,9 @@
 
 import { useMemo } from "react"
 
-import {
-     isFullMonthRange,
-     toDisplayDate,
-     toEndOfDayIso,
-     toStartOfDayIso,
-} from "@/utils/date-utils"
 import { useRevenueOverview } from "@/hooks/query/useRevenues"
+import { toEndOfDayIso, toStartOfDayIso } from "@/utils/date-utils"
+import { formatRevenueRangeLabel } from "@/utils/revenue-filter"
 import { TotalRevenueCard } from "./total-revenue-card"
 
 type RevenueRangeTotalCardProps = {
@@ -27,17 +23,11 @@ export function RevenueRangeTotalCard({ from, to }: RevenueRangeTotalCardProps) 
 
      const { data, isLoading } = useRevenueOverview(params)
 
-     const fullMonth = useMemo(() => isFullMonthRange(from, to), [from, to])
-
-     const label = fullMonth
-          ? "Doanh thu tổng hệ thống (tháng)"
-          : `Doanh thu tổng hệ thống (${toDisplayDate(from)} - ${toDisplayDate(to)})`
-
      return (
           <TotalRevenueCard
                amount={data?.totalSystemRevenue ?? 0}
                isLoading={isLoading}
-               label={label}
+               label={`Doanh thu tổng hệ thống (${formatRevenueRangeLabel({ from, to })})`}
           />
      )
 }

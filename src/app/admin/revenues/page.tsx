@@ -6,7 +6,8 @@ import { AlertCircle } from "lucide-react"
 import { RevenueDashboardInsights } from "@/components/revenue/revenue-dashboard-insights"
 import { toEndOfDayIso, toInputDate, toStartOfDayIso } from "@/utils/date-utils"
 import { useRevenueAdminDashboard, useRevenueDashboard } from "../../../hooks/query/useRevenues"
-import type { RevenueDateFilter, RevenuePeriod } from "@/types/revenue"
+import type { RevenuePeriod } from "@/types/revenue"
+import { getRevenueRangeByMode, type RevenueFilterMode } from "@/utils/revenue-filter"
 import {
      RevenueDateRangePicker,
      type RevenueDateRangeValue,
@@ -23,20 +24,27 @@ export default function RevenueManagementPage() {
 
      const [appliedFrom, setAppliedFrom] = useState(defaultFrom)
      const [appliedTo, setAppliedTo] = useState(defaultTo)
-     const [selectedPeriod, setSelectedPeriod] = useState<RevenuePeriod>("month")
+     const [selectedMode, setSelectedMode] = useState<RevenueFilterMode>("month")
 
-     const filter = useMemo<RevenueDateFilter>(() => ({ from: appliedFrom, to: appliedTo }), [appliedFrom, appliedTo])
+     const effectiveRange = useMemo(
+          () => getRevenueRangeByMode(selectedMode, { from: appliedFrom, to: appliedTo }),
+          [appliedFrom, appliedTo, selectedMode],
+     )
      const dashboardFilter = useMemo(
           () => ({
-               from: toStartOfDayIso(appliedFrom),
-               to: toEndOfDayIso(appliedTo),
+               from: toStartOfDayIso(effectiveRange.from),
+               to: toEndOfDayIso(effectiveRange.to),
                topLimit: 5,
           }),
-          [appliedFrom, appliedTo],
+          [effectiveRange.from, effectiveRange.to],
      )
 
-     const { data, isLoading, isError } = useRevenueDashboard(selectedPeriod, filter)
+     const { data, isLoading, isError } = useRevenueDashboard(
+          selectedMode,
+          selectedMode === "custom" ? effectiveRange : undefined,
+     )
      const { data: dashboardData, isLoading: isDashboardLoading } = useRevenueAdminDashboard(dashboardFilter)
+     const selectedPeriod: RevenuePeriod = data?.period ?? (selectedMode === "custom" ? "month" : selectedMode)
 
      const applyRange = (next: RevenueDateRangeValue) => {
           setAppliedFrom(next.from)
@@ -46,6 +54,7 @@ export default function RevenueManagementPage() {
      const resetRange = () => {
           setAppliedFrom(defaultFrom)
           setAppliedTo(defaultTo)
+          setSelectedMode("month")
      }
 
      return (
@@ -61,6 +70,8 @@ export default function RevenueManagementPage() {
                               value={{ from: appliedFrom, to: appliedTo }}
                               onApply={applyRange}
                               onReset={resetRange}
+                              mode={selectedMode}
+                              onModeChange={setSelectedMode}
                          />
                     </div>
 
@@ -72,7 +83,7 @@ export default function RevenueManagementPage() {
                     )}
 
                     <div className="px-4 lg:px-6">
-                         <RevenueRangeTotalCard from={appliedFrom} to={appliedTo} />
+                         <RevenueRangeTotalCard from={effectiveRange.from} to={effectiveRange.to} />
                     </div>
 
                     <RevenueSummaryCards
@@ -84,7 +95,6 @@ export default function RevenueManagementPage() {
                          trend={data?.trend}
                          piePoint={data?.piePoint ?? null}
                          period={selectedPeriod}
-                         onPeriodChange={setSelectedPeriod}
                          isLoading={isLoading}
                     />
 

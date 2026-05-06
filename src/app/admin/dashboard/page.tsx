@@ -49,12 +49,25 @@ export default function Dashboard() {
                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                     <div className="px-4 lg:px-6">
                          <div className="rounded-2xl border border-border/70 bg-linear-to-r from-cyan-500/10 via-background to-emerald-500/10 p-5">
-                              <h1 className="text-xl font-semibold tracking-tight">Revenue Dashboard</h1>
+                              <h1 className="text-xl font-semibold tracking-tight">Tổng quan hệ thống</h1>
                               <p className="mt-1 text-sm text-muted-foreground">
-                                   Theo dõi tổng quan doanh thu, tỷ lệ người dùng và hiệu suất căn hộ theo khoảng ngày.
+                                   Theo dõi tổng quan hệ thống.
                               </p>
                          </div>
                     </div>
+
+                    <RevenueDashboardInsights
+                         data={data}
+                         isLoading={isLoading}
+                         className="px-4 lg:px-6"
+                         invoiceCountHref={ROUTE_ADMIN.INVOICES}
+                    />
+
+                    <div className="w-full border border-black/10"></div>
+
+                    <p className="mt-1 pl-7 text-sm text-muted-foreground">
+                         Theo dõi tổng quan doanh thu.
+                    </p>
 
                     <div className="px-4 lg:px-6">
                          <RevenueDateRangePicker
@@ -81,13 +94,6 @@ export default function Dashboard() {
                               actionLabel="Quản lý doanh thu"
                          />
                     </div>
-
-                    <RevenueDashboardInsights
-                         data={data}
-                         isLoading={isLoading}
-                         className="px-4 lg:px-6"
-                         invoiceCountHref={ROUTE_ADMIN.INVOICES}
-                    />
                </div>
           </div>
      )
