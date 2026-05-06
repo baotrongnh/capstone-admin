@@ -16,18 +16,13 @@ import type {
 
 export const useApartmentPolicies = (params?: ApartmentPolicyListQuery) =>
      useQuery<ApartmentPolicyListResponse>({
-          queryKey: [
-               "apartment-policies",
-               params?.apartmentId ?? null,
-               params?.policyId ?? null,
-               params?.isRequired ?? null,
-          ],
+          queryKey: ["apartment-policies", params],
           queryFn: () => systemConfigService.getApartmentPolicies(params),
      })
 
 export const useApartmentPolicy = (id?: string | null) =>
      useQuery<ApartmentPolicyDetail>({
-          queryKey: ["apartment-policies", id],
+          queryKey: ["apartment-policy", id],
           queryFn: async () => (await systemConfigService.getApartmentPolicyById(id!)).data!,
           enabled: !!id,
      })
@@ -67,7 +62,7 @@ export const useUpdateApartmentPolicy = () => {
                systemConfigService.updateApartmentPolicy(id, payload),
           onSuccess: (_, variables) => {
                queryClient.invalidateQueries({ queryKey: ["apartment-policies"] })
-               queryClient.invalidateQueries({ queryKey: ["apartment-policies", variables.id] })
+               queryClient.invalidateQueries({ queryKey: ["apartment-policy", variables.id] })
                message.success("Đã cập nhật policy của căn hộ.")
           },
           onError: (error: Error) => {

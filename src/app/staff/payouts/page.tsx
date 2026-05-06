@@ -163,7 +163,7 @@ export default function StaffPartnerPayoutsPage() {
 
                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as PayoutKind)}>
                     <TabsList>
-                         <TabsTrigger value="partner">Chi trả doanh thu</TabsTrigger>
+                         <TabsTrigger value="partner">Chi trả đối tác</TabsTrigger>
                          <TabsTrigger value="deposit">Trả tiền cọc</TabsTrigger>
                     </TabsList>
 

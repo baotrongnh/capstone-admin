@@ -1128,57 +1128,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/iot/utility-rate-plans": {
+    "/api/v1/iot/utility-rates/global": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List tiered utility rate plans */
-        get: operations["IoTController_findAllUtilityRatePlans"];
-        put?: never;
-        /** Create tiered utility rate plan */
-        post: operations["IoTController_createUtilityRatePlan"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/iot/utility-rate-plans/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get tiered utility rate plan detail */
-        get: operations["IoTController_findOneUtilityRatePlan"];
+        /** Get global default electricity/water rates for new meters */
+        get: operations["IoTController_getGlobalUtilityRates"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Update tiered utility rate plan */
-        patch: operations["IoTController_updateUtilityRatePlan"];
+        /** Update global default electricity/water rates used when creating new meters */
+        patch: operations["IoTController_updateGlobalUtilityRates"];
         trace?: never;
     };
-    "/api/v1/iot/utility-rate-plans/{id}/archive": {
+    "/api/v1/iot/utility-rates/current": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Get current flat electricity/water rates for an apartment */
+        get: operations["IoTController_getCurrentUtilityRates"];
         put?: never;
-        /** Archive tiered utility rate plan */
-        post: operations["IoTController_archiveUtilityRatePlan"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update current flat electricity/water rates for an apartment */
+        patch: operations["IoTController_updateCurrentUtilityRates"];
         trace?: never;
     };
     "/api/v1/iot/meters": {
@@ -1193,23 +1176,6 @@ export interface paths {
         put?: never;
         /** Create utility meter */
         post: operations["IoTController_createMeter"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/iot/meters/{id}/effective-rate-plan": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Preview effective tiered rate plan for a meter */
-        get: operations["IoTController_findEffectiveRatePlanForMeter"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5038,26 +5004,121 @@ export interface components {
             electric?: components["schemas"]["IoTUtilityMeterItemDto"] | null;
             water?: components["schemas"]["IoTUtilityMeterItemDto"] | null;
         };
-        UtilityRateTierDto: {
-            /** @example 1 */
-            tier: number;
-            /** @example 0 */
-            from: number;
-            /** @example 50 */
-            to?: number | null;
-            /** @example 1806 */
-            unitPrice: number;
+        UpdateGlobalUtilityRateDto: {
+            /**
+             * @description Default electricity rate in VND per kWh for new meters
+             * @example 3500
+             */
+            electricityRatePerUnit?: number;
+            /**
+             * @description Default water rate in VND per m3 for new meters
+             * @example 15000
+             */
+            waterRatePerUnit?: number;
+            /** @example Default rates for new utility meters */
+            notes?: string;
         };
-        UtilityRateTiersDto: {
-            /** @example progressive */
-            calculationMode: string;
+        UpdateCurrentUtilityRateDto: {
+            /**
+             * Format: uuid
+             * @description Apartment ID
+             */
+            apartmentId: string;
+            /**
+             * @description Electricity rate in VND per kWh
+             * @example 3500
+             */
+            electricityRatePerUnit?: number;
+            /**
+             * @description Water rate in VND per m3
+             * @example 15000
+             */
+            waterRatePerUnit?: number;
+        };
+        CreateUtilityMeterDto: {
+            /** @example EL-2026-001 */
+            meterNumber: string;
+            /** @enum {string} */
+            meterType: "electricity" | "water" | "gas" | "internet";
+            /** @example Schneider */
+            brand?: string;
+            /** @example iEM3155 */
+            model?: string;
+            /**
+             * Format: uuid
+             * @description Apartment ID
+             */
+            apartmentId: string;
+            /** @example 2026-01-15 */
+            installationDate: string;
             /** @example kWh */
-            unit: string;
-            tiers: components["schemas"]["UtilityRateTierDto"][];
+            unitOfMeasurement?: string;
+            /**
+             * @description Optional per-meter override. When omitted, the global default utility rate is used for electricity/water meters.
+             * @example 3500
+             */
+            ratePerUnit?: number;
+            /** @default false */
+            isDigital: boolean;
+            notes?: string;
         };
-        CreateUtilityRatePlanDto: {
-            /** @example Electricity progressive rate 2026 */
-            name: string;
+        UpdateUtilityMeterDto: {
+            /** @example EL-2026-001 */
+            meterNumber?: string;
+            /** @enum {string} */
+            meterType?: "electricity" | "water" | "gas" | "internet";
+            /** @example Schneider */
+            brand?: string;
+            /** @example iEM3155 */
+            model?: string;
+            /**
+             * Format: uuid
+             * @description Apartment ID
+             */
+            apartmentId?: string;
+            /** @example 2026-01-15 */
+            installationDate?: string;
+            /** @example kWh */
+            unitOfMeasurement?: string;
+            /**
+             * @description Optional per-meter override. When omitted, the global default utility rate is used for electricity/water meters.
+             * @example 3500
+             */
+            ratePerUnit?: number;
+            /** @default false */
+            isDigital: boolean;
+            notes?: string;
+            /** @enum {string} */
+            status?: "active" | "inactive" | "faulty" | "replaced";
+        };
+        CreateUtilityReadingDto: {
+            /**
+             * Format: uuid
+             * @description Utility meter ID
+             */
+            utilityMeterId: string;
+            /**
+             * Format: uuid
+             * @description Rental contract ID
+             */
+            rentalContractId?: string;
+            /** @example 2026-02-01 */
+            readingDate: string;
+            /**
+             * @description Current reading value
+             * @example 1250.5
+             */
+            readingValue: number;
+            /**
+             * @default manual
+             * @enum {string}
+             */
+            readingType: "manual" | "automatic" | "estimated";
+            /** @description Photo evidence of meter reading */
+            images?: string[];
+            notes?: string;
+        };
+        CreateIoTBoardDeviceDto: {
             /**
              * @example electricity
              * @enum {string}
@@ -10381,13 +10442,49 @@ export interface operations {
             };
         };
     };
-    IoTController_findAllUtilityRatePlans: {
+    IoTController_getGlobalUtilityRates: {
         parameters: {
-            query?: {
-                meterType?: "electricity" | "water" | "gas" | "internet";
-                scopeType?: "global" | "apartment" | "meter" | "contract";
-                scopeId?: string;
-                status?: "active" | "inactive" | "archived";
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IoTController_updateGlobalUtilityRates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGlobalUtilityRateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    IoTController_getCurrentUtilityRates: {
+        parameters: {
+            query: {
+                /** @description Apartment ID */
+                apartmentId: string;
             };
             header?: never;
             path?: never;
@@ -10403,7 +10500,7 @@ export interface operations {
             };
         };
     };
-    IoTController_createUtilityRatePlan: {
+    IoTController_updateCurrentUtilityRates: {
         parameters: {
             query?: never;
             header?: never;
@@ -10412,72 +10509,11 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateUtilityRatePlanDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    IoTController_findOneUtilityRatePlan: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    IoTController_updateUtilityRatePlan: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUtilityRatePlanDto"];
+                "application/json": components["schemas"]["UpdateCurrentUtilityRateDto"];
             };
         };
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    IoTController_archiveUtilityRatePlan: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10523,31 +10559,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    IoTController_findEffectiveRatePlanForMeter: {
-        parameters: {
-            query?: {
-                /** @description Contract ID for contract-scoped override lookup */
-                contractId?: string;
-                at?: string;
-            };
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
             };
         };
     };

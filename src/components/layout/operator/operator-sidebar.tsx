@@ -4,10 +4,8 @@ import {
   IconBuilding,
   IconDeviceAirtag,
   IconHeartHandshake,
-  IconHelp,
   IconInnerShadowTop,
   IconListDetails,
-  IconUsers
 } from "@tabler/icons-react"
 import * as React from "react"
 
@@ -23,7 +21,6 @@ import {
 } from "@/components/ui/sidebar"
 import { ROUTE_OPERATOR } from "@/constant/routes"
 import { OperatorNavMain } from "./operator-nav-main"
-import { OperatorNavSecondary } from "./operator-nav-secondary"
 
 const data = {
   navMain: [
@@ -37,11 +34,6 @@ const data = {
       url: ROUTE_OPERATOR.AMENITY,
       icon: IconListDetails,
     },
-    // {
-    //   title: "Quản lý nhân viên",
-    //   url: ROUTE_OPERATOR.STAFF_MANAGER,
-    //   icon: IconUsers,
-    // },
     {
       title: "Duyệt hợp tác",
       url: ROUTE_OPERATOR.REQUEST_PARTNER,
@@ -52,13 +44,6 @@ const data = {
       url: ROUTE_OPERATOR.IOT_MANAGER,
       icon: IconDeviceAirtag,
     }
-  ],
-  navSecondary: [
-    {
-      title: "Trợ giúp",
-      url: "#",
-      icon: IconHelp,
-    },
   ]
 }
 
@@ -82,8 +67,6 @@ export function OperatorSidebar({ ...props }: React.ComponentProps<typeof Sideba
       </SidebarHeader>
       <SidebarContent>
         <OperatorNavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} /> */}
-        <OperatorNavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
