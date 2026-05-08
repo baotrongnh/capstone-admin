@@ -2,6 +2,7 @@ export const ROUTE_STAFF = {
   INQUIRY: "/staff/inquiry",
   SCHEDULE: "/staff/schedule",
   MAINTENANCE: "/staff/maintenance",
+  TICKETS: "/staff/tickets",
   VERIFY_USER_INFORMATION: "/staff/verify-user-information",
   CHAT: "/staff/chat",
   REQUEST: "/staff/request",

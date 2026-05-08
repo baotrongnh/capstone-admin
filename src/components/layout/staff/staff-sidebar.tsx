@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import {
   IconBrandLine,
   IconCalendarStats,
   IconContract,
   IconHelp,
+  IconHomeCheck,
   IconHomeQuestion,
   IconInnerShadowTop,
 } from "@tabler/icons-react";
@@ -31,7 +32,7 @@ export function StaffSidebar({
 
   const navMain = [
     {
-      title: 'Lịch hẹn xem căn hộ',
+      title: "Lịch hẹn xem căn hộ",
       url: ROUTE_STAFF.SCHEDULE,
       icon: IconCalendarStats,
     },
@@ -41,6 +42,7 @@ export function StaffSidebar({
   const navMain2 = [
     { title: t("messages"), url: ROUTE_STAFF.CHAT, icon: IconBrandLine },
     { title: "Yêu cầu bảo trì", url: ROUTE_STAFF.MAINTENANCE, icon: IconHelp },
+    { title: "Kiểm tra quá hạn", url: ROUTE_STAFF.TICKETS, icon: IconHomeCheck },
   ];
 
   const navMain3 = [
@@ -83,3 +85,5 @@ export function StaffSidebar({
     </Sidebar>
   );
 }
+
+
