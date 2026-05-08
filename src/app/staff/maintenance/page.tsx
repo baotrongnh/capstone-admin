@@ -40,7 +40,6 @@ import { formatDateTime } from "@/utils/format"
 
 const createCompleteForm = (): MaintenanceCompleteForm => ({
      resolutionNotes: "",
-     cost: "",
      completionImages: [],
 })
 
@@ -111,18 +110,10 @@ export default function StaffMaintenancePage() {
                return
           }
 
-          const rawCost = completeForm.cost.trim()
-          const cost = rawCost ? Number(rawCost) : undefined
-          if (rawCost && (!Number.isFinite(cost) || Number(cost) < 0)) {
-               message.warning("Chi phí không hợp lệ.")
-               return
-          }
-
           await completeMaintenance.mutateAsync({
                id: completeItem.id,
                payload: {
                     resolutionNotes,
-                    ...(typeof cost === "number" ? { cost } : {}),
                     ...(completeForm.completionImages.length > 0
                          ? { completionImages: completeForm.completionImages }
                          : {}),
@@ -284,10 +275,6 @@ export default function StaffMaintenancePage() {
                               <div className="space-y-2">
                                    <p className="text-sm font-medium">Ghi chú hoàn tất <span className="text-red-500">*</span></p>
                                    <Textarea value={completeForm.resolutionNotes} onChange={(event) => setCompleteForm((prev) => ({ ...prev, resolutionNotes: event.target.value }))} rows={4} placeholder="Ví dụ: Đã thay linh kiện, kiểm tra hoạt động ổn định." />
-                              </div>
-                              <div className="space-y-2">
-                                   <p className="text-sm font-medium">Chi phí (VNĐ)</p>
-                                   <Input type="number" min={0} value={completeForm.cost} onChange={(event) => setCompleteForm((prev) => ({ ...prev, cost: event.target.value }))} placeholder="Nhập chi phí nếu có" />
                               </div>
                               <div className="space-y-2">
                                    <p className="text-sm font-medium">Ảnh hoàn tất</p>
