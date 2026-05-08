@@ -45,7 +45,6 @@ export type MaintenanceUpdateForm = {
 
 export type MaintenanceCompleteForm = {
      resolutionNotes: string
-     cost: string
      completionImages: File[]
 }
 

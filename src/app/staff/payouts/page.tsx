@@ -69,10 +69,24 @@ const getStatusClass = (status?: string | null) => {
 
 const toMoney = (value?: string | number | null) => formatVND(value ?? 0, true)
 
+const emptyValue = (value?: string | number | boolean | null) => {
+     if (value === null || value === undefined || value === "") return "-"
+     if (typeof value === "boolean") return value ? "Có" : "Không"
+     return String(value)
+}
+
+const DetailItem = ({ label, value }: { label: string; value?: string | number | boolean | null }) => (
+     <div className="rounded-lg border bg-white p-3">
+          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="mt-1 break-words text-sm font-medium text-gray-900">{emptyValue(value)}</p>
+     </div>
+)
+
 export default function StaffPartnerPayoutsPage() {
      const [activeTab, setActiveTab] = useState<PayoutKind>("partner")
      const [month, setMonth] = useState(() => toMonthValue(previousMonth()))
      const [target, setTarget] = useState<ConfirmTarget | null>(null)
+     const [detailTarget, setDetailTarget] = useState<ConfirmTarget | null>(null)
      const [transferReference, setTransferReference] = useState("")
      const [transferNote, setTransferNote] = useState("")
      const [refundReason, setRefundReason] = useState("")
@@ -205,9 +219,14 @@ export default function StaffPartnerPayoutsPage() {
                                                        <TableCell className="text-right font-semibold">{toMoney(item.payoutAmount)}</TableCell>
                                                        <TableCell><Badge className={`${getStatusClass(item.status)} border`}>{getStatusLabel(item.status)}</Badge></TableCell>
                                                        <TableCell className="text-right">
-                                                            <Button size="sm" onClick={() => openConfirm({ kind: "partner", item })} disabled={isConfirming}>
+                                                            <div className="flex justify-end gap-2">
+                                                                 <Button size="sm" variant="outline" onClick={() => setDetailTarget({ kind: "partner", item })}>
+                                                                      Chi tiết
+                                                                 </Button>
+                                                                 <Button size="sm" onClick={() => openConfirm({ kind: "partner", item })} disabled={isConfirming}>
                                                                  Xác nhận
-                                                            </Button>
+                                                                 </Button>
+                                                            </div>
                                                        </TableCell>
                                                   </TableRow>
                                              ))}
@@ -257,9 +276,14 @@ export default function StaffPartnerPayoutsPage() {
                                                        <TableCell className="text-right font-semibold">{toMoney(item.payoutAmount)}</TableCell>
                                                        <TableCell><Badge className={`${getStatusClass(item.status)} border`}>{getStatusLabel(item.status)}</Badge></TableCell>
                                                        <TableCell className="text-right">
-                                                            <Button size="sm" onClick={() => openConfirm({ kind: "deposit", item })} disabled={isConfirming}>
-                                                                 Xác nhận
-                                                            </Button>
+                                                            <div className="flex justify-end gap-2">
+                                                                 <Button size="sm" variant="outline" onClick={() => setDetailTarget({ kind: "deposit", item })}>
+                                                                      Chi tiết
+                                                                 </Button>
+                                                                 <Button size="sm" onClick={() => openConfirm({ kind: "deposit", item })} disabled={isConfirming}>
+                                                                      Xác nhận
+                                                                 </Button>
+                                                            </div>
                                                        </TableCell>
                                                   </TableRow>
                                              ))}
@@ -284,12 +308,16 @@ export default function StaffPartnerPayoutsPage() {
                                    {target?.kind === "partner" ? (
                                         <>
                                              <p><span className="text-muted-foreground">Đối tác:</span> {target.item.partnerCompanyName || target.item.partnerName}</p>
+                                             <p><span className="text-muted-foreground">Ngân hàng:</span> {target.item.bankName || "-"}</p>
+                                             <p><span className="text-muted-foreground">STK:</span> {target.item.bankAccountNumber || "-"}</p>
                                              <p><span className="text-muted-foreground">Tháng:</span> {target.item.payoutMonth}</p>
                                              <p><span className="text-muted-foreground">Số tiền:</span> {toMoney(target.item.payoutAmount)}</p>
                                         </>
                                    ) : target?.kind === "deposit" ? (
                                         <>
                                              <p><span className="text-muted-foreground">Người nhận:</span> {target.item.recipientFullName}</p>
+                                             <p><span className="text-muted-foreground">Ngân hàng:</span> {target.item.recipientBankName || "-"}</p>
+                                             <p><span className="text-muted-foreground">STK:</span> {target.item.recipientBankAccountNumber || "-"}</p>
                                              <p><span className="text-muted-foreground">Hợp đồng:</span> {target.item.contractNumber}</p>
                                              <p><span className="text-muted-foreground">Số tiền:</span> {toMoney(target.item.payoutAmount)}</p>
                                         </>
@@ -326,6 +354,81 @@ export default function StaffPartnerPayoutsPage() {
                                    {isConfirming ? "Đang xác nhận..." : "Xác nhận đã chuyển"}
                               </Button>
                          </DialogFooter>
+                    </DialogContent>
+               </Dialog>
+
+               <Dialog open={!!detailTarget} onOpenChange={(open) => !open && setDetailTarget(null)}>
+                    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+                         <DialogHeader>
+                              <DialogTitle>{detailTarget?.kind === "deposit" ? "Chi tiết hoàn tiền cọc" : "Chi tiết chi trả đối tác"}</DialogTitle>
+                              <DialogDescription>Thông tin đầy đủ theo dữ liệu API trả về.</DialogDescription>
+                         </DialogHeader>
+
+                         {detailTarget?.kind === "partner" ? (
+                              <div className="space-y-4">
+                                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                        <DetailItem label="Payout ID" value={detailTarget.item.payoutId} />
+                                        <DetailItem label="Partner ID" value={detailTarget.item.partnerId} />
+                                        <DetailItem label="Tên đối tác" value={detailTarget.item.partnerName} />
+                                        <DetailItem label="Công ty" value={detailTarget.item.partnerCompanyName} />
+                                        <DetailItem label="Ngân hàng" value={detailTarget.item.bankName} />
+                                        <DetailItem label="STK" value={detailTarget.item.bankAccountNumber} />
+                                        <DetailItem label="Điều khoản thanh toán" value={detailTarget.item.paymentTerms} />
+                                        <DetailItem label="Tháng chi trả" value={detailTarget.item.payoutMonth} />
+                                        <DetailItem label="Bắt đầu kỳ" value={formatDateTime(detailTarget.item.billingPeriodStart)} />
+                                        <DetailItem label="Kết thúc kỳ" value={formatDateTime(detailTarget.item.billingPeriodEndExclusive)} />
+                                        <DetailItem label="Hạn trả" value={formatDateTime(detailTarget.item.dueDate)} />
+                                        <DetailItem label="Doanh thu gộp" value={toMoney(detailTarget.item.grossRevenue)} />
+                                        <DetailItem label="Hoa hồng" value={toMoney(detailTarget.item.commissionAmount)} />
+                                        <DetailItem label="Tỷ lệ hoa hồng" value={`${detailTarget.item.effectiveCommissionRate}%`} />
+                                        <DetailItem label="Số tiền chi trả" value={toMoney(detailTarget.item.payoutAmount)} />
+                                        <DetailItem label="Tiền tệ" value={detailTarget.item.currency} />
+                                        <DetailItem label="Trạng thái" value={getStatusLabel(detailTarget.item.status)} />
+                                        <DetailItem label="Đến hạn" value={detailTarget.item.isDue} />
+                                        <DetailItem label="Mã giao dịch" value={detailTarget.item.transferReference} />
+                                        <DetailItem label="Ghi chú" value={detailTarget.item.transferNote} />
+                                        <DetailItem label="Xác nhận lúc" value={detailTarget.item.confirmedAt ? formatDateTime(detailTarget.item.confirmedAt) : null} />
+                                        <DetailItem label="Staff xác nhận" value={detailTarget.item.confirmedByStaffId} />
+                                   </div>
+                                   {detailTarget.item.transferProofUrl ? (
+                                        <a className="text-sm font-medium text-blue-600 hover:underline" href={detailTarget.item.transferProofUrl} target="_blank" rel="noreferrer">
+                                             Xem ảnh minh chứng chuyển khoản
+                                        </a>
+                                   ) : null}
+                              </div>
+                         ) : detailTarget?.kind === "deposit" ? (
+                              <div className="space-y-4">
+                                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                        <DetailItem label="Payout Payment ID" value={detailTarget.item.payoutPaymentId} />
+                                        <DetailItem label="Contract ID" value={detailTarget.item.contractId} />
+                                        <DetailItem label="Mã hợp đồng" value={detailTarget.item.contractNumber} />
+                                        <DetailItem label="Apartment ID" value={detailTarget.item.apartmentId} />
+                                        <DetailItem label="Căn hộ" value={detailTarget.item.apartmentNumber} />
+                                        <DetailItem label="Recipient User ID" value={detailTarget.item.recipientUserId} />
+                                        <DetailItem label="Người nhận" value={detailTarget.item.recipientFullName} />
+                                        <DetailItem label="Số điện thoại" value={detailTarget.item.recipientPhone} />
+                                        <DetailItem label="Ngân hàng" value={detailTarget.item.recipientBankName} />
+                                        <DetailItem label="STK" value={detailTarget.item.recipientBankAccountNumber} />
+                                        <DetailItem label="Tháng chi trả" value={detailTarget.item.payoutMonth} />
+                                        <DetailItem label="Ngày kết thúc HĐ" value={formatDateTime(detailTarget.item.contractEndDate)} />
+                                        <DetailItem label="Hạn trả" value={formatDateTime(detailTarget.item.dueDate)} />
+                                        <DetailItem label="Tiền cọc" value={toMoney(detailTarget.item.depositAmount)} />
+                                        <DetailItem label="Số tiền chi trả" value={toMoney(detailTarget.item.payoutAmount)} />
+                                        <DetailItem label="Tiền tệ" value={detailTarget.item.currency} />
+                                        <DetailItem label="Trạng thái" value={getStatusLabel(detailTarget.item.status)} />
+                                        <DetailItem label="Đến hạn" value={detailTarget.item.isDue} />
+                                        <DetailItem label="Mã giao dịch" value={detailTarget.item.transferReference} />
+                                        <DetailItem label="Ghi chú" value={detailTarget.item.transferNote} />
+                                        <DetailItem label="Xác nhận lúc" value={detailTarget.item.confirmedAt ? formatDateTime(detailTarget.item.confirmedAt) : null} />
+                                        <DetailItem label="Staff xác nhận" value={detailTarget.item.confirmedByStaffId} />
+                                   </div>
+                                   {detailTarget.item.transferProofUrl ? (
+                                        <a className="text-sm font-medium text-blue-600 hover:underline" href={detailTarget.item.transferProofUrl} target="_blank" rel="noreferrer">
+                                             Xem ảnh minh chứng chuyển khoản
+                                        </a>
+                                   ) : null}
+                              </div>
+                         ) : null}
                     </DialogContent>
                </Dialog>
           </div>
