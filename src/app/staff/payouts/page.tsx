@@ -361,7 +361,6 @@ export default function StaffPartnerPayoutsPage() {
                     <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
                          <DialogHeader>
                               <DialogTitle>{detailTarget?.kind === "deposit" ? "Chi tiết hoàn tiền cọc" : "Chi tiết chi trả đối tác"}</DialogTitle>
-                              <DialogDescription>Thông tin đầy đủ theo dữ liệu API trả về.</DialogDescription>
                          </DialogHeader>
 
                          {detailTarget?.kind === "partner" ? (
