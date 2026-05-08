@@ -19,4 +19,5 @@ export const endpoints = {
   activityLogs: createEndpoints("activity-logs"),
   apartmentPolicies: createEndpoints("apartment-policies"),
   contracts: createEndpoints("contracts"),
+  tickets: createEndpoints("tickets"),
 }

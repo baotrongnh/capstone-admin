@@ -1,13 +1,11 @@
-"use client"
+﻿"use client"
 
-import { useState } from "react"
-import { vi } from "date-fns/locale"
+import { useMemo, useState } from "react"
 import { message, Modal } from "antd"
-import { CalendarIcon, MoreHorizontalIcon, RefreshCcwIcon, WrenchIcon } from "lucide-react"
+import { MoreHorizontalIcon, RefreshCcwIcon, WrenchIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
 import {
      Dialog,
      DialogContent,
@@ -20,20 +18,13 @@ import {
      DropdownMenu,
      DropdownMenuContent,
      DropdownMenuItem,
-     DropdownMenuSeparator,
      DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
-import {
-     useCompleteMaintenance,
-     useMaintenance,
-     useMaintenances,
-     useUpdateMaintenance,
-} from "@/hooks/query/useMaintenance"
+import { useCompleteMaintenance, useMaintenance, useMaintenances } from "@/hooks/query/useMaintenance"
 import {
      getMaintenanceAddress,
      getMaintenanceCategoryLabel,
@@ -41,541 +32,324 @@ import {
      getMaintenanceStatusOption,
      MAINTENANCE_PRIORITY_OPTIONS,
      MAINTENANCE_STATUS_OPTIONS,
+     type MaintenanceCompleteForm,
      type MaintenanceItem,
-     type MaintenancePriority,
      type MaintenanceStatus,
-     type MaintenanceUpdateForm,
-     type MaintenanceUpdateRequestBody,
-     normalizeMaintenancePriority,
-     toIsoDateTime,
-     toLocalDateInput,
 } from "@/types/maintenance"
 import { formatDateTime } from "@/utils/format"
 
-const TODAY = new Date(new Date().setHours(0, 0, 0, 0))
-const UPDATE_STATUS_OPTIONS = MAINTENANCE_STATUS_OPTIONS.filter((option) =>
-     ["scheduled", "in_progress", "completed", "cancelled"].includes(option.value),
-)
-
-const createUpdateForm = (
-     item?: Partial<Pick<MaintenanceItem, "status" | "urgency" | "preferredDate">>,
-): MaintenanceUpdateForm => ({
-     status: UPDATE_STATUS_OPTIONS.some((option) => option.value === item?.status)
-          ? (item?.status as MaintenanceStatus)
-          : "scheduled",
-     priority: normalizeMaintenancePriority(item?.urgency),
-     scheduledDate: toLocalDateInput(item?.preferredDate),
+const createCompleteForm = (): MaintenanceCompleteForm => ({
      resolutionNotes: "",
      cost: "",
+     completionImages: [],
 })
-
-const parseDate = (value: string) => {
-     if (!value) return undefined
-
-     const date = new Date(`${value}T00:00:00`)
-     return Number.isNaN(date.getTime()) ? undefined : date
-}
-
-const formatDateLabel = (value: string) =>
-     parseDate(value)?.toLocaleDateString("vi-VN", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-     }) || "Chọn ngày lên lịch"
-
-const toDateValue = (date: Date) => {
-     const year = date.getFullYear()
-     const month = String(date.getMonth() + 1).padStart(2, "0")
-     const day = String(date.getDate()).padStart(2, "0")
-     return `${year}-${month}-${day}`
-}
-
-const buildUpdatePayload = (
-     form: MaintenanceUpdateForm,
-): { payload: MaintenanceUpdateRequestBody; invalidCost: boolean } => {
-     const payload: MaintenanceUpdateRequestBody = {
-          status: form.status,
-          priority: form.priority,
-     }
-
-     const scheduledDate = toIsoDateTime(form.scheduledDate)
-     if (scheduledDate) payload.scheduledDate = scheduledDate
-
-     const resolutionNotes = form.resolutionNotes.trim()
-     if (resolutionNotes) payload.resolutionNotes = resolutionNotes
-
-     const rawCost = form.cost.trim()
-     if (!rawCost) return { payload, invalidCost: false }
-
-     const cost = Number(rawCost)
-     if (!Number.isFinite(cost) || cost < 0) {
-          return { payload, invalidCost: true }
-     }
-
-     payload.cost = cost
-     return { payload, invalidCost: false }
-}
 
 const getBadgeClass = (value?: string | null, type: "status" | "priority" = "status") =>
      type === "status"
-          ? getMaintenanceStatusOption(value)?.badgeClass || "border-slate-200 bg-slate-100 text-slate-700"
-          : getMaintenancePriorityOption(value)?.badgeClass || "border-slate-200 bg-slate-100 text-slate-700"
+          ? getMaintenanceStatusOption(value)?.badgeClass || "bg-slate-100 text-slate-700 border-slate-200"
+          : getMaintenancePriorityOption(value)?.badgeClass || "bg-slate-100 text-slate-700 border-slate-200"
 
-const renderImages = (images?: string[] | null) => {
-     if (!images?.length) return null
+const getImagePreview = (file: File) => URL.createObjectURL(file)
 
-     return (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-               {images.map((imageUrl, index) => (
-                <a
-                     key={`${imageUrl}-${index}`}
-                     href={imageUrl}
-                     target="_blank"
-                     rel="noreferrer"
-                     className="group overflow-hidden rounded-lg border bg-muted"
-                >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                         src={imageUrl}
-                         alt={`maintenance-${index + 1}`}
-                         className="aspect-square h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
-                    />
-                    </a>
-               ))}
-          </div>
-     )
+type RuntimeMaintenanceItem = MaintenanceItem & {
+     assignedTask?: {
+          id?: string | null
+          assignedToStaffId?: string | null
+          status?: string | null
+     } | null
 }
+
+const getRuntimeItem = (item: MaintenanceItem) => item as RuntimeMaintenanceItem
+
+const getApartmentLines = (apartment?: MaintenanceItem["apartment"] | null) => [
+     apartment?.apartmentNumber,
+     apartment?.streetAddress || apartment?.address,
+     apartment?.wardName,
+     apartment?.provinceName,
+     apartment?.fullAddress,
+].filter(Boolean)
+
+const getImageUrl = (value?: string | null) => (typeof value === "string" && value.trim() ? value.trim() : "")
+const canPreviewImage = (value: string) => /^(https?:|data:|blob:)/i.test(value)
 
 export default function StaffMaintenancePage() {
      const [statusFilter, setStatusFilter] = useState<"all" | MaintenanceStatus>("all")
-     const [selectedMaintenance, setSelectedMaintenance] = useState<MaintenanceItem | null>(null)
-     const [openDetail, setOpenDetail] = useState(false)
-     const [openUpdate, setOpenUpdate] = useState(false)
-     const [updateForm, setUpdateForm] = useState<MaintenanceUpdateForm>(createUpdateForm())
+     const [selectedId, setSelectedId] = useState<string | null>(null)
+     const [completeItem, setCompleteItem] = useState<MaintenanceItem | null>(null)
+     const [completeForm, setCompleteForm] = useState<MaintenanceCompleteForm>(createCompleteForm())
 
      const { data: listResponse, isLoading, isFetching, refetch } = useMaintenances(
           statusFilter === "all" ? undefined : { status: statusFilter },
      )
-     const { data: detailResponse, isLoading: detailLoading } = useMaintenance(selectedMaintenance?.id || null)
-
-     const maintenanceList = listResponse?.data ?? []
-     const detail = detailResponse?.data
-     const updateMaintenance = useUpdateMaintenance()
+     const { data: detailResponse } = useMaintenance(selectedId)
      const completeMaintenance = useCompleteMaintenance()
 
-     const openDetailDialog = (item: MaintenanceItem) => {
-          setSelectedMaintenance(item)
-          setOpenDetail(true)
-     }
+     const items = useMemo(() => listResponse?.data ?? [], [listResponse?.data])
+     const detail = detailResponse?.data
+     const selectedListItem = useMemo(() => items.find((item) => item.id === selectedId) ?? null, [items, selectedId])
 
-     const closeDetailDialog = () => {
-          setOpenDetail(false)
-          setSelectedMaintenance(null)
-     }
-
-     const openUpdateDialog = (item: MaintenanceItem) => {
-          setSelectedMaintenance(item)
-          setUpdateForm(createUpdateForm(item))
-          setOpenUpdate(true)
-     }
-
-     const closeUpdateDialog = () => {
-          setOpenUpdate(false)
-          setSelectedMaintenance(null)
-          setUpdateForm(createUpdateForm())
-     }
-
-     const updateFormField = <K extends keyof MaintenanceUpdateForm>(key: K, value: MaintenanceUpdateForm[K]) =>
-          setUpdateForm((prev) => ({ ...prev, [key]: value }))
-
-     const handleSubmitUpdate = async () => {
-          if (!selectedMaintenance?.id) return
-
-          const { payload, invalidCost } = buildUpdatePayload(updateForm)
-          if (invalidCost) {
-               message.error("Chi phí không hợp lệ.")
-               return
-          }
-
-          try {
-               await updateMaintenance.mutateAsync({ id: selectedMaintenance.id, payload })
-               closeUpdateDialog()
-          } catch {
-               // Error toast already handled in hook.
-          }
-     }
-
-     const handleComplete = (item: MaintenanceItem) => {
+     const openCompleteDialog = (item: MaintenanceItem) => {
           if (item.status === "completed") {
                message.info("Yêu cầu này đã hoàn tất.")
                return
           }
+          setCompleteItem(item)
+          setCompleteForm(createCompleteForm())
+     }
 
-          Modal.confirm({
-               title: "Hoàn tất yêu cầu bảo trì",
-               content: `Xác nhận chuyển yêu cầu "${item.title}" sang trạng thái hoàn tất?`,
-               okText: "Hoàn tất",
-               cancelText: "Hủy",
-               async onOk() {
-                    try {
-                         await completeMaintenance.mutateAsync(item.id)
-                    } catch {
-                         // Error toast already handled in hook.
-                    }
+     const closeCompleteDialog = () => {
+          setCompleteItem(null)
+          setCompleteForm(createCompleteForm())
+     }
+
+     const submitComplete = async () => {
+          if (!completeItem) return
+
+          const resolutionNotes = completeForm.resolutionNotes.trim()
+          if (!resolutionNotes) {
+               message.warning("Vui lòng nhập ghi chú hoàn tất.")
+               return
+          }
+
+          const rawCost = completeForm.cost.trim()
+          const cost = rawCost ? Number(rawCost) : undefined
+          if (rawCost && (!Number.isFinite(cost) || Number(cost) < 0)) {
+               message.warning("Chi phí không hợp lệ.")
+               return
+          }
+
+          await completeMaintenance.mutateAsync({
+               id: completeItem.id,
+               payload: {
+                    resolutionNotes,
+                    ...(typeof cost === "number" ? { cost } : {}),
+                    ...(completeForm.completionImages.length > 0
+                         ? { completionImages: completeForm.completionImages }
+                         : {}),
                },
           })
+          closeCompleteDialog()
      }
 
      return (
-          <div className="space-y-5">
-               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-6">
+               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                         <h1 className="text-2xl font-bold text-gray-900">Xử lý yêu cầu khách hàng</h1>
+                         <h1 className="text-2xl font-semibold tracking-tight">Bảo trì</h1>
                          <p className="text-sm text-muted-foreground">
-                              Theo dõi, cập nhật tiến độ và hoàn tất yêu cầu khách hàng.
                          </p>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                         <Select
-                              value={statusFilter}
-                              onValueChange={(value) => setStatusFilter(value as "all" | MaintenanceStatus)}
-                         >
-                              <SelectTrigger className="w-50">
-                                   <SelectValue placeholder="Lọc theo trạng thái" />
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                         <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as "all" | MaintenanceStatus)}>
+                              <SelectTrigger className="w-[190px]">
+                                   <SelectValue placeholder="Lọc trạng thái" />
                               </SelectTrigger>
                               <SelectContent>
                                    <SelectItem value="all">Tất cả trạng thái</SelectItem>
                                    {MAINTENANCE_STATUS_OPTIONS.map((status) => (
-                                        <SelectItem key={status.value} value={status.value}>
-                                             {status.label}
-                                        </SelectItem>
+                                        <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
                                    ))}
                               </SelectContent>
                          </Select>
-
                          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-                              <RefreshCcwIcon className="mr-1 size-4" />
+                              <RefreshCcwIcon className={`mr-2 size-4 ${isFetching ? "animate-spin" : ""}`} />
                               Làm mới
                          </Button>
                     </div>
                </div>
 
-               <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+               <div className="rounded-xl border bg-card">
                     <Table>
-                         <TableHeader className="bg-muted/40">
-                              <TableRow>
-                                   <TableHead>Tiêu đề</TableHead>
-                                   <TableHead>Căn hộ</TableHead>
-                                   <TableHead>Danh mục</TableHead>
-                                   <TableHead>Mức độ</TableHead>
-                                   <TableHead>Trạng thái</TableHead>
-                                   <TableHead>Ngày hẹn</TableHead>
-                                   <TableHead>Tạo lúc</TableHead>
-                                   <TableHead className="text-right">Thao tác</TableHead>
-                              </TableRow>
+                         <TableHeader>
+                                   <TableRow>
+                                        <TableHead>Yêu cầu</TableHead>
+                                        <TableHead>Căn hộ</TableHead>
+                                        <TableHead>Phân công</TableHead>
+                                        <TableHead>Loại</TableHead>
+                                        <TableHead>Ưu tiên</TableHead>
+                                        <TableHead>Trạng thái</TableHead>
+                                        <TableHead>Ảnh</TableHead>
+                                        <TableHead>Ngày hẹn</TableHead>
+                                        <TableHead className="text-right">Thao tác</TableHead>
+                                   </TableRow>
                          </TableHeader>
                          <TableBody>
                               {isLoading ? (
-                                   <TableRow>
-                                        <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                                             Đang tải danh sách bảo trì...
+                                   <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">Đang tải...</TableCell></TableRow>
+                              ) : items.length === 0 ? (
+                                   <TableRow><TableCell colSpan={9} className="py-10 text-center text-muted-foreground">Không có yêu cầu bảo trì.</TableCell></TableRow>
+                              ) : items.map((item) => (
+                                   <TableRow key={item.id}>
+                                        <TableCell>
+                                             <div className="font-medium">{item.title}</div>
+                                             <div className="text-xs text-muted-foreground">ID: {item.id}</div>
+                                             <div className="text-xs text-muted-foreground">Tạo: {formatDateTime(item.createdAt)}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                             <div className="max-w-[220px] space-y-1 text-sm">
+                                                  {getApartmentLines(item.apartment).map((line, index) => (
+                                                       <div key={`${line}-${index}`} className={index === 0 ? "font-medium" : "text-muted-foreground"}>{line}</div>
+                                                  ))}
+                                             </div>
+                                        </TableCell>
+                                        <TableCell>
+                                             <Badge variant="outline">{getRuntimeItem(item).assignedTask?.status || "Chưa có"}</Badge>
+                                             {getRuntimeItem(item).assignedTask?.id ? <div className="mt-1 text-xs text-muted-foreground">{getRuntimeItem(item).assignedTask?.id}</div> : null}
+                                        </TableCell>
+                                        <TableCell>{getMaintenanceCategoryLabel(item.category)}</TableCell>
+                                        <TableCell><Badge className={`${getBadgeClass(item.urgency, "priority")} border`}>{getMaintenancePriorityOption(item.urgency)?.label || item.urgency}</Badge></TableCell>
+                                        <TableCell><Badge className={`${getBadgeClass(item.status)} border`}>{getMaintenanceStatusOption(item.status)?.label || item.status}</Badge></TableCell>
+                                        <TableCell>{item.images?.length ? `${item.images.length} ảnh` : "-"}</TableCell>
+                                        <TableCell>{formatDateTime(item.preferredDate) || "-"}</TableCell>
+                                        <TableCell className="text-right">
+                                             <DropdownMenu>
+                                                  <DropdownMenuTrigger asChild>
+                                                       <Button variant="ghost" size="icon"><MoreHorizontalIcon className="size-4" /></Button>
+                                                  </DropdownMenuTrigger>
+                                                  <DropdownMenuContent align="end">
+                                                       <DropdownMenuItem onClick={() => setSelectedId(item.id)}>Xem chi tiết</DropdownMenuItem>
+                                                       <DropdownMenuItem disabled={item.status === "completed"} onClick={() => openCompleteDialog(item)}>
+                                                            Hoàn tất
+                                                       </DropdownMenuItem>
+                                                  </DropdownMenuContent>
+                                             </DropdownMenu>
                                         </TableCell>
                                    </TableRow>
-                              ) : maintenanceList.length === 0 ? (
-                                   <TableRow>
-                                        <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                                             Không có yêu cầu bảo trì nào.
-                                        </TableCell>
-                                   </TableRow>
-                              ) : (
-                                   maintenanceList.map((item) => (
-                                        <TableRow key={item.id}>
-                                             <TableCell>
-                                                  <div className="space-y-1">
-                                                       <p className="text-sm font-semibold">{item.title}</p>
-                                                       <p className="text-xs text-muted-foreground">#{item.id}</p>
-                                                  </div>
-                                             </TableCell>
-                                             <TableCell>
-                                                  <div className="text-sm">
-                                                       <p className="font-medium">{item.apartment.apartmentNumber}</p>
-                                                       <p className="text-xs text-muted-foreground">{getMaintenanceAddress(item.apartment)}</p>
-                                                  </div>
-                                             </TableCell>
-                                             <TableCell>{getMaintenanceCategoryLabel(item.category)}</TableCell>
-                                             <TableCell>
-                                                  <Badge className={`${getBadgeClass(item.urgency, "priority")} border`}>
-                                                       {getMaintenancePriorityOption(item.urgency)?.label || item.urgency}
-                                                  </Badge>
-                                             </TableCell>
-                                             <TableCell>
-                                                  <Badge className={`${getBadgeClass(item.status)} border`}>
-                                                       {getMaintenanceStatusOption(item.status)?.label || item.status}
-                                                  </Badge>
-                                             </TableCell>
-                                             <TableCell>{formatDateTime(item.preferredDate) || "-"}</TableCell>
-                                             <TableCell>{formatDateTime(item.createdAt) || "-"}</TableCell>
-                                             <TableCell className="text-right">
-                                                  <DropdownMenu>
-                                                       <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="size-8">
-                                                                 <MoreHorizontalIcon className="size-4" />
-                                                            </Button>
-                                                       </DropdownMenuTrigger>
-                                                       <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => openDetailDialog(item)}>
-                                                                 Xem chi tiết
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => openUpdateDialog(item)}>
-                                                                 Cập nhật xử lý
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem
-                                                                 disabled={item.status === "completed" || completeMaintenance.isPending}
-                                                                 onClick={() => handleComplete(item)}
-                                                            >
-                                                                 Đánh dấu hoàn tất
-                                                            </DropdownMenuItem>
-                                                       </DropdownMenuContent>
-                                                  </DropdownMenu>
-                                             </TableCell>
-                                        </TableRow>
-                                   ))
-                              )}
+                              ))}
                          </TableBody>
                     </Table>
                </div>
 
-               <Dialog open={openDetail} onOpenChange={(open) => !open && closeDetailDialog()}>
-                    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+               <Dialog open={!!selectedId && !!detail} onOpenChange={(open) => !open && setSelectedId(null)}>
+                    <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
                          <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2">
-                                   <WrenchIcon className="size-4" />
-                                   Chi tiết yêu cầu bảo trì
-                              </DialogTitle>
-                              <DialogDescription>
-                                   Theo dõi nội dung yêu cầu, người gửi và mốc thời gian xử lý.
-                              </DialogDescription>
+                              <DialogTitle>{detail?.title || "Chi tiết bảo trì"}</DialogTitle>
+                              <DialogDescription>{detail?.description || "Thông tin yêu cầu bảo trì"}</DialogDescription>
                          </DialogHeader>
-
-                         {detailLoading ? (
-                              <p className="text-sm text-muted-foreground">Đang tải chi tiết...</p>
-                         ) : !detail ? (
-                              <p className="text-sm text-muted-foreground">Không tìm thấy dữ liệu chi tiết.</p>
-                         ) : (
-                              <div className="space-y-4 text-sm">
-                                   <div className="rounded-lg border p-4">
-                                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                                             <div className="space-y-1">
-                                                  <p className="text-lg font-semibold">{detail.title}</p>
-                                                  <p className="text-xs text-muted-foreground">Mã yêu cầu: #{detail.id}</p>
-                                             </div>
-                                             <div className="flex flex-wrap gap-2">
-                                                  <Badge className={`${getBadgeClass(detail.status)} border`}>
-                                                       {getMaintenanceStatusOption(detail.status)?.label || detail.status}
-                                                  </Badge>
-                                                  <Badge className={`${getBadgeClass(detail.urgency, "priority")} border`}>
-                                                       {getMaintenancePriorityOption(detail.urgency)?.label || detail.urgency}
-                                                  </Badge>
-                                             </div>
-                                        </div>
-                                        <p className="mt-3 leading-6">{detail.description || "-"}</p>
+                         {detail ? (
+                              <div className="space-y-5">
+                                   <div className="grid gap-4 md:grid-cols-3">
+                                        <Info label="ID yêu cầu" value={detail.id} />
+                                        <Info label="Trạng thái" value={getMaintenanceStatusOption(detail.status)?.label || detail.status} />
+                                        <Info label="Độ ưu tiên" value={getMaintenancePriorityOption(detail.urgency)?.label || detail.urgency} />
+                                        <Info label="Loại" value={getMaintenanceCategoryLabel(detail.category)} />
+                                        <Info label="Ngày tạo" value={formatDateTime(detail.createdAt)} />
+                                        <Info label="Ngày cập nhật" value={formatDateTime(detail.updatedAt)} />
+                                        <Info label="Ngày hẹn" value={formatDateTime(detail.preferredDate) || "-"} />
+                                        <Info label="Khung giờ hẹn" value={detail.preferredTimeSlot || "-"} />
+                                        <Info label="Cần người thuê có mặt" value={detail.isTenantPresentRequired ? "Có" : "Không"} />
+                                        <Info label="Người gửi" value={detail.user?.fullName || "-"} />
+                                        <Info label="SĐT người gửi" value={detail.user?.phone || "-"} />
+                                        <Info label="Đã đánh giá" value={detail.isRated ? "Có" : "Không"} />
                                    </div>
 
-                                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                        <div className="rounded-lg border p-3">
-                                             <p className="text-xs text-muted-foreground">Căn hộ</p>
-                                             <p className="font-medium">{detail.apartment?.apartmentNumber || "-"}</p>
-                                        </div>
-                                        <div className="rounded-lg border p-3">
-                                             <p className="text-xs text-muted-foreground">Địa chỉ</p>
-                                             <p className="font-medium break-words">{getMaintenanceAddress(detail.apartment)}</p>
-                                        </div>
-                                        <div className="rounded-lg border p-3">
-                                             <p className="text-xs text-muted-foreground">Người gửi yêu cầu</p>
-                                             <p className="font-medium">{detail.user?.fullName || "-"}</p>
-                                             <p className="text-xs text-muted-foreground">{detail.user?.phone || "-"}</p>
-                                        </div>
-                                        <div className="rounded-lg border p-3">
-                                             <p className="text-xs text-muted-foreground">Có cần khách có mặt</p>
-                                             <p className="font-medium">{detail.isTenantPresentRequired ? "Có" : "Không"}</p>
-                                        </div>
-                                        <div className="rounded-lg border p-3">
-                                             <p className="text-xs text-muted-foreground">Thời gian ưu tiên</p>
-                                             <p className="font-medium">{formatDateTime(detail.preferredDate) || "-"}</p>
-                                        </div>
-                                        <div className="rounded-lg border p-3">
-                                             <p className="text-xs text-muted-foreground">Hoàn tất lúc</p>
-                                             <p className="font-medium">{formatDateTime(detail.completedAt) || "-"}</p>
-                                        </div>
+                                   <div className="grid gap-4 md:grid-cols-2">
+                                        <Info label="Mã căn hộ" value={detail.apartment?.apartmentNumber || selectedListItem?.apartment?.apartmentNumber || "-"} />
+                                        <Info label="Địa chỉ" value={getMaintenanceAddress(detail.apartment)} />
+                                        <Info label="Đường" value={detail.apartment?.streetAddress || detail.apartment?.address || "-"} />
+                                        <Info label="Phường" value={detail.apartment?.wardName || "-"} />
+                                        <Info label="Mã phường" value={String(detail.apartment?.wardCode ?? "-")} />
+                                        <Info label="Tỉnh/TP" value={detail.apartment?.provinceName || "-"} />
                                    </div>
 
-                                   {detail.images?.length ? (
-                                        <div className="space-y-2">
-                                             <p className="text-sm font-medium">Hình ảnh sự cố</p>
-                                             {renderImages(detail.images)}
-                                        </div>
-                                   ) : null}
+                                   <div className="grid gap-4 md:grid-cols-3">
+                                        <Info label="Task ID" value={getRuntimeItem(selectedListItem as MaintenanceItem)?.assignedTask?.id || detail.assignedTaskId || "-"} />
+                                        <Info label="Staff ID" value={getRuntimeItem(selectedListItem as MaintenanceItem)?.assignedTask?.assignedToStaffId || "-"} />
+                                        <Info label="Task status" value={getRuntimeItem(selectedListItem as MaintenanceItem)?.assignedTask?.status || "-"} />
+                                   </div>
 
-                                   {detail.completionImages?.length ? (
-                                        <div className="space-y-2">
-                                             <p className="text-sm font-medium">Hình ảnh hoàn tất</p>
-                                             {renderImages(detail.completionImages)}
-                                        </div>
-                                   ) : null}
+                                   <div className="grid gap-4 md:grid-cols-2">
+                                        <Info label="Chi phí dự kiến" value={detail.costEstimate || "-"} />
+                                        <Info label="Chi phí thực tế" value={detail.actualCost || "-"} />
+                                        <Info label="Bên thanh toán" value={detail.costCoveredBy || "-"} />
+                                        <Info label="Hoàn tất lúc" value={formatDateTime(detail.completedAt) || "-"} />
+                                        <div className="md:col-span-2"><Info label="Ghi chú hoàn tất" value={detail.completionNotes || "-"} /></div>
+                                        <div className="md:col-span-2"><Info label="Phản hồi người thuê" value={detail.tenantFeedback || "-"} /></div>
+                                   </div>
+
+                                   <ImageGallery title="Ảnh sự cố" images={detail.images || selectedListItem?.images || []} />
+                                   <ImageGallery title="Ảnh hoàn tất" images={detail.completionImages || []} />
                               </div>
-                         )}
+                         ) : null}
                     </DialogContent>
                </Dialog>
 
-               <Dialog
-                    open={openUpdate}
-                    onOpenChange={(open) => {
-                         if (!open) closeUpdateDialog()
-                    }}
-               >
-                    <DialogContent className="sm:max-w-2xl">
+               <Dialog open={!!completeItem} onOpenChange={(open) => !open && closeCompleteDialog()}>
+                    <DialogContent className="max-w-2xl">
                          <DialogHeader>
-                              <DialogTitle>Cập nhật xử lý bảo trì</DialogTitle>
-                              <DialogDescription>
-                                   Cập nhật trạng thái và thông tin xử lý cho yêu cầu bảo trì đã chọn.
-                              </DialogDescription>
+                              <DialogTitle>Hoàn tất bảo trì</DialogTitle>
+                              <DialogDescription>{completeItem?.title}</DialogDescription>
                          </DialogHeader>
-
-                         <div className="space-y-4 py-1">
-                              <div className="rounded-lg border bg-muted/20 p-3 text-sm">
-                                   <p className="font-semibold">{selectedMaintenance?.title || "-"}</p>
-                                   <div className="mt-1 flex flex-col gap-1 text-muted-foreground md:flex-row md:flex-wrap md:items-center md:gap-4">
-                                        <span>Mã yêu cầu: #{selectedMaintenance?.id || "-"}</span>
-                                        <span>Căn hộ: {selectedMaintenance?.apartment.apartmentNumber || "-"}</span>
-                                        <span>Ngày yêu cầu: {formatDateTime(selectedMaintenance?.preferredDate) || "-"}</span>
-                                   </div>
+                         <div className="space-y-4">
+                              <div className="space-y-2">
+                                   <p className="text-sm font-medium">Ghi chú hoàn tất <span className="text-red-500">*</span></p>
+                                   <Textarea value={completeForm.resolutionNotes} onChange={(event) => setCompleteForm((prev) => ({ ...prev, resolutionNotes: event.target.value }))} rows={4} placeholder="Ví dụ: Đã thay linh kiện, kiểm tra hoạt động ổn định." />
                               </div>
-
-                              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                                   <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Trạng thái</p>
-                                        <Select
-                                             value={updateForm.status}
-                                             onValueChange={(value) => updateFormField("status", value as MaintenanceStatus)}
-                                        >
-                                             <SelectTrigger>
-                                                  <SelectValue />
-                                             </SelectTrigger>
-                                             <SelectContent>
-                                                  {UPDATE_STATUS_OPTIONS.map((item) => (
-                                                       <SelectItem key={item.value} value={item.value}>
-                                                            {item.label}
-                                                       </SelectItem>
-                                                  ))}
-                                             </SelectContent>
-                                        </Select>
-                                   </div>
-
-                                   <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Mức độ</p>
-                                        <Select
-                                             value={updateForm.priority}
-                                             onValueChange={(value) => updateFormField("priority", value as MaintenancePriority)}
-                                        >
-                                             <SelectTrigger>
-                                                  <SelectValue />
-                                             </SelectTrigger>
-                                             <SelectContent>
-                                                  {MAINTENANCE_PRIORITY_OPTIONS.map((item) => (
-                                                       <SelectItem key={item.value} value={item.value}>
-                                                            {item.label}
-                                                       </SelectItem>
-                                                  ))}
-                                             </SelectContent>
-                                        </Select>
-                                   </div>
-
-                                   <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Ngày lên lịch</p>
-                                        <Popover>
-                                             <PopoverTrigger asChild>
-                                                  <Button
-                                                       type="button"
-                                                       variant="outline"
-                                                       className="w-full justify-start text-left font-normal"
-                                                  >
-                                                       <CalendarIcon className="mr-2 size-4" />
-                                                       {formatDateLabel(updateForm.scheduledDate)}
-                                                  </Button>
-                                             </PopoverTrigger>
-                                             <PopoverContent className="w-auto p-0" align="start">
-                                                  <Calendar
-                                                       mode="single"
-                                                       locale={vi}
-                                                       selected={parseDate(updateForm.scheduledDate)}
-                                                       onSelect={(date) => {
-                                                            if (!date) return
-
-                                                            const nextDate = new Date(date)
-                                                            nextDate.setHours(0, 0, 0, 0)
-                                                            updateFormField("scheduledDate", toDateValue(nextDate))
-                                                       }}
-                                                       disabled={(date) => {
-                                                            const normalized = new Date(date)
-                                                            normalized.setHours(0, 0, 0, 0)
-                                                            return normalized < TODAY
-                                                       }}
-                                                       initialFocus
-                                                  />
-                                             </PopoverContent>
-                                        </Popover>
-                                   </div>
-
-                                   <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Chi phí (VNĐ)</p>
-                                        <Input
-                                             type="number"
-                                             min={0}
-                                             value={updateForm.cost}
-                                             onChange={(event) => updateFormField("cost", event.target.value)}
-                                             placeholder="Nhập chi phí nếu có"
-                                        />
-                                   </div>
-
-                                   <div className="space-y-1 md:col-span-2">
-                                        <p className="text-xs text-muted-foreground">Ghi chú xử lý</p>
-                                        <Textarea
-                                             value={updateForm.resolutionNotes}
-                                             onChange={(event) => updateFormField("resolutionNotes", event.target.value)}
-                                             placeholder="Ví dụ: Đã thay block điều hòa, kiểm tra hoạt động ổn định"
-                                             rows={4}
-                                        />
-                                   </div>
+                              <div className="space-y-2">
+                                   <p className="text-sm font-medium">Chi phí (VNĐ)</p>
+                                   <Input type="number" min={0} value={completeForm.cost} onChange={(event) => setCompleteForm((prev) => ({ ...prev, cost: event.target.value }))} placeholder="Nhập chi phí nếu có" />
+                              </div>
+                              <div className="space-y-2">
+                                   <p className="text-sm font-medium">Ảnh hoàn tất</p>
+                                   <Input type="file" accept="image/*" multiple onChange={(event) => setCompleteForm((prev) => ({ ...prev, completionImages: Array.from(event.target.files ?? []) }))} />
+                                   {completeForm.completionImages.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                             {completeForm.completionImages.map((file, index) => (
+                                                  <button key={`${file.name}-${index}`} type="button" className="relative size-20 overflow-hidden rounded-lg border" onClick={() => Modal.confirm({ title: "Xóa ảnh?", onOk: () => setCompleteForm((prev) => ({ ...prev, completionImages: prev.completionImages.filter((_, i) => i !== index) })) })}>
+                                                       <img src={getImagePreview(file)} alt={file.name} className="h-full w-full object-cover" />
+                                                  </button>
+                                             ))}
+                                        </div>
+                                   ) : null}
                               </div>
                          </div>
-
-                         <DialogFooter className="flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                              <Button
-                                   type="button"
-                                   variant="ghost"
-                                   onClick={() => setUpdateForm(createUpdateForm(selectedMaintenance ?? undefined))}
-                                   disabled={updateMaintenance.isPending}
-                              >
-                                   Khôi phục dữ liệu đã chọn
+                         <DialogFooter>
+                              <Button variant="outline" onClick={closeCompleteDialog} disabled={completeMaintenance.isPending}>Hủy</Button>
+                              <Button onClick={submitComplete} disabled={completeMaintenance.isPending}>
+                                   {completeMaintenance.isPending ? "Đang hoàn tất..." : "Hoàn tất"}
                               </Button>
-                              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                                   <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={closeUpdateDialog}
-                                        disabled={updateMaintenance.isPending}
-                                   >
-                                        Hủy
-                                   </Button>
-                                   <Button onClick={handleSubmitUpdate} disabled={updateMaintenance.isPending}>
-                                        {updateMaintenance.isPending ? "Đang cập nhật..." : "Lưu cập nhật"}
-                                   </Button>
-                              </div>
                          </DialogFooter>
                     </DialogContent>
                </Dialog>
+          </div>
+     )
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+     return (
+          <div className="rounded-lg border bg-muted/30 p-3">
+               <p className="text-xs text-muted-foreground">{label}</p>
+               <p className="mt-1 font-medium">{value}</p>
+          </div>
+     )
+}
+
+function ImageGallery({ title, images }: { title: string; images?: (string | null)[] | null }) {
+     const validImages = (images ?? []).map(getImageUrl).filter(Boolean)
+
+     return (
+          <div className="space-y-2">
+               <p className="text-sm font-medium">{title} ({validImages.length})</p>
+               {validImages.length > 0 ? (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                         {validImages.map((image, index) => (
+                              <div key={`${image}-${index}`} className="overflow-hidden rounded-lg border bg-muted/30">
+                                   {canPreviewImage(image) ? (
+                                        <a href={image} target="_blank" rel="noreferrer">
+                                             <img src={image} alt={`${title} ${index + 1}`} className="h-40 w-full object-cover" />
+                                        </a>
+                                   ) : (
+                                        <div className="flex h-40 items-center justify-center px-3 text-center text-xs text-muted-foreground">
+                                             Không thể preview ảnh local từ thiết bị
+                                        </div>
+                                   )}
+                                   <div className="break-all border-t p-2 text-xs text-muted-foreground">{image}</div>
+                              </div>
+                         ))}
+                    </div>
+               ) : (
+                    <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">Chưa có ảnh.</div>
+               )}
           </div>
      )
 }

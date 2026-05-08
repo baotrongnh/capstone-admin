@@ -1,6 +1,7 @@
 import { endpoints } from "@/lib/apis/endpoints";
 import {
      MaintenanceCompleteResponse,
+     MaintenanceCompleteRequestBody,
      MaintenanceDetailResponse,
      MaintenanceListQuery,
      MaintenanceListResponse,
@@ -8,6 +9,14 @@ import {
      MaintenanceUpdateResponse,
 } from "@/types/maintenance";
 import { apiClient } from "../apis/client";
+
+const toCompleteFormData = (payload: MaintenanceCompleteRequestBody) => {
+     const formData = new FormData();
+     formData.append("resolutionNotes", payload.resolutionNotes);
+     if (typeof payload.cost === "number") formData.append("cost", String(payload.cost));
+     payload.completionImages?.forEach((image) => formData.append("completionImages", image));
+     return formData;
+};
 
 export const maintenanceService = {
      getList: async (params?: MaintenanceListQuery): Promise<MaintenanceListResponse> => {
@@ -28,8 +37,10 @@ export const maintenanceService = {
           return data;
      },
 
-     complete: async (id: string): Promise<MaintenanceCompleteResponse> => {
-          const { data } = await apiClient.patch(`${endpoints.maintenance}/${id}/complete`);
+     complete: async (id: string, payload: MaintenanceCompleteRequestBody): Promise<MaintenanceCompleteResponse> => {
+          const { data } = await apiClient.patch(`${endpoints.maintenance}/${id}/complete`, toCompleteFormData(payload), {
+               headers: { "Content-Type": "multipart/form-data" },
+          });
           return data;
      },
 };

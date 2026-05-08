@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { maintenanceService } from "@/lib/services/maintenance.service";
-import { MaintenanceListQuery, MaintenanceUpdateRequestBody } from "@/types/maintenance";
+import { MaintenanceCompleteRequestBody, MaintenanceListQuery, MaintenanceUpdateRequestBody } from "@/types/maintenance";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
 
@@ -39,10 +39,10 @@ export const useCompleteMaintenance = () => {
      const queryClient = useQueryClient();
 
      return useMutation({
-          mutationFn: (id: string) => maintenanceService.complete(id),
-          onSuccess: (_, id) => {
+          mutationFn: ({ id, payload }: { id: string; payload: MaintenanceCompleteRequestBody }) => maintenanceService.complete(id, payload),
+          onSuccess: (_, variables) => {
                queryClient.invalidateQueries({ queryKey: ["maintenance"] });
-               queryClient.invalidateQueries({ queryKey: ["maintenance", id] });
+               queryClient.invalidateQueries({ queryKey: ["maintenance", variables.id] });
                message.success("Đã hoàn tất yêu cầu bảo trì.");
           },
           onError: (error) => {
@@ -50,3 +50,4 @@ export const useCompleteMaintenance = () => {
           },
      });
 };
+

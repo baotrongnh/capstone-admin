@@ -1,4 +1,4 @@
-import type { paths } from "@/types/api"
+﻿import type { paths } from "@/types/api"
 
 export type MaintenanceListResponse =
      paths["/api/v1/maintenance"]["get"]["responses"]["200"]["content"]["application/json"]
@@ -14,6 +14,12 @@ export type MaintenanceUpdateResponse =
      paths["/api/v1/maintenance/{id}"]["patch"]["responses"]["200"]["content"]["application/json"]
 export type MaintenanceCompleteResponse =
      paths["/api/v1/maintenance/{id}/complete"]["patch"]["responses"]["200"]["content"]["application/json"]
+export type MaintenanceCompleteRequestBody = Omit<
+     paths["/api/v1/maintenance/{id}/complete"]["patch"]["requestBody"]["content"]["multipart/form-data"],
+     "completionImages"
+> & {
+     completionImages?: File[]
+}
 
 export type MaintenanceItem = NonNullable<MaintenanceListResponse["data"]>[number]
 export type MaintenanceDetailData = NonNullable<MaintenanceDetailResponse["data"]>
@@ -35,6 +41,12 @@ export type MaintenanceUpdateForm = {
      scheduledDate: string
      resolutionNotes: string
      cost: string
+}
+
+export type MaintenanceCompleteForm = {
+     resolutionNotes: string
+     cost: string
+     completionImages: File[]
 }
 
 export const MAINTENANCE_CATEGORY_LABELS: Record<MaintenanceCategory, string> = {
@@ -136,3 +148,4 @@ export const toIsoDateTime = (value: string) => {
      const date = new Date(value)
      return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
+
