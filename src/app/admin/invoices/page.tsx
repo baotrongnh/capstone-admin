@@ -37,7 +37,7 @@ const STATUS_CLASSES: Record<string, string> = {
 const formatMoney = (value?: string | number | null) => (value ? formatVND(value, true) : "-")
 
 const formatNumber = (value?: string | number | null) => {
-     if (!value) return "-"
+     if (value === null || value === undefined || value === "") return "-"
      const number = Number(value)
      return Number.isNaN(number) ? String(value) : number.toLocaleString("vi-VN")
 }
@@ -103,24 +103,22 @@ export default function AdminInvoicesPage() {
                                    </SelectContent>
                               </Select>
                               <Button className="h-8 px-3 text-xs" variant="outline" onClick={resetFilters}>Đặt lại</Button>
-                              <Button className="ml-auto h-8 px-3 text-xs" variant="outline" onClick={() => void refetch()} disabled={isFetching}>
-                                   {isFetching ? "Đang tải..." : "Làm mới"}
-                              </Button>
+                              <Button className="h-8 px-3 text-xs" variant="outline" onClick={() => refetch()} disabled={isFetching}>Làm mới</Button>
+                              <p className="text-sm text-muted-foreground">Trang {page}/{Math.max(totalPages, 1)}</p>
                          </div>
                     </CardHeader>
                </Card>
 
                {isError ? (
-                    <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                         <AlertCircle className="h-4 w-4" />
+                    <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                         <AlertCircle className="size-4" />
                          Không thể tải hóa đơn điện/nước.
                     </div>
                ) : null}
 
-               <Card className="border-border/70">
-                    <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+               <Card>
+                    <CardHeader>
                          <CardTitle className="text-base">Danh sách hóa đơn</CardTitle>
-                         <p className="text-sm text-muted-foreground">Trang {page}/{Math.max(totalPages, 1)}</p>
                     </CardHeader>
                     <CardContent>
                          <Table>
@@ -152,8 +150,8 @@ export default function AdminInvoicesPage() {
                                                        <p className="text-xs text-muted-foreground">{invoice.billingMonth || "-"}</p>
                                                   </TableCell>
                                                   <TableCell>
-                                                       <p className="font-medium">{invoice.apartment.apartmentNumber}</p>
-                                                       <p className="text-xs text-muted-foreground">{invoice.contract.contractNumber}</p>
+                                                       <p className="font-medium">{invoice.apartment?.apartmentNumber || "-"}</p>
+                                                       <p className="text-xs text-muted-foreground">{invoice.contract?.contractNumber || "-"}</p>
                                                   </TableCell>
                                                   <TableCell><StatusBadge status={invoice.status} /></TableCell>
                                                   <TableCell><BreakdownCell value={invoice.electricity} /></TableCell>

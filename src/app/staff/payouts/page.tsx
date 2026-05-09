@@ -15,6 +15,7 @@ import {
      DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
@@ -37,11 +38,6 @@ type ConfirmTarget =
 const toMonthValue = (date: Date) => {
      const month = String(date.getMonth() + 1).padStart(2, "0")
      return `${date.getFullYear()}-${month}`
-}
-
-const previousMonth = () => {
-     const now = new Date()
-     return new Date(now.getFullYear(), now.getMonth() - 1, 1)
 }
 
 const getStatusLabel = (status?: string | null) => {
@@ -69,6 +65,8 @@ const getStatusClass = (status?: string | null) => {
 
 const toMoney = (value?: string | number | null) => formatVND(value ?? 0, true)
 
+const isCompletedPayout = (status?: string | null) => status === "paid" || status === "refunded"
+
 const emptyValue = (value?: string | number | boolean | null) => {
      if (value === null || value === undefined || value === "") return "-"
      if (typeof value === "boolean") return value ? "Có" : "Không"
@@ -84,7 +82,7 @@ const DetailItem = ({ label, value }: { label: string; value?: string | number |
 
 export default function StaffPartnerPayoutsPage() {
      const [activeTab, setActiveTab] = useState<PayoutKind>("partner")
-     const [month, setMonth] = useState(() => toMonthValue(previousMonth()))
+     const [month, setMonth] = useState(() => toMonthValue(new Date()))
      const [target, setTarget] = useState<ConfirmTarget | null>(null)
      const [detailTarget, setDetailTarget] = useState<ConfirmTarget | null>(null)
      const [transferReference, setTransferReference] = useState("")
@@ -223,9 +221,11 @@ export default function StaffPartnerPayoutsPage() {
                                                                  <Button size="sm" variant="outline" onClick={() => setDetailTarget({ kind: "partner", item })}>
                                                                       Chi tiết
                                                                  </Button>
-                                                                 <Button size="sm" onClick={() => openConfirm({ kind: "partner", item })} disabled={isConfirming}>
-                                                                 Xác nhận
-                                                                 </Button>
+                                                                 {!isCompletedPayout(item.status) ? (
+                                                                      <Button size="sm" onClick={() => openConfirm({ kind: "partner", item })} disabled={isConfirming}>
+                                                                           Xác nhận
+                                                                      </Button>
+                                                                 ) : null}
                                                             </div>
                                                        </TableCell>
                                                   </TableRow>
@@ -280,9 +280,11 @@ export default function StaffPartnerPayoutsPage() {
                                                                  <Button size="sm" variant="outline" onClick={() => setDetailTarget({ kind: "deposit", item })}>
                                                                       Chi tiết
                                                                  </Button>
-                                                                 <Button size="sm" onClick={() => openConfirm({ kind: "deposit", item })} disabled={isConfirming}>
-                                                                      Xác nhận
-                                                                 </Button>
+                                                                 {!isCompletedPayout(item.status) ? (
+                                                                      <Button size="sm" onClick={() => openConfirm({ kind: "deposit", item })} disabled={isConfirming}>
+                                                                           Xác nhận
+                                                                      </Button>
+                                                                 ) : null}
                                                             </div>
                                                        </TableCell>
                                                   </TableRow>
@@ -326,24 +328,24 @@ export default function StaffPartnerPayoutsPage() {
 
                               <div className="grid gap-3 sm:grid-cols-2">
                                    <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Mã giao dịch</p>
+                                        <Label>Mã giao dịch</Label>
                                         <Input value={transferReference} onChange={(event) => setTransferReference(event.target.value)} placeholder="VD: MB-TRX-000321" />
                                    </div>
                                    <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Ảnh minh chứng *</p>
+                                        <Label>Ảnh minh chứng *</Label>
                                         <Input type="file" accept="image/*" onChange={(event) => setTransferProof(event.target.files?.[0] ?? null)} />
                                    </div>
                               </div>
 
                               {target?.kind === "deposit" ? (
                                    <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground">Lý do hoàn cọc</p>
+                                        <Label>Lý do hoàn cọc</Label>
                                         <Input value={refundReason} onChange={(event) => setRefundReason(event.target.value)} />
                                    </div>
                               ) : null}
 
                               <div className="space-y-1">
-                                   <p className="text-xs text-muted-foreground">Ghi chú</p>
+                                   <Label>Ghi chú</Label>
                                    <Textarea value={transferNote} onChange={(event) => setTransferNote(event.target.value)} rows={3} />
                               </div>
                          </div>
